@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="RESTful API到底怎么玩？记录一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RESTful API">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2018&#x2F;04&#x2F;17&#x2F;RESTful%20API&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="RESTful API到底怎么玩？记录一下。">
+<meta property="article:published_time" content="2018-04-17T13:57:19.000Z">
+<meta property="article:modified_time" content="2019-12-15T14:39:58.908Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="RESTful">
+<meta property="article:tag" content="最佳实践">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://beritra.github.com/2018/04/17/RESTful%20API/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>RESTful API | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2018/04/17/RESTful%20API/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RESTful API
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-17 21:57:19" itemprop="dateCreated datePublished" datetime="2018-04-17T21:57:19+08:00">2018-04-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-15 22:39:58" itemprop="dateModified" datetime="2019-12-15T22:39:58+08:00">2019-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" itemprop="url" rel="index">
+                    <span itemprop="name">最佳实践</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>RESTful API到底怎么玩？记录一下。</p>
+<a id="more"></a>
+
+<h2 id="是啥"><a href="#是啥" class="headerlink" title="是啥"></a>是啥</h2><p>按照是啥、有啥用、怎么用的分析步骤，先解决RESTful是什么的问题。先上高大上的定义，wiki这么说：</p>
+<blockquote>
+<p><strong>表现层状态转换</strong>（英语：<strong>Representational State Transfer</strong>，缩写：<strong>REST</strong>）</p>
+</blockquote>
+<p>##有啥用</p>
+<p>我的理解RESTful就是一种设计风格，通俗点说就是我们设计API的一种指导思想。主要有几个特点：</p>
+<ul>
+<li>统一</li>
+<li>无状态</li>
+<li>可缓存</li>
+<li>分层</li>
+</ul>
+<p>其他特征没觉得有什么用，暂且不说。个人觉得无状态是RESTful最大的特点，和http协议的设计思路类似。另外RESTful应该着重强调对资源的控制，即每一个URI代表一种资源，客户端通过HTTP动词，对服务端的资源进行操作。</p>
+<p>但是回到有啥用这个问题上，个人觉得风格统一，容易理解，方便使用是比较大的优点，其他的倒是没有了。</p>
+<h2 id="怎么用"><a href="#怎么用" class="headerlink" title="怎么用"></a>怎么用</h2><p>RESTful的核心思想是用五个HTTP动词对资源进行操作：</p>
+<ol>
+<li>GET(获取) 从服务器获取一个资源或者资源列表</li>
+<li>POST(创建) 在服务器上创建一个新资源</li>
+<li>PUT(更新) 以整体方式更新服务器上的一个资源</li>
+<li>PATCH(更新) 更新服务器上的某个资源的部分属性</li>
+<li>DELETE(删除) 删除服务器上的资源</li>
+</ol>
+<p>另外有两个不常用的动词：</p>
+<ol>
+<li>HEAD 获取资源元数据</li>
+<li>获取信息。这个cors解决跨域的时候有可能用到。</li>
+</ol>
+<p>以下是一篇文章中的栗子：</p>
+<ul>
+<li>GET /zoos:获取所有动物园信息</li>
+<li>POST /zoos: 创造一个新的动物园</li>
+<li>GET /zoos/ZID: 获取整个动物园对象</li>
+<li>PUT /zoos/ZID: 更新整个动物园对象</li>
+<li>PATCH /zoos/ZID: 更新动物园对象中的某些属性</li>
+<li>DELETE /zoos/ZID: 删除动物园</li>
+<li>GET /zoos/ZID/animals: 获取ZID这个动物园下的所有动物</li>
+</ul>
+<p>可以看出这里的栗子URL采用了path info的模式，所有查询参数都在URL路径中。但是RESTful风格一般没有对这个做要求，放在后面的参数中也可以。</p>
+<p>##认证怎么搞</p>
+<p>常用的接口认证有如下几种方式：</p>
+<h3 id="Token-JSON-Web-Token"><a href="#Token-JSON-Web-Token" class="headerlink" title="Token(JSON Web Token)"></a>Token(JSON Web Token)</h3><p>JWT 是JSON风格轻量级的授权和身份认证规范，可实现无状态、分布式的Web应用授权，JWT主要由以下三部分构成，由.进行连接</p>
+<ul>
+<li>Header</li>
+<li>Payload</li>
+<li>Signature</li>
+</ul>
+<p>所以完整的JWT格式应该是类似<code>xxxxx.yyyyy.zzzzz</code>这样。</p>
+<h4 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h4><p>header主要声明token类型和使用的加密算法，比如：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  <span class="attr">"alg"</span>: <span class="string">"HS256"</span>,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  <span class="attr">"typ"</span>: <span class="string">"JWT"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后将头部进行Base64加密，得到第一部分。</p>
+<h4 id="Payload"><a href="#Payload" class="headerlink" title="Payload"></a>Payload</h4><p>payload包含你进行认证需要的数据，比如：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  <span class="attr">"sub"</span>: <span class="string">"1234567890"</span>,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  <span class="attr">"name"</span>: <span class="string">"John Doe"</span>,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  <span class="attr">"admin"</span>: <span class="literal">true</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后将有效Payload用Base64进行编码，以形成JWT的第二部分。</p>
+<h4 id="Signature"><a href="#Signature" class="headerlink" title="Signature"></a>Signature</h4><p>要创建签名部分，必须要有已经编码的header，编过码的Payload，一个密匙（secret）和加密算法。</p>
+<p>例如，如果想使用HMAC SHA256算法，签名将按以下方式创建：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">HMACSHA256(base64UrlEncode(header) + <span class="string">"."</span> +base64UrlEncode(payload),secret)</span></pre></td></tr></table></figure>
+
+<p>更详细的文档可以参见官方网站：<a href="https://jwt.io/" target="_blank" rel="noopener">https://jwt.io/</a></p>
+<h3 id="跨域"><a href="#跨域" class="headerlink" title="跨域"></a>跨域</h3><p>既然前后端分离了，就不可避免的要遇到跨域问题。跨域问题单独拎出来总结吧。</p>
+<p>//TODO</p>
+<p>参考资料：</p>
+<ul>
+<li><a href="https://yuedu.baidu.com/ebook/780324fbf121dd36a32d8269?pn=1&rf=https%3A%2F%2Fyuedu.baidu.com%2Febook%2F780324fbf121dd36a32d8269%3Fpn%3D1" target="_blank" rel="noopener">架构风格与基于网络应用软件的架构设计</a></li>
+<li><a href="[http://www.ruanyifeng.com/blog/2014/05/restful_api.html](http://www.ruanyifeng.com/blog/2014/05/restful_api.html)">RESTful API 设计指南</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E8%A1%A8%E7%8E%B0%E5%B1%82%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2" target="_blank" rel="noopener">wiki REST</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2011/09/restful.html" target="_blank" rel="noopener">理解RESTful架构</a></li>
+<li><a href="https://www.cnblogs.com/moonz-wu/p/4211626.html" target="_blank" rel="noopener">好RESTful API的设计原则</a></li>
+<li><a href="https://mingshan.fun/2017/12/19/restful-api-token/" target="_blank" rel="noopener">RESTful API风格基于Token的鉴权机制分析(与JWT结合)</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RESTful/" rel="tag"># RESTful</a>
+              <a href="/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="tag"># 最佳实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/17/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%B8%80%EF%BC%89%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/" rel="prev" title="机器学习（一）线性回归">
+      <i class="fa fa-chevron-left"></i> 机器学习（一）线性回归
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/01/%E7%A6%BB%E7%BA%BF%E7%8E%AF%E5%A2%83%E4%B8%8BKeepalived+MySQL%208.0%E5%AE%89%E8%A3%85%E5%92%8C%E5%8F%8C%E4%B8%BB%E9%AB%98%E5%8F%AF%E7%94%A8%E9%85%8D%E7%BD%AE/" rel="next" title="Keepalived+MySQL双主高可用配置">
+      Keepalived+MySQL双主高可用配置 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#是啥"><span class="nav-number">1.</span> <span class="nav-text">是啥</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#怎么用"><span class="nav-number">2.</span> <span class="nav-text">怎么用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Token-JSON-Web-Token"><span class="nav-number">2.1.</span> <span class="nav-text">Token(JSON Web Token)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Header"><span class="nav-number">2.1.1.</span> <span class="nav-text">Header</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Payload"><span class="nav-number">2.1.2.</span> <span class="nav-text">Payload</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Signature"><span class="nav-number">2.1.3.</span> <span class="nav-text">Signature</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#跨域"><span class="nav-number">2.2.</span> <span class="nav-text">跨域</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

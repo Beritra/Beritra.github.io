@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="整理下面试的时候可能会问到的Java常用API问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java API 常见面试问题">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2017&#x2F;05&#x2F;02&#x2F;Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="整理下面试的时候可能会问到的Java常用API问题">
+<meta property="article:published_time" content="2017-05-01T16:21:53.000Z">
+<meta property="article:modified_time" content="2019-12-15T14:06:27.987Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="面试">
+<meta property="article:tag" content="API">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://beritra.github.com/2017/05/02/Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Java API 常见面试问题 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2017/05/02/Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java API 常见面试问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-05-02 00:21:53" itemprop="dateCreated datePublished" datetime="2017-05-02T00:21:53+08:00">2017-05-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-15 22:06:27" itemprop="dateModified" datetime="2019-12-15T22:06:27+08:00">2019-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index">
+                    <span itemprop="name">面试</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>整理下面试的时候可能会问到的Java常用API问题</p>
+<a id="more"></a>
+
+<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h4 id="怎么将byte转换为String？"><a href="#怎么将byte转换为String？" class="headerlink" title="怎么将byte转换为String？"></a>怎么将byte转换为String？</h4><p>可以使用String接收byte[]参数的构造器来进行转换，需要注意的是使用正确的编码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> String(<span class="string">"你好啊"</span>.getBytes(), StandardCharsets.UTF_8);</span></pre></td></tr></table></figure>
+
+<h4 id="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><a href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？" class="headerlink" title="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"></a>我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</h4><p>是的，可以强制转换,但是Java中int是32位的，而byte是8位的，所以，如果强制转化，int类型的高24位将会被丢弃，byte类型的范围是-127到128。</p>
+<h4 id="Java中的-操作符是线程安全的吗？"><a href="#Java中的-操作符是线程安全的吗？" class="headerlink" title="Java中的++操作符是线程安全的吗？"></a>Java中的++操作符是线程安全的吗？</h4><p>不是，这个操作实际上涉及三个指令：读取变量值，增加，再存储会内存，这个过程有可能出现多个线程交叉。</p>
+<h4 id="3-0-1-0-3-将会返回什么？true-还是-false？"><a href="#3-0-1-0-3-将会返回什么？true-还是-false？" class="headerlink" title="3*0.1 == 0.3 将会返回什么？true 还是 false？"></a>3*0.1 == 0.3 将会返回什么？true 还是 false？</h4><p>false，因为有些浮点数不能精确度的表示出来。<br>可以用<code>BigDecimal</code>转换后进行精确计算：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">BigDecimal bigDecimal = <span class="keyword">new</span> BigDecimal(<span class="string">"0.2"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">System.out.println(bigDecimal.multiply(<span class="keyword">new</span> BigDecimal(<span class="string">"6"</span>)).doubleValue());</span></pre></td></tr></table></figure>
+<p>这里注意要用BigDecimal的String构造器，如果是用double类型，仍然是不精确的。<br>参考：<a href="https://my.oschina.net/junn/blog/136978" target="_blank" rel="noopener">Java中浮点型数据Float和Double进行精确计算的问题</a></p>
+<h4 id="可以用Switch中使用String吗？"><a href="#可以用Switch中使用String吗？" class="headerlink" title="可以用Switch中使用String吗？"></a>可以用Switch中使用String吗？</h4><p>从Java7开始，我们可以在switch case中使用字符串，但这仅仅是一个语法糖。内部实现在switch中使用字符串的hash code。</p>
+<h4 id="String和StringBuilder-StringBuffer"><a href="#String和StringBuilder-StringBuffer" class="headerlink" title="String和StringBuilder/StringBuffer"></a>String和StringBuilder/StringBuffer</h4><p>String是只读字符串，它所引用的字符串内容是不能被改变的。而StringBuffer和StringBuilder表示的字符串对象是可以修改的。StringBuilder是JDK1.5引入的，区别在于它是在单线程环境下使用的，所有方面都没有被synchronized修饰，因此它的效率也比StringBuffer高。<br>关于性能问题，有个知乎问题：<a href="https://www.zhihu.com/question/20101840" target="_blank" rel="noopener">JAVA 中的 StringBuilder 和 StringBuffer 适用的场景是什么？</a> 评论区提到，现在用+号拼接字符串已经没有了性能损失，除非在一个循环里面重复执行，因为这样会多次创建StringBuilder</p>
+<p>有一个面试题问：有没有哪种情况用 + 做字符串连接比调用 StringBuffer / StringBuilder 对象的 append 方法性能更好？如果连接后得到的字符串在静态存储区中是早已存在的，那么用+做字符串连接是优于 StringBuffer / StringBuilder 的 append 方法的。</p>
+<h1 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h1><h4 id="ArrayList和LinkedList区别是什么"><a href="#ArrayList和LinkedList区别是什么" class="headerlink" title="ArrayList和LinkedList区别是什么"></a>ArrayList和LinkedList区别是什么</h4><p>ArrayList底层使用数组，随机访问效率高，插入和删除元素的效率低，需要连续空间；LinkedList底层使用链表，随机访问元素效率低，插入和删除效率高，不需要连续空间。</p>
+<h4 id="LinkedHashMap-和-PriorityQueue-的区别是什么？"><a href="#LinkedHashMap-和-PriorityQueue-的区别是什么？" class="headerlink" title="LinkedHashMap 和 PriorityQueue 的区别是什么？"></a>LinkedHashMap 和 PriorityQueue 的区别是什么？</h4><p>PriorityQueue保证最高或者最低优先级的元素总在队列头部，但是LinkedHashMap维持的顺序是元素插入的顺序。当遍历一个PriorityQueue时，没有任何顺序保证，但是LinkedHashMap保证按照插入顺序。</p>
+<h4 id="Java中怎么打印数组？"><a href="#Java中怎么打印数组？" class="headerlink" title="Java中怎么打印数组？"></a>Java中怎么打印数组？</h4><p>用Arrays.toString()和Arrays.deepToString()方法。</p>
+<h4 id="TreeMap是用什么实现的？"><a href="#TreeMap是用什么实现的？" class="headerlink" title="TreeMap是用什么实现的？"></a>TreeMap是用什么实现的？</h4><p>红黑树。</p>
+<h4 id="ArrayList和HashMap的默认大小是多少？"><a href="#ArrayList和HashMap的默认大小是多少？" class="headerlink" title="ArrayList和HashMap的默认大小是多少？"></a>ArrayList和HashMap的默认大小是多少？</h4><p>ArrayList的默认大小是是个元素，HashMap的默认大小是16个元素（必须是2的幂）</p>
+<h4 id="Iterator和ListIterator的区别是什么？"><a href="#Iterator和ListIterator的区别是什么？" class="headerlink" title="Iterator和ListIterator的区别是什么？"></a>Iterator和ListIterator的区别是什么？</h4><ul>
+<li>Iterator可以用来遍历Set和List集合，但是ListIterator只能用来遍历List。</li>
+<li>Iterator对集合只能是前向遍历，但是ListIterator可以前向也可以后向。</li>
+<li>ListIterator实现了Iterator接口，并且包含其他功能。比如：增加元素，替换元素，获取前一个和后一个元素的索引等等。</li>
+</ul>
+<h4 id="快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><a href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？" class="headerlink" title="快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？"></a>快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</h4><p>Iterator的安全失败是基于对底层集合做拷贝，因此，它不受源集合上修改的影响。java.util包下面的所有集合都是快速失败的，而java.util.current包下面的所有类都是安全失败的。快速失败的迭代器会抛出CurrentModificationException异常，而安全失败的迭代器永远不会抛出这样的异常。</p>
+<h4 id="用什么方法来实现集合的排序？"><a href="#用什么方法来实现集合的排序？" class="headerlink" title="用什么方法来实现集合的排序？"></a>用什么方法来实现集合的排序？</h4><p>可以使用有序集合比如TreeSet或者TreeMap，你也可以使用Collections.sort()来排序</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/API/" rel="tag"># API</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/04/13/JavaFX%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/" rel="prev" title="JavaFX简单入门">
+      <i class="fa fa-chevron-left"></i> JavaFX简单入门
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/05/07/Java-JVM-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/" rel="next" title="Java JVM 常见面试问题">
+      Java JVM 常见面试问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据类型"><span class="nav-number">1.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#怎么将byte转换为String？"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">怎么将byte转换为String？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中的-操作符是线程安全的吗？"><span class="nav-number">1.0.0.3.</span> <span class="nav-text">Java中的++操作符是线程安全的吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-0-1-0-3-将会返回什么？true-还是-false？"><span class="nav-number">1.0.0.4.</span> <span class="nav-text">3*0.1 &#x3D;&#x3D; 0.3 将会返回什么？true 还是 false？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以用Switch中使用String吗？"><span class="nav-number">1.0.0.5.</span> <span class="nav-text">可以用Switch中使用String吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#String和StringBuilder-StringBuffer"><span class="nav-number">1.0.0.6.</span> <span class="nav-text">String和StringBuilder&#x2F;StringBuffer</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集合"><span class="nav-number">2.</span> <span class="nav-text">集合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayList和LinkedList区别是什么"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">ArrayList和LinkedList区别是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LinkedHashMap-和-PriorityQueue-的区别是什么？"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">LinkedHashMap 和 PriorityQueue 的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中怎么打印数组？"><span class="nav-number">2.0.0.3.</span> <span class="nav-text">Java中怎么打印数组？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeMap是用什么实现的？"><span class="nav-number">2.0.0.4.</span> <span class="nav-text">TreeMap是用什么实现的？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayList和HashMap的默认大小是多少？"><span class="nav-number">2.0.0.5.</span> <span class="nav-text">ArrayList和HashMap的默认大小是多少？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Iterator和ListIterator的区别是什么？"><span class="nav-number">2.0.0.6.</span> <span class="nav-text">Iterator和ListIterator的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><span class="nav-number">2.0.0.7.</span> <span class="nav-text">快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用什么方法来实现集合的排序？"><span class="nav-number">2.0.0.8.</span> <span class="nav-text">用什么方法来实现集合的排序？</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

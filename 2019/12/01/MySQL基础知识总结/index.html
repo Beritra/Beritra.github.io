@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="总结 MySQL 中的一些基础知识点。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL基础知识总结">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;01&#x2F;MySQL%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="总结 MySQL 中的一些基础知识点。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;b64c2e300c0f200ee55c674e4d113886.png">
+<meta property="article:published_time" content="2019-12-01T04:12:12.000Z">
+<meta property="article:modified_time" content="2019-12-15T14:27:18.340Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;b64c2e300c0f200ee55c674e4d113886.png">
+
+<link rel="canonical" href="http://beritra.github.com/2019/12/01/MySQL%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>MySQL基础知识总结 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2019/12/01/MySQL%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL基础知识总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-01 12:12:12" itemprop="dateCreated datePublished" datetime="2019-12-01T12:12:12+08:00">2019-12-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-15 22:27:18" itemprop="dateModified" datetime="2019-12-15T22:27:18+08:00">2019-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>总结 MySQL 中的一些基础知识点。</p>
+<a id="more"></a>
+
+<p>本文尽量按照MySQL 8.0版本的规则，但是很多参考书籍和资料还是基于5.*版本，可能有疏漏。</p>
+<h2 id="SQL基础"><a href="#SQL基础" class="headerlink" title="SQL基础"></a>SQL基础</h2><p>SQL全称是Structure Query Language（结构化查询语言）。主要分为三个类别：</p>
+<ul>
+<li>DDL（Data Definiton Languages）语句：数据定义语言，这些语句定义的不同的数据段、数据库、表、列、索引等数据库对象的定义。常用的关键字包括<code>create</code>、<code>drop</code>、<code>alter</code>等。</li>
+<li>DML（Data Manipulation Language）语句：数据操纵语句、用于添加、删除、更新和查询数据库记录，并检查数据完整性，常见的语句关键字包括<code>insert</code>、<code>delete</code>、<code>update</code>和<code>select</code>等。</li>
+<li>DCL（Data Control Language）语句：数据控制语句，用于控制不同的数据段直接的许可和访问级别的语句。这些语句定义的数据库、表、字段、用户的访问权限和安全级别。主要语句关键字包括<code>grant</code>、<code>revoke</code>等。</li>
+</ul>
+<h3 id="DDL语句"><a href="#DDL语句" class="headerlink" title="DDL语句"></a>DDL语句</h3><h4 id="数据库增删改查"><a href="#数据库增删改查" class="headerlink" title="数据库增删改查"></a>数据库增删改查</h4><p>数据库创建的格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE DATABASE db_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    [[DEFAULT] CHARACTER SET charset_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    [[DEFAULT] COLLATE collation_name]</span></pre></td></tr></table></figure>
+
+<p>常用的字符集参数为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">create database test_database default CHARACTER SET utf8mb4 collate utf8mb4_unicode_ci;</span></pre></td></tr></table></figure>
+
+<p>建议使用<code>utf8mb4</code>代替<code>utf8</code>，后者在存储比如<code>emoji</code>表情的时候会出错。<code>collate</code>关键字代表的是字符排序规则，会影响结果展示的顺序和<code>order by</code>等排序参数。</p>
+<p>删除数据库语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">drop database db_name;</span></pre></td></tr></table></figure>
+
+<p>要修改字符集参数的话：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ALTER DATABASE db_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    [[DEFAULT] CHARACTER SET charset_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    [[DEFAULT] COLLATE collation_name]</span></pre></td></tr></table></figure>
+
+<p>MySQL似乎是没有提供对数据库重命名的方法。</p>
+<p>如果想查看一共有多少个数据库，可以用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">show databases;</span></pre></td></tr></table></figure>
+
+<p>会显示包含系统库在内的所有数据库。</p>
+<h4 id="表的增删改查"><a href="#表的增删改查" class="headerlink" title="表的增删改查"></a>表的增删改查</h4><p>创建表的语句比较复杂，直接把官网文档上的完整表述贴了过来：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE [TEMPORARY] TABLE [IF NOT EXISTS] tbl_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    (create_definition,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    [table_options]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    [partition_options]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">CREATE [TEMPORARY] TABLE [IF NOT EXISTS] tbl_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    [(create_definition,...)]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    [table_options]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    [partition_options]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    [IGNORE | REPLACE]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    [AS] query_expression</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">CREATE [TEMPORARY] TABLE [IF NOT EXISTS] tbl_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    &#123; LIKE old_tbl_name | (LIKE old_tbl_name) &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">create_definition:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    col_name column_definition</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">  | &#123;INDEX|KEY&#125; [index_name] [index_type] (key_part,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">      [index_option] ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">  | &#123;FULLTEXT|SPATIAL&#125; [INDEX|KEY] [index_name] (key_part,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">      [index_option] ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">  | [CONSTRAINT [symbol]] PRIMARY KEY</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">      [index_type] (key_part,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">      [index_option] ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">  | [CONSTRAINT [symbol]] UNIQUE [INDEX|KEY]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">      [index_name] [index_type] (key_part,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">      [index_option] ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">  | [CONSTRAINT [symbol]] FOREIGN KEY</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">      [index_name] (col_name,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">      reference_definition</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">  | check_constraint_definition</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">column_definition:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">    data_type [NOT NULL | NULL] [DEFAULT &#123;literal | (expr)&#125; ]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">      [AUTO_INCREMENT] [UNIQUE [KEY]] [[PRIMARY] KEY]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">      [COMMENT &#39;string&#39;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">37</span></pre></td><td class="code"><pre><span class="line">      [COLLATE collation_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">38</span></pre></td><td class="code"><pre><span class="line">      [COLUMN_FORMAT &#123;FIXED|DYNAMIC|DEFAULT&#125;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">39</span></pre></td><td class="code"><pre><span class="line">      [STORAGE &#123;DISK|MEMORY&#125;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">40</span></pre></td><td class="code"><pre><span class="line">      [reference_definition]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">41</span></pre></td><td class="code"><pre><span class="line">      [check_constraint_definition]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">42</span></pre></td><td class="code"><pre><span class="line">  | data_type</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">43</span></pre></td><td class="code"><pre><span class="line">      [COLLATE collation_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">44</span></pre></td><td class="code"><pre><span class="line">      [GENERATED ALWAYS] AS (expr)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">45</span></pre></td><td class="code"><pre><span class="line">      [VIRTUAL | STORED] [NOT NULL | NULL]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">46</span></pre></td><td class="code"><pre><span class="line">      [UNIQUE [KEY]] [[PRIMARY] KEY]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">47</span></pre></td><td class="code"><pre><span class="line">      [COMMENT &#39;string&#39;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">48</span></pre></td><td class="code"><pre><span class="line">      [reference_definition]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">49</span></pre></td><td class="code"><pre><span class="line">      [check_constraint_definition]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">50</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">51</span></pre></td><td class="code"><pre><span class="line">data_type:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">52</span></pre></td><td class="code"><pre><span class="line">    (see Chapter 11, Data Types)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">53</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">54</span></pre></td><td class="code"><pre><span class="line">key_part: &#123;col_name [(length)] | (expr)&#125; [ASC | DESC]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">55</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">56</span></pre></td><td class="code"><pre><span class="line">index_type:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">57</span></pre></td><td class="code"><pre><span class="line">    USING &#123;BTREE | HASH&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">58</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">59</span></pre></td><td class="code"><pre><span class="line">index_option:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">60</span></pre></td><td class="code"><pre><span class="line">    KEY_BLOCK_SIZE [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">61</span></pre></td><td class="code"><pre><span class="line">  | index_type</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">62</span></pre></td><td class="code"><pre><span class="line">  | WITH PARSER parser_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">63</span></pre></td><td class="code"><pre><span class="line">  | COMMENT &#39;string&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">64</span></pre></td><td class="code"><pre><span class="line">  | &#123;VISIBLE | INVISIBLE&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">65</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">66</span></pre></td><td class="code"><pre><span class="line">check_constraint_definition:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">67</span></pre></td><td class="code"><pre><span class="line">    [CONSTRAINT [symbol]] CHECK (expr) [[NOT] ENFORCED]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">68</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">69</span></pre></td><td class="code"><pre><span class="line">reference_definition:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">70</span></pre></td><td class="code"><pre><span class="line">    REFERENCES tbl_name (key_part,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">71</span></pre></td><td class="code"><pre><span class="line">      [MATCH FULL | MATCH PARTIAL | MATCH SIMPLE]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">72</span></pre></td><td class="code"><pre><span class="line">      [ON DELETE reference_option]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">73</span></pre></td><td class="code"><pre><span class="line">      [ON UPDATE reference_option]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">74</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">75</span></pre></td><td class="code"><pre><span class="line">reference_option:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">76</span></pre></td><td class="code"><pre><span class="line">    RESTRICT | CASCADE | SET NULL | NO ACTION | SET DEFAULT</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">77</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">78</span></pre></td><td class="code"><pre><span class="line">table_options:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">79</span></pre></td><td class="code"><pre><span class="line">    table_option [[,] table_option] ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">80</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">81</span></pre></td><td class="code"><pre><span class="line">table_option:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">82</span></pre></td><td class="code"><pre><span class="line">    AUTO_INCREMENT [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">83</span></pre></td><td class="code"><pre><span class="line">  | AVG_ROW_LENGTH [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">84</span></pre></td><td class="code"><pre><span class="line">  | [DEFAULT] CHARACTER SET [&#x3D;] charset_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">85</span></pre></td><td class="code"><pre><span class="line">  | CHECKSUM [&#x3D;] &#123;0 | 1&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">86</span></pre></td><td class="code"><pre><span class="line">  | [DEFAULT] COLLATE [&#x3D;] collation_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">87</span></pre></td><td class="code"><pre><span class="line">  | COMMENT [&#x3D;] &#39;string&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">88</span></pre></td><td class="code"><pre><span class="line">  | COMPRESSION [&#x3D;] &#123;&#39;ZLIB&#39;|&#39;LZ4&#39;|&#39;NONE&#39;&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">89</span></pre></td><td class="code"><pre><span class="line">  | CONNECTION [&#x3D;] &#39;connect_string&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">90</span></pre></td><td class="code"><pre><span class="line">  | &#123;DATA|INDEX&#125; DIRECTORY [&#x3D;] &#39;absolute path to directory&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">91</span></pre></td><td class="code"><pre><span class="line">  | DELAY_KEY_WRITE [&#x3D;] &#123;0 | 1&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">92</span></pre></td><td class="code"><pre><span class="line">  | ENCRYPTION [&#x3D;] &#123;&#39;Y&#39; | &#39;N&#39;&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">93</span></pre></td><td class="code"><pre><span class="line">  | ENGINE [&#x3D;] engine_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">94</span></pre></td><td class="code"><pre><span class="line">  | INSERT_METHOD [&#x3D;] &#123; NO | FIRST | LAST &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">95</span></pre></td><td class="code"><pre><span class="line">  | KEY_BLOCK_SIZE [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">96</span></pre></td><td class="code"><pre><span class="line">  | MAX_ROWS [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">97</span></pre></td><td class="code"><pre><span class="line">  | MIN_ROWS [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">98</span></pre></td><td class="code"><pre><span class="line">  | PACK_KEYS [&#x3D;] &#123;0 | 1 | DEFAULT&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">99</span></pre></td><td class="code"><pre><span class="line">  | PASSWORD [&#x3D;] &#39;string&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">100</span></pre></td><td class="code"><pre><span class="line">  | ROW_FORMAT [&#x3D;] &#123;DEFAULT|DYNAMIC|FIXED|COMPRESSED|REDUNDANT|COMPACT&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">101</span></pre></td><td class="code"><pre><span class="line">  | STATS_AUTO_RECALC [&#x3D;] &#123;DEFAULT|0|1&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">102</span></pre></td><td class="code"><pre><span class="line">  | STATS_PERSISTENT [&#x3D;] &#123;DEFAULT|0|1&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">103</span></pre></td><td class="code"><pre><span class="line">  | STATS_SAMPLE_PAGES [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">104</span></pre></td><td class="code"><pre><span class="line">  | TABLESPACE tablespace_name [STORAGE &#123;DISK|MEMORY&#125;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">105</span></pre></td><td class="code"><pre><span class="line">  | UNION [&#x3D;] (tbl_name[,tbl_name]...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">106</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">107</span></pre></td><td class="code"><pre><span class="line">partition_options:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">108</span></pre></td><td class="code"><pre><span class="line">    PARTITION BY</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">109</span></pre></td><td class="code"><pre><span class="line">        &#123; [LINEAR] HASH(expr)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">110</span></pre></td><td class="code"><pre><span class="line">        | [LINEAR] KEY [ALGORITHM&#x3D;&#123;1|2&#125;] (column_list)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">111</span></pre></td><td class="code"><pre><span class="line">        | RANGE&#123;(expr) | COLUMNS(column_list)&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">112</span></pre></td><td class="code"><pre><span class="line">        | LIST&#123;(expr) | COLUMNS(column_list)&#125; &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">113</span></pre></td><td class="code"><pre><span class="line">    [PARTITIONS num]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">114</span></pre></td><td class="code"><pre><span class="line">    [SUBPARTITION BY</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">115</span></pre></td><td class="code"><pre><span class="line">        &#123; [LINEAR] HASH(expr)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">116</span></pre></td><td class="code"><pre><span class="line">        | [LINEAR] KEY [ALGORITHM&#x3D;&#123;1|2&#125;] (column_list) &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">117</span></pre></td><td class="code"><pre><span class="line">      [SUBPARTITIONS num]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">118</span></pre></td><td class="code"><pre><span class="line">    ]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">119</span></pre></td><td class="code"><pre><span class="line">    [(partition_definition [, partition_definition] ...)]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">120</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">121</span></pre></td><td class="code"><pre><span class="line">partition_definition:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">122</span></pre></td><td class="code"><pre><span class="line">    PARTITION partition_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">123</span></pre></td><td class="code"><pre><span class="line">        [VALUES</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">124</span></pre></td><td class="code"><pre><span class="line">            &#123;LESS THAN &#123;(expr | value_list) | MAXVALUE&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">125</span></pre></td><td class="code"><pre><span class="line">            |</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">126</span></pre></td><td class="code"><pre><span class="line">            IN (value_list)&#125;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">127</span></pre></td><td class="code"><pre><span class="line">        [[STORAGE] ENGINE [&#x3D;] engine_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">128</span></pre></td><td class="code"><pre><span class="line">        [COMMENT [&#x3D;] &#39;string&#39; ]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">129</span></pre></td><td class="code"><pre><span class="line">        [DATA DIRECTORY [&#x3D;] &#39;data_dir&#39;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">130</span></pre></td><td class="code"><pre><span class="line">        [INDEX DIRECTORY [&#x3D;] &#39;index_dir&#39;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">131</span></pre></td><td class="code"><pre><span class="line">        [MAX_ROWS [&#x3D;] max_number_of_rows]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">132</span></pre></td><td class="code"><pre><span class="line">        [MIN_ROWS [&#x3D;] min_number_of_rows]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">133</span></pre></td><td class="code"><pre><span class="line">        [TABLESPACE [&#x3D;] tablespace_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">134</span></pre></td><td class="code"><pre><span class="line">        [(subpartition_definition [, subpartition_definition] ...)]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">135</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">136</span></pre></td><td class="code"><pre><span class="line">subpartition_definition:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">137</span></pre></td><td class="code"><pre><span class="line">    SUBPARTITION logical_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">138</span></pre></td><td class="code"><pre><span class="line">        [[STORAGE] ENGINE [&#x3D;] engine_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">139</span></pre></td><td class="code"><pre><span class="line">        [COMMENT [&#x3D;] &#39;string&#39; ]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">140</span></pre></td><td class="code"><pre><span class="line">        [DATA DIRECTORY [&#x3D;] &#39;data_dir&#39;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">141</span></pre></td><td class="code"><pre><span class="line">        [INDEX DIRECTORY [&#x3D;] &#39;index_dir&#39;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">142</span></pre></td><td class="code"><pre><span class="line">        [MAX_ROWS [&#x3D;] max_number_of_rows]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">143</span></pre></td><td class="code"><pre><span class="line">        [MIN_ROWS [&#x3D;] min_number_of_rows]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">144</span></pre></td><td class="code"><pre><span class="line">        [TABLESPACE [&#x3D;] tablespace_name]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">145</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">146</span></pre></td><td class="code"><pre><span class="line">query_expression:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">147</span></pre></td><td class="code"><pre><span class="line">    SELECT ...   (Some valid select or union statement)</span></pre></td></tr></table></figure>
+
+<p>可以看到创建表的时候，主要分为三个部分，包括创建定义、表选项、分区选项等，实际上大多数时候用不到这么多功能。</p>
+<p>不手动指定的话，模式使用<code>InnoDB</code>作为数据库引擎，<code>InnoDB</code>最大支持40亿张表。</p>
+<p>一个简单的创建语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">create table test_table</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">(</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    id    int not null auto_increment primary key,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    name  varchar(20),</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    class varchar(20),</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    age   int</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">)engine&#x3D;InnoDB character set utf8mb4;</span></pre></td></tr></table></figure>
+
+<p>创建完成后，可以使用<code>desc</code>关键字查看表结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">desc tablename;</span></pre></td></tr></table></figure>
+
+<p><code>desc</code>命令输出的信息相对比较简单，可以使用如下语句查看详细的建表语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">show create table tablename;</span></pre></td></tr></table></figure>
+
+<p>修改表结构使用<code>alter table</code>语句：</p>
+<ul>
+<li><p>修改表类型：<code>ALTER TABLE table_name MODIFY [COLUMN] column_definition [FIRST|AFTER colname]</code></p>
+</li>
+<li><p>增加表字段：<code>ALTER TABLE table_name ADD [COLUMN] column_definition [FIRST|AFTER col_name]</code></p>
+</li>
+<li><p>删除表字段：<code>ALTER TABLE table_name DROP [COLUMN] col_name</code></p>
+</li>
+<li><p>修改字段名：<code>ALTER TABLE tablename CHANGE [COLUMN] old_col_name column_definition [FIRST|AFTER col_name]</code></p>
+</li>
+<li><p>修改字段排列顺序：前面介绍的的字段增加和修改语法(ADD/CNAHGE/MODIFY)中,都有一个可选项 first|after<br>column_name,这个选项可以用来修改字段在表中的位置,默认 ADD 增加的新字段是加在<br>表的最后位置,而 CHANGE/MODIFY 默认都不会改变字段的位置。</p>
+</li>
+<li><p>重命名表，老版本的MySQL一般使用：<code>ALTER TABLE test_table RENAME to test_table02;</code></p>
+<p>MySQL 8.0中支持<code>rename</code>关键字：<code>rename table test_table02 to test_table;</code></p>
+</li>
+</ul>
+<h3 id="DML语句"><a href="#DML语句" class="headerlink" title="DML语句"></a>DML语句</h3><h4 id="插入记录"><a href="#插入记录" class="headerlink" title="插入记录"></a>插入记录</h4><p>表创建好后,就可以往里插入记录了,插入记录的基本语法如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">INSERT INTO tablename (field1,field2,......fieldn) VALUES(value1,value2,......valuesn);</span></pre></td></tr></table></figure>
+
+<h4 id="更新记录"><a href="#更新记录" class="headerlink" title="更新记录"></a>更新记录</h4><p>对于表里的记录值,可以通过 update 命令进行更改,语法如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">UPDATE tablename SET field1&#x3D;value1,field2.&#x3D;value2,......fieldn&#x3D;valuen [WHERE CONDITION]</span></pre></td></tr></table></figure>
+
+<h4 id="删除记录"><a href="#删除记录" class="headerlink" title="删除记录"></a>删除记录</h4><p>如果记录不再需要,可以用 delete 命令进行删除,语法如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">DELETE FROM tablename [WHERE CONDITION]</span></pre></td></tr></table></figure>
+
+<h4 id="查询记录"><a href="#查询记录" class="headerlink" title="查询记录"></a>查询记录</h4><p>SELECT 的语法很复杂,所有这里只介绍最基本的语法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">SELECT * FROM tablename [WHERE CONDITION]</span></pre></td></tr></table></figure>
+
+<p>太复杂的就不重复了，这些都是基础内容，网上的教程一大把。</p>
+<h3 id="DCL语句"><a href="#DCL语句" class="headerlink" title="DCL语句"></a>DCL语句</h3><p>DCL 语句主要是 DBA 用来管理系统中的对象权限时所使用,一般的开发人员很少使用。只记录几条经常用的吧。</p>
+<p>这里经常遇到的就是MySQL 8.0和之前版本的不一致，往往在网上搜到一个命令，拿过来不能用，MySQL 8.0的变动以下几个方面：</p>
+<h4 id="验证插件和密码加密方式的变化"><a href="#验证插件和密码加密方式的变化" class="headerlink" title="验证插件和密码加密方式的变化"></a>验证插件和密码加密方式的变化</h4><p>在 MySQL 8.0 中，<code>caching_sha2_password</code> 是默认的身份验证插件而不是之前版本的 <code>mysql_native_password</code>，默认的密码加密方式是 <code>SHA2</code> 。</p>
+<h4 id="用户授权和修改密码"><a href="#用户授权和修改密码" class="headerlink" title="用户授权和修改密码"></a>用户授权和修改密码</h4><p>之前版本：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">GRANT ALL PRIVILEGES ON *.* TO &#96;mike&#96;@&#96;%&#96; IDENTIFIED BY &#39;000000&#39; WITH GRANT OPTION;</span></pre></td></tr></table></figure>
+
+<p>MySQL 8.0版本中正确的授权语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE USER &#39;mike&#39;@&#39;%&#39; IDENTIFIED BY &#39;000000&#39;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">GRANT ALL ON *.* TO &#39;mike&#39;@&#39;%&#39; WITH GRANT OPTION;</span></pre></td></tr></table></figure>
+
+<p>可以看到，创建用户和授权是分开的，不再能一个语句搞定。</p>
+<p>修改密码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED WITH mysql_native_password BY &#39;新密码&#39;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">FLUSH PRIVILEGES;</span></pre></td></tr></table></figure>
+
+<p>也可以使用mysqladmin命令:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">mysqladmin -u root -p password 新密码</span></pre></td></tr></table></figure>
+
+<p>还有很多其他内容，作为开发不用完全掌握，可以详见这个博文：<a href="https://juejin.im/post/5b6eec2cf265da0f5e3315a6" target="_blank" rel="noopener">MySQL 8.0用户和角色管理</a></p>
+<h2 id="MySQL数据类型"><a href="#MySQL数据类型" class="headerlink" title="MySQL数据类型"></a>MySQL数据类型</h2><h3 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h3><p>MySQL 支持所有标准 SQL 中的数值类型,其中包括严格数值类型(INTEGER、SMALLINT、DECIMAL 和 NUMERIC),以及近似数值数据类型(FLOAT、REAL 和 DOUBLE PRECISION),并在此基础上做了扩展。扩展后增加了TINYINT、MEDIUMINT 和 BIGINT 这 3 种长度不同的整型,并增加了 BIT 类型,用来存放位数据。</p>
+<h4 id="整型数据"><a href="#整型数据" class="headerlink" title="整型数据"></a>整型数据</h4><p>对于整型数据,MySQL 还支持在类型名称后面的小括号内指定显示宽度,例如 int(5)表示当数值宽度小于 5 位的时候在数字前面填满宽度,如果不显示指定宽度则默认为 int(11)，一般配合 zerofill 使用。</p>
+<p>设置了宽度限制后,如果插入大于宽度限制的值,不会对插入的数据有任何影响,还是按照类型的实际精度进行保存。</p>
+<h4 id="小数"><a href="#小数" class="headerlink" title="小数"></a>小数</h4><p>对于小数的表示,MySQL 分为两种方式:浮点数和定点数。浮点数包括 float(单精度)和 double(双精度),而定点数则只有 decimal 一种表示。定点数在 MySQL 内部以字符串形式存放,比浮点数更精确,适合用来表示货币等精度高的数据。</p>
+<p>浮点数和定点数都可以用类型名称后加“(M,D)”的方式来进行表示,“(M,D)”表示该值一共显示 M 位数字(整数位+小数位),其中 D 位位于小数点后面,M 和 D 又称为精度和标度。</p>
+<p>由于float和double分别以32位和64位存储，所以实际上是可能产生精度丢失的。比如一个float类型的列，插入0.123456789的时候，实际存储到数据库的只是近似值0.123457,，当位数更多的时候这个问题更明显，比如分别向float和double类型的列中插入987654321.123456789，会得到987654000和987654321.1234568。</p>
+<p>所以想要存储高精度、准确的数字，还是需要用decimal类型。</p>
+<h3 id="日期时间类型"><a href="#日期时间类型" class="headerlink" title="日期时间类型"></a>日期时间类型</h3><p>MySQL中的事件类型有：<code>DATE</code>、<code>DATETIME</code>、<code>TIMESTAMP</code>、<code>TIME</code>、<code>YEAR</code></p>
+<p>这些数据类型的主要区别如下:</p>
+<ul>
+<li>如果要用来表示年月日,通常用 DATE 来表示。</li>
+<li>如果要用来表示年月日时分秒,通常用 DATETIME 表示。</li>
+<li>如果只用来表示时分秒,通常用 TIME 来表示。</li>
+<li>如果需要经常插入或者更新日期为当前系统时间,则通常使用 TIMESTAMP 来表示。TIMESTAMP 值返回后显示为“YYYY-MM-DD HH:MM:SS”格式的字符串,显示宽度固定为 19 个字符。如果想要获得数字值,应在 TIMESTAMP 列添加+0。</li>
+<li>如果只是表示年份,可以用 YEAR 来表示,它比 DATE 占用更少的空间。YEAR 有 2 位或4 位格式的年。默认是 4 位格式。在 4 位格式中,允许的值是 1901<del>2155 和 0000。在2 位格式中,允许的值是 70</del>69,表示从 1970~2069 年。 MySQL 以 YYYY 格式显示 YEAR值。</li>
+</ul>
+<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><p>MySQL 包括了 CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM 和 SET 等多种字符串类型。下面的表详细列出了这些字符类型的比较。</p>
+<p><img src="http://nas.beritra.com:18081/uploads/big/b64c2e300c0f200ee55c674e4d113886.png" alt=""></p>
+<h4 id="CHAR和VCHAR类型"><a href="#CHAR和VCHAR类型" class="headerlink" title="CHAR和VCHAR类型"></a>CHAR和VCHAR类型</h4><p>CHAR 和 VARCHAR 很类似,都用来保存 MySQL 中较短的字符串。二者的主要区别在于存储方式的不同：CHAR 列的长度固定为创建表时声明的长度，长度可以为从 0<del>255 的任何值；而 VARCHAR 列中的值为可变长字符串，长度可以指定为0</del>65535( 5.0.3以后)之间的值。在检索的时候，CHAR 列删除了尾部的空格，而 VARCHAR 则保留这些空格。</p>
+<h4 id="BINARY-和-VARBINARY-类型"><a href="#BINARY-和-VARBINARY-类型" class="headerlink" title="BINARY 和 VARBINARY 类型"></a>BINARY 和 VARBINARY 类型</h4><p>BINARY 和 VARBINARY 类似于 CHAR 和 VARCHAR,不同的是它们包含二进制字符串而不包含非二进制字符串。</p>
+<h4 id="ENUM-类型"><a href="#ENUM-类型" class="headerlink" title="ENUM 类型"></a>ENUM 类型</h4><p>ENUM 中文名称叫枚举类型，它的值范围需要在创建表时通过枚举方式显式指定，对 1<del>255 个成员的枚举需要 1 个字节存储；对于 255</del>65535 个成员，需要 2 个字节存储。最多允许有 65535 个成员。</p>
+<h4 id="SET-类型"><a href="#SET-类型" class="headerlink" title="SET 类型"></a>SET 类型</h4><p>Set 和 ENUM 类型非常类似，也是一个字符串对象，里面可以包含 0~64 个成员。根据成员的不同，存储上也有所不同。</p>
+<ul>
+<li>1~8 成员的集合,占 1 个字节。</li>
+<li>9~16 成员的集合,占 2 个字节。</li>
+<li>17~24 成员的集合,占 3 个字节。</li>
+<li>25~32 成员的集合,占 4 个字节。</li>
+<li>33~64 成员的集合,占 8 个字节。</li>
+</ul>
+<h3 id="其他类型"><a href="#其他类型" class="headerlink" title="其他类型"></a>其他类型</h3><p>MySQL 8中还支持多种空间类型，应该是用来存储地理信息之类的结构化信息的，但是没找到太多中文资料，平时也没用过，就不误人子弟了。</p>
+<p>另外还有新增的JSON类型支持。</p>
+<h4 id="创建JSON字段"><a href="#创建JSON字段" class="headerlink" title="创建JSON字段"></a>创建JSON字段</h4><p>创建JSON类型的字段很简单，跟其他数据结构没什么区别：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE TABLE t1 (jdoc JSON);</span></pre></td></tr></table></figure>
+
+<h4 id="插入JSON"><a href="#插入JSON" class="headerlink" title="插入JSON"></a>插入JSON</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">INSERT INTO t1 VALUES(&#39;&#123;&quot;key1&quot;: &quot;value1&quot;, &quot;key2&quot;: &quot;value2&quot;&#125;&#39;);</span></pre></td></tr></table></figure>
+
+<p>数据库会对JSON的格式进行校验，如果插入错误的格式会报错。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">mysql&gt; INSERT INTO t1 VALUES(&#39;[1, 2,&#39;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ERROR 3140 (22032) at line 2: Invalid JSON text:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&quot;Invalid value.&quot; at position 6 in value (or column) &#39;[1, 2,&#39;.</span></pre></td></tr></table></figure>
+
+<h4 id="查询JSON"><a href="#查询JSON" class="headerlink" title="查询JSON"></a>查询JSON</h4><p>查询 json 中的数据用 column-&gt;path 的形式，其中对象类型 path 这样表示 $.path, 而数组类型则是 $[index]</p>
+<p>查询testproject表student字段中json对象id为1的记录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">SELECT * FROM testproject WHERE student-&gt;&#39;$.id&#39;&#x3D; 1;</span></pre></td></tr></table></figure>
+
+<p>查询testproject表student字段中json对象id为1或者5的记录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">SELECT * FROM testproject WHERE student-&gt;&#39;$.id&#39; in (1,5);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">SELECT * FROM testproject WHERE student-&gt;&#39;$.id&#39; &#x3D; 1 or student-&gt;&#39;$.id&#39; &#x3D; 5;</span></pre></td></tr></table></figure>
+
+<h4 id="更新数据"><a href="#更新数据" class="headerlink" title="更新数据"></a>更新数据</h4><p>MySQL 并不支持 column-&gt;path 的形式进行更新操作。如果是整个 json 更新的话，和插入时类似的。如果需要更新JSON中的某个值，需要用系统提供的函数：</p>
+<ul>
+<li>json_array_append：在json后面追加</li>
+<li>json_array_insert：在指定下标插入</li>
+<li>json_replace：只替换已经存在的旧值，不存在则忽略</li>
+<li>json_set：替换旧值，并插入不存在的新值</li>
+<li>json_insert：插入新值，但不替换已经存在的旧值</li>
+<li>json_remove：删除元素</li>
+</ul>
+<p>这部分详细操作可以参考官方文档<a href="https://dev.mysql.com/doc/refman/8.0/en/json.html" target="_blank" rel="noopener">The JSON Data Type</a>和博客<a href="https://zhuanlan.zhihu.com/p/89873632" target="_blank" rel="noopener">mysql支持原生json使用说明</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/01/Java%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E9%9B%86%E5%90%88%E7%B1%BB/" rel="prev" title="Java中的各种集合类">
+      <i class="fa fa-chevron-left"></i> Java中的各种集合类
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/12/01/MySQL%E5%8E%9F%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/" rel="next" title="MySQL原理和优化">
+      MySQL原理和优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL基础"><span class="nav-number">1.</span> <span class="nav-text">SQL基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DDL语句"><span class="nav-number">1.1.</span> <span class="nav-text">DDL语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据库增删改查"><span class="nav-number">1.1.1.</span> <span class="nav-text">数据库增删改查</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表的增删改查"><span class="nav-number">1.1.2.</span> <span class="nav-text">表的增删改查</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DML语句"><span class="nav-number">1.2.</span> <span class="nav-text">DML语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#插入记录"><span class="nav-number">1.2.1.</span> <span class="nav-text">插入记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更新记录"><span class="nav-number">1.2.2.</span> <span class="nav-text">更新记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除记录"><span class="nav-number">1.2.3.</span> <span class="nav-text">删除记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查询记录"><span class="nav-number">1.2.4.</span> <span class="nav-text">查询记录</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DCL语句"><span class="nav-number">1.3.</span> <span class="nav-text">DCL语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#验证插件和密码加密方式的变化"><span class="nav-number">1.3.1.</span> <span class="nav-text">验证插件和密码加密方式的变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用户授权和修改密码"><span class="nav-number">1.3.2.</span> <span class="nav-text">用户授权和修改密码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL数据类型"><span class="nav-number">2.</span> <span class="nav-text">MySQL数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数值类型"><span class="nav-number">2.1.</span> <span class="nav-text">数值类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#整型数据"><span class="nav-number">2.1.1.</span> <span class="nav-text">整型数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小数"><span class="nav-number">2.1.2.</span> <span class="nav-text">小数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日期时间类型"><span class="nav-number">2.2.</span> <span class="nav-text">日期时间类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串类型"><span class="nav-number">2.3.</span> <span class="nav-text">字符串类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CHAR和VCHAR类型"><span class="nav-number">2.3.1.</span> <span class="nav-text">CHAR和VCHAR类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BINARY-和-VARBINARY-类型"><span class="nav-number">2.3.2.</span> <span class="nav-text">BINARY 和 VARBINARY 类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ENUM-类型"><span class="nav-number">2.3.3.</span> <span class="nav-text">ENUM 类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SET-类型"><span class="nav-number">2.3.4.</span> <span class="nav-text">SET 类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他类型"><span class="nav-number">2.4.</span> <span class="nav-text">其他类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建JSON字段"><span class="nav-number">2.4.1.</span> <span class="nav-text">创建JSON字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#插入JSON"><span class="nav-number">2.4.2.</span> <span class="nav-text">插入JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查询JSON"><span class="nav-number">2.4.3.</span> <span class="nav-text">查询JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更新数据"><span class="nav-number">2.4.4.</span> <span class="nav-text">更新数据</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

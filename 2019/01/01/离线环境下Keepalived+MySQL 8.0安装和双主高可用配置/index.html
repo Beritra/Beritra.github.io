@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="记录一个Keepalived+MySQL 双主高可用配置的配置过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Keepalived+MySQL双主高可用配置">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;01&#x2F;01&#x2F;%E7%A6%BB%E7%BA%BF%E7%8E%AF%E5%A2%83%E4%B8%8BKeepalived+MySQL%208.0%E5%AE%89%E8%A3%85%E5%92%8C%E5%8F%8C%E4%B8%BB%E9%AB%98%E5%8F%AF%E7%94%A8%E9%85%8D%E7%BD%AE&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="记录一个Keepalived+MySQL 双主高可用配置的配置过程。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;8a7f799589b2d471ddf3f97a0d8d01e5.png">
+<meta property="article:published_time" content="2019-01-01T04:12:12.000Z">
+<meta property="article:modified_time" content="2019-12-15T14:37:31.604Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="运维">
+<meta property="article:tag" content="Keepalived">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;8a7f799589b2d471ddf3f97a0d8d01e5.png">
+
+<link rel="canonical" href="http://beritra.github.com/2019/01/01/%E7%A6%BB%E7%BA%BF%E7%8E%AF%E5%A2%83%E4%B8%8BKeepalived+MySQL%208.0%E5%AE%89%E8%A3%85%E5%92%8C%E5%8F%8C%E4%B8%BB%E9%AB%98%E5%8F%AF%E7%94%A8%E9%85%8D%E7%BD%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Keepalived+MySQL双主高可用配置 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2019/01/01/%E7%A6%BB%E7%BA%BF%E7%8E%AF%E5%A2%83%E4%B8%8BKeepalived+MySQL%208.0%E5%AE%89%E8%A3%85%E5%92%8C%E5%8F%8C%E4%B8%BB%E9%AB%98%E5%8F%AF%E7%94%A8%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Keepalived+MySQL双主高可用配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-01-01 12:12:12" itemprop="dateCreated datePublished" datetime="2019-01-01T12:12:12+08:00">2019-01-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-15 22:37:31" itemprop="dateModified" datetime="2019-12-15T22:37:31+08:00">2019-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index">
+                    <span itemprop="name">运维</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>记录一个Keepalived+MySQL 双主高可用配置的配置过程。</p>
+<a id="more"></a>
+
+<h3 id="系统环境准备"><a href="#系统环境准备" class="headerlink" title="系统环境准备"></a>系统环境准备</h3><p>两台服务器IP：</p>
+<ul>
+<li><p>10.17.55.201主要的</p>
+</li>
+<li><p>10.17.55.202次要的</p>
+</li>
+</ul>
+<p>两台系统版本均为 CentOS Linux release 7.4.1708 (Core)</p>
+<p>MySQL官网上下载mysql-8.0.18-1.el7.x86_64.rpm-bundle.tar，即适用于CentOS的MySQL 8.0.18</p>
+<h3 id="组件安装"><a href="#组件安装" class="headerlink" title="组件安装"></a>组件安装</h3><p>CentOS可能带有默认的Mariadb，如果不想用的话可以执行<code>rpm -qa|grep mariadb</code>找到所有安装包，然后依次执行<code>rpm -r 每个文件名</code>卸载Mariadb。</p>
+<p>然后从官网上下载相应的MySQL安装文件。</p>
+<p>安装顺序为</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">rpm -ivh mysql-community-common-5.7.17-1.el7.x86_64.rpm   </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">rpm -ivh mysql-community-libs-5.7.17-1.el7.x86_64.rpm   </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">rpm -ivh mysql-community-client-5.7.17-1.el7.x86_64.rpm  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">rpm -ivh mysql-community-server-5.7.17-1.el7.x86_64.rpm  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">rpm -ivh mysql-community-devel-5.7.17-1.el7.x86_64.rpm</span></pre></td></tr></table></figure>
+
+<p>安装最后一个的时候有可能出现依赖openssl的问题，重新安装openssl无效，输入参数<code>-e --nodeps</code>可以解决，暂不清楚原理</p>
+<h3 id="数据库配置"><a href="#数据库配置" class="headerlink" title="数据库配置"></a>数据库配置</h3><p>先从主备模式开始进行配置，方便排错。</p>
+<h4 id="主实例"><a href="#主实例" class="headerlink" title="主实例"></a>主实例</h4><p>修改配置文件/etc/my.cnf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[mysqld]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">log-bin&#x3D;mysql-bin #日志名称</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">server-id&#x3D;1 #数据库id,两个实例不能一样</span></pre></td></tr></table></figure>
+
+<p>然后创建用户，用于数据同步，MySQL 8.0之后的用户创建方式和之前不一样</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE USER &#39;repl&#39;@&#39;10.17.55.202&#39; IDENTIFIED WITH mysql_native_password BY &#39;1&#39;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">GRANT REPLICATION SLAVE ON *.* TO &#39;repl&#39;@&#39;10.17.55.202&#39;;</span></pre></td></tr></table></figure>
+
+<p>然后刷新权限</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">flush privileges;</span></pre></td></tr></table></figure>
+
+<p>查看主节点的binary log文件名和位置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">show master status;</span></pre></td></tr></table></figure>
+
+<p><img src="http://nas.beritra.com:18081/uploads/big/8a7f799589b2d471ddf3f97a0d8d01e5.png" alt="image-20191119183450339"></p>
+<p>记录下来<code>File</code>和<code>Position</code>两个字段，下面要用。</p>
+<h4 id="备用实例"><a href="#备用实例" class="headerlink" title="备用实例"></a>备用实例</h4><p>在从节点上设置参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST&#x3D;&#39;10.17.55.201&#39;,MASTER_USER&#x3D;&#39;repl&#39;,MASTER_PASSWORD&#x3D;&#39;1&#39;,MASTER_LOG_FILE&#x3D;&#39;mysql-bin.000002&#39;,MASTER_LOG_POS&#x3D;1141;</span></pre></td></tr></table></figure>
+
+<p>然后启动从节点<code>start slave</code>，并且查看节点状态<code>show slave status\G</code></p>
+<p>如果看到节点的状态信息中包含一下的两条，证明连接成功。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Slave_IO_State: Waiting for master to send event</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Slave_SQL_Running_State: Slave has read all relay log; waiting for more updates</span></pre></td></tr></table></figure>
+
+<p>然后验证一下：</p>
+<p>切换回主节点，新建一个数据库或者表，从节点中应该同步添加了。</p>
+<h4 id="双主环境"><a href="#双主环境" class="headerlink" title="双主环境"></a>双主环境</h4><p>以上搭建的是MySQL主备模式，双主模式其实一样，只不过两者之间互为主备。</p>
+<p>同样的，把之前的备用节点当做主节点，之前的主节点当做备用节点，再来一遍。不要忘记修改<code>my.cnf</code>。</p>
+<p>配置完成之后继续新建一个数据库或者表，测试是否同步。</p>
+<h3 id="Keepalived安装和配置"><a href="#Keepalived安装和配置" class="headerlink" title="Keepalived安装和配置"></a>Keepalived安装和配置</h3><p>CentOS上直接可以用yum安装Keepalived，省了不少事情，不过可能遇到错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Error: Package: 1:net-snmp-agent-libs-5.7.2-43.el7.x86_64 (base)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">           Requires: libmysqlclient.so.18()(64bit)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Error: Package: 1:net-snmp-agent-libs-5.7.2-43.el7.x86_64 (base)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">           Requires: libmysqlclient.so.18(libmysqlclient_18)(64bit)</span></pre></td></tr></table></figure>
+
+<p>安装MySQL安装包中的<code>libs-compat</code>即可</p>
+<p>然后对keepalived进行配置，最简配置如下：</p>
+<p>主节点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">! Configuration File for keepalived</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">   router_id master</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">vrrp_instance VI_1 &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    state MASTER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    interface eth1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    virtual_router_id 51</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    priority 100</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    advert_int 1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    unicast_src_ip 172.18.0.2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    unicast_peer &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        1172.18.0.3</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    authentication &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        auth_type PASS</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">        auth_pass 1111</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    virtual_ipaddress &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">	172.18.0.10</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+
+
+<p>从节点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">! Configuration File for keepalived</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">   router_id master</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">vrrp_instance VI_1 &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    state MASTER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    interface eth1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    virtual_router_id 51</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    priority 90</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    advert_int 1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    unicast_src_ip 172.18.0.3</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    unicast_peer &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        1172.18.0.2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    authentication &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        auth_type PASS</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">        auth_pass 1111</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    virtual_ipaddress &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">        172.18.0.10</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>主要有几点重要的地方，一个是<code>router_id</code>不能一样，这个是区分每个实力上的标志。</p>
+<p>然后<code>state</code>可以都为<code>master</code>，即按照权重来强占。</p>
+<p><code>interface</code>填写的是网卡名称，这个要结合自己实际的网卡名。</p>
+<p><code>virtual_router_id</code>在同一个网络环境下不可以重复，不然会出问题。</p>
+<p><code>priority</code>是权重，按照这个值来确定主节点。</p>
+<p>一般采用单播的形式，方便配置而且不影响其他服务，所以两个配置文件中的<code>unicast_src_ip</code>和<code>unicast_peer</code>是相反的。</p>
+<p><code>virtual_ipaddress</code>填写需要使用的虚拟IP就可以了。</p>
+<p>如果是在容器中创建虚拟IP，有可能遇到错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">IPVS: Can&#39;t initialize ipvs: Protocol not available</span></pre></td></tr></table></figure>
+
+<p>开启的必要条件有两个：</p>
+<ol>
+<li>容器放开权限，即添加参数<code>--privileged</code></li>
+<li>宿主机同样需要开启<code>ipvasdm</code></li>
+</ol>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>输入<code>ip a</code>应该就可以看到虚拟ip出现在网络信息中。</p>
+<p>没有这个命令的话通过<code>yum install iproute</code>安装</p>
+<h3 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h3><h4 id="MySQL状态监测脚本"><a href="#MySQL状态监测脚本" class="headerlink" title="MySQL状态监测脚本"></a>MySQL状态监测脚本</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">pgrep -x mysqld &amp;&gt; /dev/null</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> [ $? -ne 0 ]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">then</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">  <span class="built_in">echo</span> <span class="string">"not running"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">else</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">  <span class="built_in">echo</span> <span class="string">"running"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">fi</span></span></pre></td></tr></table></figure>
+
+
+
+<h4 id="Nginx状态监测脚本"><a href="#Nginx状态监测脚本" class="headerlink" title="Nginx状态监测脚本"></a>Nginx状态监测脚本</h4><h4 id="FastDFS检测脚本"><a href="#FastDFS检测脚本" class="headerlink" title="FastDFS检测脚本"></a>FastDFS检测脚本</h4><h4 id="FTP检测脚本"><a href="#FTP检测脚本" class="headerlink" title="FTP检测脚本"></a>FTP检测脚本</h4>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E8%BF%90%E7%BB%B4/" rel="tag"># 运维</a>
+              <a href="/tags/Keepalived/" rel="tag"># Keepalived</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/17/RESTful%20API/" rel="prev" title="RESTful API">
+      <i class="fa fa-chevron-left"></i> RESTful API
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/01/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JVM%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%94%E8%AE%B0/" rel="next" title="深入理解JVM虚拟机笔记">
+      深入理解JVM虚拟机笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#系统环境准备"><span class="nav-number">1.</span> <span class="nav-text">系统环境准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组件安装"><span class="nav-number">2.</span> <span class="nav-text">组件安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库配置"><span class="nav-number">3.</span> <span class="nav-text">数据库配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主实例"><span class="nav-number">3.1.</span> <span class="nav-text">主实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#备用实例"><span class="nav-number">3.2.</span> <span class="nav-text">备用实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#双主环境"><span class="nav-number">3.3.</span> <span class="nav-text">双主环境</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Keepalived安装和配置"><span class="nav-number">4.</span> <span class="nav-text">Keepalived安装和配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">5.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#附录"><span class="nav-number">6.</span> <span class="nav-text">附录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL状态监测脚本"><span class="nav-number">6.1.</span> <span class="nav-text">MySQL状态监测脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Nginx状态监测脚本"><span class="nav-number">6.2.</span> <span class="nav-text">Nginx状态监测脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FastDFS检测脚本"><span class="nav-number">6.3.</span> <span class="nav-text">FastDFS检测脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FTP检测脚本"><span class="nav-number">6.4.</span> <span class="nav-text">FTP检测脚本</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

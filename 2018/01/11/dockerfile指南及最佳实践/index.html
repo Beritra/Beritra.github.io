@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="学习Docker的时候遇到了不少问题，也有同事询问的时候不能回答上来，所以系统的记录一些Docker原理方面的学习过程。先从dockerfile入手，本篇主要是官网文档的翻译。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dockerfile指南及最佳实践">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2018&#x2F;01&#x2F;11&#x2F;dockerfile%E6%8C%87%E5%8D%97%E5%8F%8A%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="学习Docker的时候遇到了不少问题，也有同事询问的时候不能回答上来，所以系统的记录一些Docker原理方面的学习过程。先从dockerfile入手，本篇主要是官网文档的翻译。">
+<meta property="article:published_time" content="2018-01-11T01:45:34.000Z">
+<meta property="article:modified_time" content="2019-12-15T14:34:22.075Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Dockerfile">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://beritra.github.com/2018/01/11/dockerfile%E6%8C%87%E5%8D%97%E5%8F%8A%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>dockerfile指南及最佳实践 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2018/01/11/dockerfile%E6%8C%87%E5%8D%97%E5%8F%8A%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          dockerfile指南及最佳实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-11 09:45:34" itemprop="dateCreated datePublished" datetime="2018-01-11T09:45:34+08:00">2018-01-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-15 22:34:22" itemprop="dateModified" datetime="2019-12-15T22:34:22+08:00">2019-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index">
+                    <span itemprop="name">Docker</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>学习Docker的时候遇到了不少问题，也有同事询问的时候不能回答上来，所以系统的记录一些Docker原理方面的学习过程。先从dockerfile入手，本篇主要是官网文档的翻译。</p>
+<a id="more"></a>
+<h2 id="Docker的内核基础"><a href="#Docker的内核基础" class="headerlink" title="Docker的内核基础"></a>Docker的内核基础</h2><p>提到Docker，基本都知道其本质是宿主机上面的一个进程，通过namespace实现了资源隔离。通过cgroups实现了资源限制，通过写时复制（copy-on-write）实现了高效的文件操作。从Linux内核3.8版本开始，提供了namespace功能，主要分为以下六项隔离：</p>
+<ul>
+<li>UTS：主机名与域名</li>
+<li>IPC：信号量、消息队列和共享内存</li>
+<li>PID：进程编号</li>
+<li>Network：网络设备、网络栈、端口等</li>
+<li>Mount：挂载点（文件系统）</li>
+<li>User：用户和用户组</li>
+</ul>
+<h3 id="Docker自底向上的结构"><a href="#Docker自底向上的结构" class="headerlink" title="Docker自底向上的结构"></a>Docker自底向上的结构</h3><p>构建一个Docker应用可以分为以下三层：</p>
+<ul>
+<li>Stack</li>
+<li>Service</li>
+<li>Container</li>
+</ul>
+<h3 id="使用Dockerfile定义一个容器"><a href="#使用Dockerfile定义一个容器" class="headerlink" title="使用Dockerfile定义一个容器"></a>使用Dockerfile定义一个容器</h3><p>Dockerfile定义了你的容器内的环境发生了什么。在这个环境里，资源的获取比如网络接口或者磁盘驱动都是虚拟化的，并且与你系统的其他部分是隔离开的，所以你必须将端口映射到外面，而且你必须制定那些文件需要“复制”到这个环境以内。</p>
+<p>Docker可以通过Dockerfile的命令构建一个镜像，使用Docker build命令可以创建一个连续的命令行指令进行自动构建。</p>
+<h2 id="Dockerfile指南"><a href="#Dockerfile指南" class="headerlink" title="Dockerfile指南"></a>Dockerfile指南</h2><h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><p><code>docker build</code>命令从Dockerfile和上下文中构建镜像。构建的上下文是在特定位置的文件的集合，比如PATH和URL，PATH是你本地文件系统的目录，URL是git仓库地址。</p>
+<p>上下文是递归处理的，所以PATH包括了子目录，URL也包括了仓库和它的子模块。比如把整个当前路径都作为上下文：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker build .</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon  6.51 MB</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">···</span></pre></td></tr></table></figure>
+
+<p>为了在构建上下文的时候使用一个文件，Dockerfile使用一个命令去指定某个文件，比如COPY命令。为了增加构建过程的性能，可以通过添加.dockerignore来排除某些文件。</p>
+<p>通常情况下，Dockerfile就叫Dockerfile，你可以使用<code>-f</code>命令指定使用某个Dockerfile,用法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">docker build -f &#x2F;path&#x2F;to&#x2F;a&#x2F;Dockerfile .</span></pre></td></tr></table></figure>
+
+<p>如果构建成功，你也可以指定一个仓库和标签来说明在哪里存储你的镜像：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">docker build -t shykes&#x2F;myapp .</span></pre></td></tr></table></figure>
+
+<p>为了在构建完成之后，给镜像标注多个仓库，可以添加多个<code>-t</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">docker build -t shykes&#x2F;myapp:1.0.2 -t shykes&#x2F;myapp:latest .</span></pre></td></tr></table></figure>
+
+<p>在Docker守护进程执行Dockerfile中的命令之前，它会执行一个初步的验证，如果语法不正确会返回错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker build -t test&#x2F;myapp .</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon 2.048 kB</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Error response from daemon: Unknown instruction: RUNCMD</span></pre></td></tr></table></figure>
+
+<p>Docker守护进程会依次逐条执行Dockerfile中的命令，在返回最终镜像的ID之前，如果需要，每一条命令的结果都会提交成为一个新的镜像。Docker守护进程会自动清理你发送的上下文。</p>
+<p>需要注意，每一条命令都是独立运行的，而且会导致新的镜像被创建，所以<code>RUN cd /tmp</code>不会在对下一条命令产生任何影响。</p>
+<p>如果可能，Docker会重新利用中间镜像（缓存），从而让docker build过程显著加快。你可以从控制台输出中看到<code>Using cache</code>的提示。（想要了解更多信息，参照Dockerfile最佳实践中的<a href="https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#build-cache" target="_blank" rel="noopener">构建缓存</a>部分）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker build -t svendowideit&#x2F;ambassador .</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon 15.36 kB</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Step 1&#x2F;4 : FROM alpine:3.2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 31f630c65071</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">Step 2&#x2F;4 : MAINTAINER SvenDowideit@home.org.au</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Using cache</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 2a1c91448f5f</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">Step 3&#x2F;4 : RUN apk update &amp;&amp;      apk add socat &amp;&amp;        rm -r &#x2F;var&#x2F;cache&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Using cache</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 21ed6e7fbb73</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">Step 4&#x2F;4 : CMD env | grep _TCP&#x3D; | (sed &#39;s&#x2F;.*_PORT_\([0-9]*\)_TCP&#x3D;tcp:\&#x2F;\&#x2F;\(.*\):\(.*\)&#x2F;socat -t 100000000 TCP4-LISTEN:\1,fork,reuseaddr TCP4:\2:\3 \&amp;&#x2F;&#39; &amp;&amp; echo wait) | sh</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Using cache</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 7ea8aef582cc</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">Successfully built 7ea8aef582cc</span></pre></td></tr></table></figure>
+
+<p>构建缓存只有在那些拥有本地父母链（local parent chain）的镜像中被使用。这意味着那些镜像是被前一阶段的构建产物所创造，或者被<code>docker load</code>装载的整个镜像链条所创造。如果你想指定某一个镜像使用构建缓存，你可以用<code>--cache-from</code>选项来指定。</p>
+<p>完成你的构建过程之后，你就可以准备浏览<a href="https://docs.docker.com/get-started/" target="_blank" rel="noopener">将存储仓库推入注册</a></p>
+<h3 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h3><p>Dockerfile的格式是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># Comment</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">INSTRUCTION arguments</span></pre></td></tr></table></figure>
+
+<p>指令是大小写不敏感的，但是惯例是把指令都写成大写，方便与参数区分开。</p>
+<p>Docker会按照顺序执行Dockerfile中的指令，一个Dockerfile必须从<code>FROM</code>命令开始，<code>FROM</code>命令指定了一个你要构建的基础镜像。</p>
+<p>Docker会把以<code>#</code>为起始的一行视为注释，除非这一行是一个有效的解析指令(parse directives)。一个在其他位置出现的<code>#</code>会被当做是参数的一部分，所以允许这样的语句：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># Comment</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RUN echo &#39;we are running some # of cool things&#39;</span></pre></td></tr></table></figure>
+
+<h3 id="解析指令-Parse-directives"><a href="#解析指令-Parse-directives" class="headerlink" title="解析指令 Parse directives"></a>解析指令 Parse directives</h3><p>解析指令是可选的，而且会影响Dockerfile中后续指令行的处理方式。解析指令不会增加新的构建层数，也不会被认为是一个构建步骤。它的写法是类似于特殊的注释：<code># directive=value</code>一个解析指令只被使用一次。</p>
+<p>每当一个注释、空行或者构建指令被处理之后，Docker不会再去寻找解析指令。取而代之的是它会把解析指令格式的命令行视为一个注释，而且不会尝试去验证这是否是一个解析指令。因此，所有的解析指令都应该在Dockerfile的最上方。</p>
+<p>解析指令大小写不敏感，按照惯例我们写成小写格式，而且后面添加一个空行。解析指令不支持行延长符号，所以如下是无效的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># direc \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">tive&#x3D;value</span></pre></td></tr></table></figure>
+
+<p>重复出现两次也是无效的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># directive&#x3D;value1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># directive&#x3D;value2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">FROM ImageName</span></pre></td></tr></table></figure>
+
+<p>出现在构建指令之后的解析指令会被当做普通注释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ImageName</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># directive&#x3D;value</span></pre></td></tr></table></figure>
+
+<p>出现在普通注释之后的解析指令也会被当做普通注释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># About my dockerfile</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># directive&#x3D;value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">FROM ImageName</span></pre></td></tr></table></figure>
+
+<p>非法的解析指令会被当做普通注释，此外，紧随其后的合法解析指令也会被当做注释，因为出现在一条注释之后。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># unknowndirective&#x3D;value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># knowndirective&#x3D;value</span></pre></td></tr></table></figure>
+
+<p>不换行空格允许出现在解析指令之中。因此，下列行被认为已知：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">#directive&#x3D;value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># directive &#x3D;value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">#	directive&#x3D; value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"># directive &#x3D; value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">#	  dIrEcTiVe&#x3D;value</span></pre></td></tr></table></figure>
+
+<p>支持以下解析指令：<code>escape</code></p>
+<h3 id="escape"><a href="#escape" class="headerlink" title="escape"></a>escape</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># escape&#x3D;\ (backslash)</span></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># escape&#x3D;&#96; (backtick)</span></pre></td></tr></table></figure>
+
+<p><code>escape</code>指令指定Dockerfile中的转义字符，如果没有指定，默认的转义字符是<code>\</code>.</p>
+<p>转义字符不仅作用在行中的转义字符，也作用在换行符。这允许一个Dockerfile指令跨越多行。需要注意，无论escape解释语句是否出现在Dockerfile中，转义不会在<code>RUN</code>命令中生效，除非在行尾。</p>
+<p>将转义字符设置为`在Windows中尤其有用，因为\是地址分隔符，`与<a href="https://technet.microsoft.com/en-us/library/hh847755.aspx" target="_blank" rel="noopener">Windows PowerShell</a>相一致。</p>
+<p>考虑到下面的例子会在Windows中以一个不明显的方式失败。在第二行结束位置的第二个\会被当做换行符，而不是第一个\转义的目标。同样，在第三行末尾位置的\，假设它实际上是作用为一个指令，他被当做一个行延长符。这个Dockerfile的结果是第二行和第三行被当做一个单独的指令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM microsoft&#x2F;nanoserver</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">COPY testfile.txt c:\\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">RUN dir c:\</span></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">PS C:\John&gt; docker build -t cmd .</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon 3.072 kB</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Step 1&#x2F;2 : FROM microsoft&#x2F;nanoserver</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 22738ff49c6d</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">Step 2&#x2F;2 : COPY testfile.txt c:\RUN dir c:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">GetFileAttributesEx c:RUN: The system cannot find the file specified.</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">PS C:\John&gt;</span></pre></td></tr></table></figure>
+
+<p>一个解决方案是使用<code>/</code>作为<code>COPY</code>指令和<code>dir</code>指令的目标。然而最好的情况下，这个语法在Windows上也并不自然，令人困惑，在比较坏的情况下，在Windows上使用<code>/</code>作为地址分隔符有可能出现错误。</p>
+<p>通过添加escape解析指令，下面的Dockerfile成功的使用原生的系统地址分割语法如期执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># escape&#x3D;&#96;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">FROM microsoft&#x2F;nanoserver</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">COPY testfile.txt c:\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">RUN dir c:\</span></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">PS C:\John&gt; docker build -t succeeds --no-cache&#x3D;true .</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon 3.072 kB</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Step 1&#x2F;3 : FROM microsoft&#x2F;nanoserver</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 22738ff49c6d</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">Step 2&#x2F;3 : COPY testfile.txt c:\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 96655de338de</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">Removing intermediate container 4db9acbb1682</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">Step 3&#x2F;3 : RUN dir c:\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Running in a2c157f842f5</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"> Volume in drive C has no label.</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"> Volume Serial Number is 7E6D-E0F7</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"> Directory of c:\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">10&#x2F;05&#x2F;2016  05:04 PM             1,894 License.txt</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">10&#x2F;05&#x2F;2016  02:22 PM    &lt;DIR&gt;          Program Files</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">10&#x2F;05&#x2F;2016  02:14 PM    &lt;DIR&gt;          Program Files (x86)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">10&#x2F;28&#x2F;2016  11:18 AM                62 testfile.txt</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">10&#x2F;28&#x2F;2016  11:20 AM    &lt;DIR&gt;          Users</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">10&#x2F;28&#x2F;2016  11:20 AM    &lt;DIR&gt;          Windows</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">           2 File(s)          1,956 bytes</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">           4 Dir(s)  21,259,096,064 bytes free</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 01c7f3bef04f</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">Removing intermediate container a2c157f842f5</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">Successfully built 01c7f3bef04f</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">PS C:\John&gt;</span></pre></td></tr></table></figure>
+
+<h3 id="环境替换"><a href="#环境替换" class="headerlink" title="环境替换"></a>环境替换</h3><p>环境变量（通过<code>ENV</code>命令声明的）也可以在用在某一指令中，像一个变量一样被Dockerfile解释。转义也被用作将类变量语法逐字逐句的包含到声明中。（Environment variables (declared with the ENV statement) can also be used in certain instructions as variables to be interpreted by the Dockerfile. Escapes are also handled for including variable-like syntax into a statement literally.）</p>
+<p>环境变量在Dockerfile中会表示为<code>$variable_name</code>或者<code>${variable_name}</code>。这两种表述方式等价，其中大括号方式通常被用作表述没有空格的变量名字，像<code>${foo}_bar</code>。</p>
+<p><code>${variable_name}</code>这种语法同样支持几种标准的bash编辑方式如下：</p>
+<ul>
+<li><code>${variable:-word}</code>表示如果变量是一个集合，那么结果就是集合的值，否则结果是word。</li>
+<li><code>${variable:+word}</code>表示如果变量是一个集合，那么结果是word，否则是空字符串。</li>
+</ul>
+<p>在所有情况下，<code>word</code>可以使任何字符串，包括额外的环境变量。</p>
+<p>可以通过在变量前添加<code>\</code>进行转义：<code>\$foo</code>或者<code>\${foo}</code>。比如下面的例子，将会对<code>$foo</code>和<code>${foo}</code>逐字严格各自转换。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM busybox</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENV foo &#x2F;bar</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">WORKDIR $&#123;foo&#125;   # WORKDIR &#x2F;bar</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">ADD . $foo       # ADD . &#x2F;bar</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">COPY \$foo &#x2F;quux # COPY $foo &#x2F;quux</span></pre></td></tr></table></figure>
+
+<p>环境变量在所有下列指令中被支持：</p>
+<ul>
+<li><code>ADD</code></li>
+<li><code>COPY</code></li>
+<li><code>ENV</code></li>
+<li><code>EXPOSE</code></li>
+<li><code>FROM</code></li>
+<li><code>LABEL</code></li>
+<li><code>STOPSIGNAL</code></li>
+<li><code>USER</code></li>
+<li><code>VOLUMN</code></li>
+<li><code>WORKDIR</code></li>
+</ul>
+<p>同样的：</p>
+<ul>
+<li><code>ONBUILD</code>（与其他上述指令一同使用的时候）</li>
+</ul>
+<p>在整个指令中，环境变量替代物会为每一个变量使用同一个值。如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ENV abc&#x3D;hello</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENV abc&#x3D;bye def&#x3D;$abc</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ENV ghi&#x3D;$abc</span></pre></td></tr></table></figure>
+
+<p>结果是def的值为hello，而不是bye。然而，ghi的值是bye因为这不是将abc设置为bye的那条语句。</p>
+<h3 id="dockerignore-file"><a href="#dockerignore-file" class="headerlink" title=".dockerignore file"></a>.dockerignore file</h3><p>在docker命令行把上下文发送给docker守护进程之前，它会在上下文路径的根目录下搜索文件名为.dockerignore的文件。如果文件存在，命令行就会把符合的文件从上下文中排除出去。</p>
+<p>.dockerignore文件的示例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># comment</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">*&#x2F;temp*</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">*&#x2F;*&#x2F;temp*</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">temp?</span></pre></td></tr></table></figure>
+
+<p>这个文件会产生如下构建行为：<br>命令|行为<br>—|—<br><code>#comment</code>|忽略<br><code>*/temp*</code>|排除根路径下所有直接子目录内文件名或者目录名以<code>temp</code>为开头的文件或文件夹。比如：<code>/somedir/temporary.txt</code>就被排除了,或者路径<code>/somedir/temp</code>。<br><code>*/*/temp*</code>|排除所有根路径下二级子目录中以<code>temp</code>为起始文件名的文件或文件夹。比如：<code>/somedir/subdir/temporary.txt</code>。<br><code>temp?</code>|排除根目录下文件名或目录名是<code>temp</code>后面加一个字符。比如：<code>/tempa</code>和<code>tempb</code>。</p>
+<p>具体用法和.gitignore类似，不再赘述。</p>
+<h3 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM &lt;image&gt; [AS &lt;name&gt;]</span></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM &lt;image&gt;[:&lt;tag&gt;] [AS &lt;name&gt;]</span></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM &lt;image&gt;[@&lt;digest&gt;] [AS &lt;name&gt;]</span></pre></td></tr></table></figure>
+
+<p><code>FROM</code>指令初始化了一个新的构建阶段，而且为后续的指令准备了基础镜像。所以，一个有效的Dockerfile应该以<code>FROM</code>指令起始。镜像可以是任何有效的镜像，尤其简单的是可以从公共仓库下载镜像作为开始。</p>
+<ul>
+<li><code>ARG</code>是唯一可以出现在<code>FROM</code>之前的指令。</li>
+<li>在一个Dockerfile中，<code>FROM</code>可以出现多次，创建多个镜像，或者把一个构建阶段作为另一个的依赖。只需要注意，在一条新的<code>FROM</code>指令提交之前把上一个的镜像ID记录下来。每一个<code>FROM</code>指令会清除之前指令创造的所有状态。</li>
+<li>可选的，使用<code>AS name</code>语句可以赋予新的构建阶段可以一个名称。这个名称还可以在随后的<code>FROM</code>和<code>COPY --from=&lt;name|index&gt;</code>中使用以指定某个镜像。</li>
+<li><code>tag</code>或者<code>digest</code>选项是可选的。如果你都省略了，系统会缺省设置<code>latest</code>标签。如果找不到任何<code>tag</code>的值，构建器会返回一个错误。</li>
+</ul>
+<h3 id="理解ARG和FROM是如何相互需作用的"><a href="#理解ARG和FROM是如何相互需作用的" class="headerlink" title="理解ARG和FROM是如何相互需作用的"></a>理解ARG和FROM是如何相互需作用的</h3><p><code>FROM</code>指令支持那些由<code>ARG</code>声明的，出现在自身之前的变量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ARG  CODE_VERSION&#x3D;latest</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">FROM base:$&#123;CODE_VERSION&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">CMD  &#x2F;code&#x2F;run-app</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">FROM extras:$&#123;CODE_VERSION&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">CMD  &#x2F;code&#x2F;run-extras</span></pre></td></tr></table></figure>
+
+<p>一个<code>FROM</code>指令之前的<code>ARG</code>声明是独立于构建阶段之外的，所以不能在<code>FROM</code>之后的任何指令中使用。想要使用<code>FROM</code>指令之前的<code>ARG</code>指令的默认属性，你需要在构建阶段之内再使用一次不带赋值的<code>ARG</code>指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ARG VERSION&#x3D;latest</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">FROM busybox:$VERSION</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ARG VERSION</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">RUN echo $VERSION &gt; image_version</span></pre></td></tr></table></figure>
+
+<h3 id="RUN"><a href="#RUN" class="headerlink" title="RUN"></a>RUN</h3><p>RUN命令有两种格式;</p>
+<ul>
+<li><code>RUN &lt;command&gt;</code>（shell格式，命令在shell中执行，默认是Linux中的<code>/bin/sh -c</code>后者Windows中的<code>cmd /s /c</code>）</li>
+<li><code>RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code>（执行格式）</li>
+</ul>
+<p><code>RUN</code>指令会在当前镜像之上的新分层中执行任何命令，然后提交结果。产生的被提交镜像会在Dockerfile中的后续步骤中使用。</p>
+<p>分层的<code>RUN</code>指令和不断产生的提交符合Docker的核心思想：提交应当是简易的，容器可以从镜像的历史中的任何一个时间点创建，这点很像代码控制。</p>
+<p>执行格式避免了shell字符歧义，而且你可以不指定使用特定的shell可执行文件（bash or sh or ?）的情况下使用<code>RUN</code>指令。</p>
+<p>你可以在shell格式中使用<code>SEHLL</code>命令指定使用特定的shell。</p>
+<p>在shell格式中你可以使用<code>\</code>（反斜杠）来在多行中延续一条RUN指令，比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">RUN &#x2F;bin&#x2F;bash -c &#39;source $HOME&#x2F;.bashrc; \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">echo $HOME&#39;</span></pre></td></tr></table></figure>
+<p>等价于：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">RUN &#x2F;bin&#x2F;bash -c &#39;source $HOME&#x2F;.bashrc; echo $HOME&#39;</span></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong> 要使用不同的shell，而不是’/bin/sh’，请使用在所需shell中传递的exec形式。例如：<code>RUN [&quot;/bin/bash&quot;,&quot;-c&quot;,&quot;echo hello&quot;]</code></p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> exec形式作为JSON数组解析，这意味着您必须在单词之外使用双引号（”）而不是单引号（’）。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> 与shell格式不同，exec格式不调用命令shell。这意味着正常的shell处理不会发生。例如，RUN [“echo”,”$HOME”]不会在$HOME上进行可变替换。如果你想要shell处理，那么使用shell形式或直接执行一个shell，例如：RUN [“sh”,”-c”,”echo $HOME”]。当使用exec形式并直接执行shell时，正如shell形式的情况，它是做环境变量扩展的shell，而不是docker。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> 在JSON形式中，有必要转义反斜杠。这在Windows上特别相关，其中反斜杠是路径分隔符。因为不是有效的JSON，并且以意外的方式失败，以下行将被视为shell形式：<code>RUN [&quot;c:\windows\system32\tasklist.exe&quot;]</code>此示例的正确语法为：<code>RUN [&quot;c:\\windows\\system32\\tasklist.exe&quot;]</code></p>
+</blockquote>
+<p><code>RUN</code>指令的缓存不会在下一次构建期间自动失效。一条指令的缓存类似<code>RUN apt-get dist-upgrade -y</code>会在下一个次构建的时候重用。<code>RUN</code>指令的缓存可以使用<code>--no-cache</code>标志取消，比如<code>docker build --no-cache</code>。</p>
+<p>在Dockerfile最佳实践中看到更多的信息。</p>
+<p><code>ADD</code>指令也会使<code>RUN</code>指令的缓存失效，详情见下。</p>
+<h3 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h3><p><code>CMD</code>指令有三种格式：</p>
+<ul>
+<li>CMD [“executable”,”param1”,”param2”]（执行格式，这也是首选的格式）</li>
+<li>CMD [“param1”,”param2”]（作为ENTRYPOINT的默认参数）</li>
+<li>CMD command param1 param2（shell格式）</li>
+</ul>
+<p>Dockerfile中只能有一条CMD命令，如果有多条，那么只有最后一条生效。</p>
+<p>CMD指令的主要用意是提供一个执行容器的默认值。这些默认值可以包括一个可执行文件，或者他们可以省略可执行文件。在这种情况下你必须指定一个ENTRTPOINT指令。</p>
+<blockquote>
+<p><strong>注意：</strong> 如果使用CMD为ENTRYPOINT指令提供默认参数，CMD和ENTRYPOINT指令都应以JSON数组格式指定。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> exec形式作为JSON数组解析，这意味着您必须在单词之外使用双引号（”）而不是单引号（’）。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> 与shell表单不同，exec表单不调用命令shell。这意味着正常的shell处理不会发生。例如，<code>CMD [&quot;echo&quot;，&quot;$HOME&quot;]</code>不会在$HOME上进行可变替换。如果你想要shell处理，那么使用shell形式或直接执行一个shell，例如：<code>CMD [&quot;sh&quot;,&quot;-c&quot;,&quot;echo $HOME&quot;]</code>。当使用exec形式并直接执行shell时，正如shell形式的情况，它是做环境变量扩展的shell，而不是docker。</p>
+</blockquote>
+<p>当你使用shell或者exec格式的时候，CMD指令会在容器启动的时候执行你输入的命令。</p>
+<p>如果你使用CMD的shell格式，那么命令会以<code>/bin/sh -c</code>的形式执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">CMD echo &quot;This is a test.&quot; | wc -</span></pre></td></tr></table></figure>
+
+<p>如果你想执行你的命令但是不指定某个shell，你必须用JSON形式表述你的命令，而且给出一个可执行文件的完整地址。这种数组形式是CMD的首选格式。任何附加的参数必须单独表述为数组中的字符串：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">CMD [&quot;&#x2F;usr&#x2F;bin&#x2F;wc&quot;,&quot;--help&quot;]</span></pre></td></tr></table></figure>
+
+<p>如果你想要你的容器每次都运行相同的可执行文件，那你应该考虑将ENTRYPOINT指令和CMD一起使用。  </p>
+<p>如果用户指定了<code>docker run</code>的参数，那么这些参数就会覆盖掉CMD中指定的命令。</p>
+<blockquote>
+<p><strong>注意：</strong> 不用疑惑RUN和CMD的区别。RUN其实是运行了一条指令然后提交结果；CMD不在构建阶段执行任何指令，但是为镜像准备好指令（意思是说在docker run的时候执行）。</p>
+</blockquote>
+<h3 id="LABEL"><a href="#LABEL" class="headerlink" title="LABEL"></a>LABEL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">LABEL &lt;key&gt;&#x3D;&lt;value&gt; &lt;key&gt;&#x3D;&lt;value&gt; &lt;key&gt;&#x3D;&lt;value&gt; ...</span></pre></td></tr></table></figure>
+
+<p>LABEL指令添加镜像的元数据。一个LABEL就是一组键值对。想要在LABEL的值中添加空格，要像命令行中的转义那样使用引号和反斜杠，例子如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">LABEL &quot;com.example.vendor&quot;&#x3D;&quot;ACME Incorporated&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">LABEL com.example.label-with-value&#x3D;&quot;foo&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">LABEL version&#x3D;&quot;1.0&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">LABEL description&#x3D;&quot;This text illustrates \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">that label-values can span multiple lines.&quot;</span></pre></td></tr></table></figure>
+
+<p>一个镜像可以有多个标签，你可以在一行内指定多个标签。在Docker 1.10之前，这么做会减小最终镜像的大小，但是现在不再如此。你仍然可以选择在一条指令内指定多个标签，如下两个例子所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">LABEL multi.label1&#x3D;&quot;value1&quot; multi.label2&#x3D;&quot;value2&quot; other&#x3D;&quot;value3&quot;</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">LABEL multi.label1&#x3D;&quot;value1&quot; \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">      multi.label2&#x3D;&quot;value2&quot; \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">      other&#x3D;&quot;value3&quot;</span></pre></td></tr></table></figure>
+
+<p>基础镜像或者双亲镜像（FROM中指定的镜像）中包含的标签会被你的镜像继承。如果一个标签已经存在但是有不同的值，会以最近设置的值为准，之前的会被覆盖。想要查看一个镜像的所有标签，可以使用<code>docker inspect</code>命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&quot;Labels&quot;: &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    &quot;com.example.vendor&quot;: &quot;ACME Incorporated&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    &quot;com.example.label-with-value&quot;: &quot;foo&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    &quot;version&quot;: &quot;1.0&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    &quot;description&quot;: &quot;This text illustrates that label-values can span multiple lines.&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &quot;multi.label1&quot;: &quot;value1&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    &quot;multi.label2&quot;: &quot;value2&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &quot;other&quot;: &quot;value3&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;,</span></pre></td></tr></table></figure>
+
+<h3 id="MAINTAINER-弃用"><a href="#MAINTAINER-弃用" class="headerlink" title="MAINTAINER(弃用)"></a>MAINTAINER(弃用)</h3><p>标注作者名，已经弃用，推荐使用LABEL代替。</p>
+<h3 id="EXPOSE"><a href="#EXPOSE" class="headerlink" title="EXPOSE"></a>EXPOSE</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">EXPOSE &lt;port&gt; [&lt;port&gt;&#x2F;&lt;protocol&gt;...]</span></pre></td></tr></table></figure>
+
+<p>EXPOSE指令提示Docker，容器会在运行时监听特定的网络端口。你可以指定端口是监听TCP还是UDP，而且如果没有指定，那么默认为TCP。</p>
+<p>EXPOSE指令实际上不发布端口。它的作用是作为一个镜像构建者和容器使用者之间的文档，告知哪一个端口应当被发布。实际上想要在运行容器的时候发布端口，应当在<code>docker run</code>命令中使用<code>-p</code>参数以发布或者映射一个或者多个端口，或者用<code>-P</code>参数发布所有暴露的端口并且映射它们到高优先级（high-order）的端口上。</p>
+<p>想要建立宿主机的端口重定向，你需要看文档中的using -P flag。<code>docker netword</code>命令支持在免于暴露特定端口的情况下建立容器之间的网络通信，因为容器可以通过任意的端口连接到网络。</p>
+<h3 id="ENV"><a href="#ENV" class="headerlink" title="ENV"></a>ENV</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ENV &lt;key&gt; &lt;value&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENV &lt;key&gt;&#x3D;&lt;value&gt; ...</span></pre></td></tr></table></figure>
+
+<p>ENV指令把环境变量的key设为value。这个值会在所有Dockerfile的后续命令中存在，而且支持上面提到的环境变量替换。</p>
+<p>ENV指令有两种格式，第一种格式，<code>ENV &lt;key&gt; &lt;value&gt;</code>，会把一个单一的键设为某一值，在空格后面出现的整个字符串会被认为是值，包括空格和引号等字符。</p>
+<p>第二种格式，<code>ENV &lt;key&gt;=&lt;value&gt; ...</code>，允许一次性设置多个值。需要注意第二种方式的语法中使用等号，而第一种没有使用。就像命令行转义，引号和反斜杠可以用来包含值中的空格。<br>如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ENV myName&#x3D;&quot;John Doe&quot; myDog&#x3D;Rex\ The\ Dog \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    myCat&#x3D;fluffy</span></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ENV myName John Doe</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENV myDog Rex The Dog</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ENV myCat fluffy</span></pre></td></tr></table></figure>
+
+<p>两者作用相同，但是推荐使用第一种，因为只会产生一层缓存层。</p>
+<p>ENV命令设置的环境变量会一直存在，包括容器从最终镜像运行后。你可以使用<code>docker inspect</code>查看它们的状态，也可以使用<code>docker run --env &lt;key&gt;=&lt;value&gt;</code>改变它们的状态。</p>
+<blockquote>
+<p><strong>注意：</strong> 环境变量的持续存留有可能产生不可预期的副作用。比如设置<code>ENV DEBIAN_FRONTEND noninteractive</code>有可能让基于Debian镜像的apt-get用户产生困惑。想要为单条命令设置一个值，使用<code>RUN &lt;key&gt;=&lt;value&gt; &lt;command&gt;</code>。</p>
+</blockquote>
+<h3 id="ADD"><a href="#ADD" class="headerlink" title="ADD"></a>ADD</h3><p>ADD有两种格式：</p>
+<ul>
+<li><code>ADD [--chown=&lt;user&gt;:&lt;group&gt;] &lt;src&gt;... &lt;dest&gt;</code></li>
+<li><code>ADD [--chown=&lt;user&gt;:&lt;group&gt;] [&quot;&lt;src&gt;&quot;,... &quot;&lt;dest&gt;&quot;]</code>(包含空格的路径需要使用这种格式)</li>
+</ul>
+<blockquote>
+<p><strong>注意：</strong> <code>--chown</code>特性只支持构建Linux容器的Dockerfile，而且不会在Windows容器中生效。由于用户和用户组概念不能再Linux和Windows之间转化，所以使用<code>/etc/passwd</code>和<code>/etc/group</code>把用户和用户组转化为ID这种特性只在基于Linux的容器下可行。</p>
+</blockquote>
+<p>ADD指令从<code>&lt;src&gt;</code>复制新的文件、路径或者远程文件URL到镜像的文件系统中的<code>&lt;dest&gt;</code>位置。</p>
+<p>可以指定多个<code>&lt;src&gt;</code>资源，但是如果他们是文件或者目录的话，他们的路径应该是相对于构建上下文的。</p>
+<p>每一个<code>&lt;src&gt;</code>可以包括通配符，适配规则将按照Go语言的<a href="https://golang.org/pkg/path/filepath/#Match" target="_blank" rel="noopener">filepath.Match</a>规则。比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ADD hom* &#x2F;mydir&#x2F;        # 添加所有文件名以 &quot;hom&quot; 开头的文件</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ADD hom?.txt &#x2F;mydir&#x2F;    # ? 可以替代一个单个字符，比如， &quot;home.txt&quot;</span></pre></td></tr></table></figure>
+
+<p><code>&lt;dest&gt;</code>是一个绝对路径，或者相对于<code>WORKDIR</code>的路径，在其中，资源将被复制到目标容器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ADD test relativeDir&#x2F;          # adds &quot;test&quot; to &#96;WORKDIR&#96;&#x2F;relativeDir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ADD test &#x2F;absoluteDir&#x2F;         # adds &quot;test&quot; to &#x2F;absoluteDir&#x2F;</span></pre></td></tr></table></figure>
+
+<p>当添加一个包含特殊符号(比如<code>[</code>和<code>]</code>)的文件或者目录，你需要对这些字符进行符合Golang规则的转义，防止它们被视为一个统配规则。比如，想要添加一个文件名为<code>arr[0].txt</code>的文件，你需要：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ADD arr[[]0].txt &#x2F;mydir&#x2F;    # 复制一个名为 &quot;arr[0].txt&quot; 的文件到 &#x2F;mydir&#x2F;</span></pre></td></tr></table></figure>
+
+<p>一个新的文件或者目录被创造的时候，它的UID和GID将为0，除非用选项<code>--chown</code>指定了用户和用户组或者UID/GID组合请求指定的内容添加所有权。<code>--chown</code>选线的格式允许用户名或者用户组名以字符串或者整形形式的UID或GID组合。提供一个不带用户组的用户名或者不带GID的UID的话，会使用同样的UID作为GID。如果提供了一个用户名或者用户组名，容器的根目录文件系统<code>/etc/passwd</code>和<code>/etc/group</code>文件会被使用，来执行从名称到UID或GID的转换。下列栗子展示了合法的<code>--chown</code>选项的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ADD --chown&#x3D;55:mygroup files* &#x2F;somedir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ADD --chown&#x3D;bin files* &#x2F;somedir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ADD --chown&#x3D;1 files* &#x2F;somedir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">ADD --chown&#x3D;10:11 files* &#x2F;somedir&#x2F;</span></pre></td></tr></table></figure>
+
+<p>如果容器的根目录文件系统不包含<code>/etc/passwd</code>或者<code>/etc/group</code>文件并且用户名和用户组名都没有使用<code>--chown</code>选项，那么进行ADD操作的时候构建将会失败。使用数字的IDs不需要查找，而且对根文件系统的内容没有要求。</p>
+<p>在<code>&lt;src&gt;</code>是远程文件URL的情况下，目标将具有600的权限。如果正在检索的远程文件具有HTTP Last-Modified标头，则来自该标头的时间戳将用于设置目的地上的mtime文件。然而，像在ADD期间处理的任何其它文件一样，在决定文件是否被更改或者缓存是否被更新的时候，mtime不会被考虑进去。</p>
+<blockquote>
+<p><strong>注意：</strong> 如果通过传递一个Dockerfile通过STDIN（<code>docker build - &lt;somefile</code>）构建，没有构建上下文，所以Dockerfile只能包含一个基于URL的ADD指令。您还可以通过STDIN传递压缩归档文件：（<code>docker build - &lt;archive.tar.gz</code>），归档根目录下的Dockerfile和归档的其余部分将在构建的上下文中使用。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> 如果您的URL文件使用身份验证保护，则您需要使用<code>RUN wget</code>，<code>RUN curl</code>或从容器内使用其他工具，因为ADD指令不支持身份验证。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> 如果<code>&lt;src&gt;</code>的内容已更改，第一个遇到的ADD指令将使来自Dockerfile的所有后续指令的高速缓存无效。这包括使用于RUN指令的高速缓存无效。有关详细信息，请参阅<a href="https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#/build-cache" target="_blank" rel="noopener">Dockerfile最佳实践指南</a>。</p>
+</blockquote>
+<p>ADD遵循以下规则：</p>
+<ul>
+<li><code>&lt;src&gt;</code>路径必须在构建的上下文中;你不能<code>ADD ../something /something</code>，因为docker构建的第一步是发送上下文目录（和子目录）到docker守护进程。如果<code>&lt;src&gt;</code>是URL并且<code>&lt;dest&gt;</code>不以尾部斜杠结尾，则从URL下载文件并将其复制到<code>&lt;dest&gt;</code>。</li>
+<li>如果<code>&lt;src&gt;</code>是URL并且<code>&lt;dest&gt;</code>以尾部斜杠结尾，则从URL中推断文件名，并将文件下载到<code>&lt;dest&gt;/&lt;filename&gt;</code>。例如，<code>ADD http://example.com/foobar /</code>会创建文件<code>/foobar</code>。网址必须有一个非平凡的路径，以便在这种情况下可以发现一个适当的文件名（<code>http://example.com</code>不会工作）。</li>
+<li>如果<code>&lt;src&gt;</code>是目录，则复制目录的整个内容，包括文件系统元数据。</li>
+</ul>
+<blockquote>
+<p><strong>注意：</strong> 目录本身不被复制，只是其内容。</p>
+</blockquote>
+<ul>
+<li>如果<code>&lt;src&gt;</code>是识别的压缩格式（identity，gzip，bzip2或xz）的本地tar存档，则将其解包为目录。来自远程URL的资源不会解压缩。当目录被复制或解压缩时，它具有与<code>tar -x</code>相同的行为：结果是以下的联合：<ol>
+<li>无论目的地路径上存在什么，而且</li>
+<li>原目标树的内容，冲突以逐个文件为基础解析为“2.”。<blockquote>
+<p><strong>注意：</strong> 文件是否被识别为识别的压缩格式，仅基于文件的内容，而不是文件的名称。例如，如果一个空文件以.tar.gz结尾，则不会被识别为压缩文件，并且不会生成任何解压缩错误消息，而是将该文件简单地复制到目的地。</p>
+</blockquote>
+</li>
+</ol>
+</li>
+<li>如果<code>&lt;src&gt;</code>是任何其他类型的文件，它会与其元数据一起单独复制。在这种情况下，如果<code>&lt;dest&gt;</code>以尾部斜杠<code>/</code>结尾，它将被认为是一个目录，并且<code>&lt;src&gt;</code>的内容将被写在<code>&lt;dest&gt;/base(&lt;src&gt;)</code>。</li>
+<li>如果直接或由于使用通配符指定了多个<code>&lt;src&gt;</code>资源，则<code>&lt;dest&gt;</code>必须是目录，并且必须以斜杠<code>/</code>结尾。</li>
+<li>如果<code>&lt;dest&gt;</code>不以尾部斜杠结尾，它将被视为常规文件，<code>&lt;src&gt;</code>的内容将写在<code>&lt;dest&gt;</code>。</li>
+<li>如果<code>&lt;dest&gt;</code>不存在，则会与其路径中的所有缺少的目录一起创建。</li>
+</ul>
+<h3 id="COPY"><a href="#COPY" class="headerlink" title="COPY"></a>COPY</h3><p>COPY有两种格式：</p>
+<ul>
+<li><code>COPY [--chown=&lt;user&gt;:&lt;group&gt;] &lt;src&gt;... &lt;dest&gt;</code></li>
+<li><code>COPY [--chown=&lt;user&gt;:&lt;group&gt;] [&quot;&lt;src&gt;&quot;,... &quot;&lt;dest&gt;&quot;]</code>(带空格的路径需要使用这种格式)</li>
+</ul>
+<blockquote>
+<p><strong>注意：</strong> <code>--chown</code>特性只支持构建Linux容器的Dockerfile，而且不会在Windows容器中生效。由于用户和用户组概念不能再Linux和Windows之间转化，所以使用<code>/etc/passwd</code>和<code>/etc/group</code>把用户和用户组转化为ID这种特性只在基于Linux的容器下可行。</p>
+</blockquote>
+<p>COPY指令从<code>&lt;src&gt;</code>复制新的文件、路径或者远程文件URL到容器的文件系统中的<code>&lt;dest&gt;</code>位置。</p>
+<p>可以指定多个<code>&lt;src&gt;</code>资源，但是如果他们是文件或者目录的话，他们的路径应该是相对于构建上下文的。</p>
+<p>每一个<code>&lt;src&gt;</code>可以包括通配符，适配规则将按照Go语言的<a href="https://golang.org/pkg/path/filepath/#Match" target="_blank" rel="noopener">filepath.Match</a>规则。比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">COPY hom* &#x2F;mydir&#x2F;        # 添加所有文件名以 &quot;hom&quot; 开头的文件</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">COPY hom?.txt &#x2F;mydir&#x2F;    # ? 可以替代一个单个字符，比如， &quot;home.txt&quot;</span></pre></td></tr></table></figure>
+
+<p><code>&lt;dest&gt;</code>是一个绝对路径，或者相对于<code>WORKDIR</code>的路径，在其中，资源将被复制到目标容器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">COPY test relativeDir&#x2F;          # adds &quot;test&quot; to &#96;WORKDIR&#96;&#x2F;relativeDir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">COPY test &#x2F;absoluteDir&#x2F;         # adds &quot;test&quot; to &#x2F;absoluteDir&#x2F;</span></pre></td></tr></table></figure>
+
+<p>当添加一个包含特殊符号(比如<code>[</code>和<code>]</code>)的文件或者目录，你需要对这些字符进行符合Golang规则的转义，防止它们被视为一个统配规则。比如，想要添加一个文件名为<code>arr[0].txt</code>的文件，你需要：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">COPY arr[[]0].txt &#x2F;mydir&#x2F;    # 复制一个名为 &quot;arr[0].txt&quot; 的文件到 &#x2F;mydir&#x2F;</span></pre></td></tr></table></figure>
+
+<p>一个新的文件或者目录被创造的时候，它的UID和GID将为0，除非用选项<code>--chown</code>指定了用户和用户组或者UID/GID组合请求指定的内容添加所有权。<code>--chown</code>选线的格式允许用户名或者用户组名以字符串或者整形形式的UID或GID组合。提供一个不带用户组的用户名或者不带GID的UID的话，会使用同样的UID作为GID。如果提供了一个用户名或者用户组名，容器的根目录文件系统<code>/etc/passwd</code>和<code>/etc/group</code>文件会被使用，来执行从名称到UID或GID的转换。下列栗子展示了合法的<code>--chown</code>选项的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">COPY --chown&#x3D;55:mygroup files* &#x2F;somedir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">COPY --chown&#x3D;bin files* &#x2F;somedir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">COPY --chown&#x3D;1 files* &#x2F;somedir&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">COPY --chown&#x3D;10:11 files* &#x2F;somedir&#x2F;</span></pre></td></tr></table></figure>
+
+<p>如果容器的根目录文件系统不包含<code>/etc/passwd</code>或者<code>/etc/group</code>文件并且用户名和用户组名都没有使用<code>--chown</code>选项，那么进行COPY操作的时候构建将会失败。使用数字的IDs不需要查找，而且对根文件系统的内容没有要求。</p>
+<blockquote>
+<p><strong>注意：</strong> 如果你构建的时候使用STDIN(<code>docker build - &lt; somefile</code>)，那么就没有构建上下文，所以COPY不能使用。</p>
+</blockquote>
+<p>COPY可以选择添加<code>--from=&lt;name|index&gt;</code>选项，用来设置源目标位置为前一个构建阶段（用<code>FROM .. AS &lt;name&gt;创建</code>）从而用来代替用户发送的构建上下文。这个选项会接受一个数字索引，这个索引是从FROM指令开始所有之前的构建阶段分配的。</p>
+<p>COPY遵循以下规则：</p>
+<ul>
+<li><code>&lt;src&gt;</code>路径必须在构建的上下文中;你不能<code>COPY ../something /something</code>，因为docker构建的第一步是发送上下文目录（和子目录）到docker守护进程。</li>
+<li>如果<code>&lt;src&gt;</code>是目录，则复制目录的整个内容，包括文件系统元数据。</li>
+</ul>
+<blockquote>
+<p><strong>注意：</strong> 目录本身不被复制，只是其内容。</p>
+</blockquote>
+<ul>
+<li>如果<code>&lt;src&gt;</code>是任何其他类型的文件，它会与其元数据一起单独复制。在这种情况下，如果<code>&lt;dest&gt;</code>以尾部斜杠<code>/</code>结尾，它将被认为是一个目录，并且<code>&lt;src&gt;</code>的内容将被写在<code>&lt;dest&gt;/base(&lt;src&gt;)</code>。</li>
+<li>如果直接或由于使用通配符指定了多个<code>&lt;src&gt;</code>资源，则<code>&lt;dest&gt;</code>必须是目录，并且必须以斜杠<code>/</code>结尾。</li>
+<li>如果<code>&lt;dest&gt;</code>不以尾部斜杠结尾，它将被视为常规文件，<code>&lt;src&gt;</code>的内容将写在<code>&lt;dest&gt;</code>。</li>
+<li>如果<code>&lt;dest&gt;</code>不存在，则会与其路径中的所有缺少的目录一起创建。</li>
+</ul>
+<h3 id="ENTRYPOPTINT"><a href="#ENTRYPOPTINT" class="headerlink" title="ENTRYPOPTINT"></a>ENTRYPOPTINT</h3><p>ENTRYPOINT有两种形式：</p>
+<ul>
+<li><code>ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code>(exec形式，推荐)</li>
+<li><code>ENTRYPOINT command param1 param2</code>(shell形式)</li>
+</ul>
+<p>一个ENTRYPOINT允许你配置一个将作为可执行文件的容器。</p>
+<p>比如，下例将会启动一个默认内容的nginx，监听80端口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">docker run -i -t --rm -p 80:80 nginx</span></pre></td></tr></table></figure>
+
+<p><code>docker run &lt;image&gt;</code>的命令行参数将会在添加在exec格式的ENTRYPOINT的所有参数后面，而且会覆盖所有CMD指令所指定的参数。这允许参数通过，进入到入口点。比如<code>docker run &lt;image&gt; -d</code>会传递<code>-d</code>参数到入口点。你可以通过使用<code>docker run --entrypoint</code>重写ENTRYPOINT指令。</p>
+<p>shell格式阻止使用任何CMD或者run命令行参数，但是有缺点就是你的ENTRYPOINT将会从作为<code>/bin/bash -c</code>的子命令开始，这就不会传递信号了。这意味着可执行文件不会成为容器的<code>PID 1</code>，而且不会接受Unix信号，所以你的可执行文件不会收到<code>docker stop &lt;container&gt;</code>的<code>SIGTERM</code>。</p>
+<p>只有Dockerfile中最后的ENTRYPOINT指令会生效。</p>
+<h4 id="Exec格式的ENTRYPOINT示例"><a href="#Exec格式的ENTRYPOINT示例" class="headerlink" title="Exec格式的ENTRYPOINT示例"></a>Exec格式的ENTRYPOINT示例</h4><p>你可以使用exec形式的ENTRYPOINT用于设置相当稳定的默认命令行和参数，然后使用任意形式的CMD指令设置额外的、可能被修改的默认命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">CMD [&quot;-c&quot;]</span></pre></td></tr></table></figure>
+
+<p>当你运行一个容器，你可以看到<code>top</code>是唯一的进程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker run -it --rm --name test  top -H</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">top - 08:25:00 up  7:27,  0 users,  load average: 0.00, 0.01, 0.05</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Threads:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">%Cpu(s):  0.1 us,  0.1 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">KiB Mem:   2056668 total,  1616832 used,   439836 free,    99352 buffers</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">KiB Swap:  1441840 total,        0 used,  1441840 free.  1324440 cached Mem</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">  PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    1 root      20   0   19744   2336   2080 R  0.0  0.1   0:00.04 top</span></pre></td></tr></table></figure>
+
+<p>想要检查更多的结果，可以使用<code>docker exec</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker exec -it test ps aux</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">root         1  2.6  0.1  19752  2352 ?        Ss+  08:24   0:00 top -b -H</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">root         7  0.0  0.1  15572  2164 ?        R+   08:25   0:00 ps aux</span></pre></td></tr></table></figure>
+
+<p>而且你可以优雅的使用<code>docker stop test</code>请求关闭<code>top</code>。</p>
+<p>下例Dockerfile展示了使用ENTRYPOINT在前台运行Apache（作为<code>PID 1</code>）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM debian:stable</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RUN apt-get update &amp;&amp; apt-get install -y --force-yes apache2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">EXPOSE 80 443</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">VOLUME [&quot;&#x2F;var&#x2F;www&quot;, &quot;&#x2F;var&#x2F;log&#x2F;apache2&quot;, &quot;&#x2F;etc&#x2F;apache2&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">ENTRYPOINT [&quot;&#x2F;usr&#x2F;sbin&#x2F;apache2ctl&quot;, &quot;-D&quot;, &quot;FOREGROUND&quot;]</span></pre></td></tr></table></figure>
+
+<p>如果你需要写一个开始脚本作为单独可执行文件，你可以保证最终的可执行文件通过<code>exec</code>和<code>gosu</code>命令接受到Unix信号：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;env bash</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">set -e</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">if [ &quot;$1&quot; &#x3D; &#39;postgres&#39; ]; then</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    chown -R postgres &quot;$PGDATA&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    if [ -z &quot;$(ls -A &quot;$PGDATA&quot;)&quot; ]; then</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        gosu postgres initdb</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    fi</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    exec gosu postgres &quot;$@&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">fi</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">exec &quot;$@&quot;</span></pre></td></tr></table></figure>
+
+<p>最终，如果你需要在关闭的时候做一些额外的清理工作（或是与其他容器进行通讯），或者联合多个可执行文件，你可能需要确认ENTRYPOINT脚本能够接受到Unix信号并且传递他们，然后做更多工作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;sh</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># Note: I&#39;ve written this using sh so it works in the busybox container too</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"># USE the trap if you need to also do manual cleanup after the service is stopped,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">#     or need to start multiple services in the one container</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">trap &quot;echo TRAPed signal&quot; HUP INT QUIT TERM</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"># start service in background here</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#x2F;usr&#x2F;sbin&#x2F;apachectl start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">echo &quot;[hit enter key to exit] or run &#39;docker stop &lt;container&gt;&#39;&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">read</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"># stop service and clean up here</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">echo &quot;stopping apache&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">&#x2F;usr&#x2F;sbin&#x2F;apachectl stop</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">echo &quot;exited $0&quot;</span></pre></td></tr></table></figure>
+
+<p>如果你用<code>docker run -it --rm -p 80:80 --name test apache</code>命令运行这个镜像，你可以通过<code>docker exec</code>检查容器的进程，或者用<code>docker top</code>，然后请求脚本来停止Apache：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker exec -it test ps aux</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">root         1  0.1  0.0   4448   692 ?        Ss+  00:42   0:00 &#x2F;bin&#x2F;sh &#x2F;run.sh 123 cmd cmd2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">root        19  0.0  0.2  71304  4440 ?        Ss   00:42   0:00 &#x2F;usr&#x2F;sbin&#x2F;apache2 -k start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">www-data    20  0.2  0.2 360468  6004 ?        Sl   00:42   0:00 &#x2F;usr&#x2F;sbin&#x2F;apache2 -k start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">www-data    21  0.2  0.2 360468  6000 ?        Sl   00:42   0:00 &#x2F;usr&#x2F;sbin&#x2F;apache2 -k start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">root        81  0.0  0.1  15572  2140 ?        R+   00:44   0:00 ps aux</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">$ docker top test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">PID                 USER                COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">10035               root                &#123;run.sh&#125; &#x2F;bin&#x2F;sh &#x2F;run.sh 123 cmd cmd2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">10054               root                &#x2F;usr&#x2F;sbin&#x2F;apache2 -k start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">10055               33                  &#x2F;usr&#x2F;sbin&#x2F;apache2 -k start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">10056               33                  &#x2F;usr&#x2F;sbin&#x2F;apache2 -k start</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">$ &#x2F;usr&#x2F;bin&#x2F;time docker stop test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">real	0m 0.27s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">user	0m 0.03s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">sys	0m 0.03s</span></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong> 你可以使用<code>--entrypoint</code>来重写ENTRYPOINT，但是这只会设置二进制到exec(不会使用<code>sh -c</code>)。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> exec格式是解析成JSON数组的格式，这意味着你必须使用双引号(“)包围文字，而不是用单引号(‘)。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> 与shell格式不同，exec格式不会调用shell命令，这意味着shell处理不会进行。比如，<code>ENTRYPOINT [&quot;echo&quot;,&quot;$HOME&quot;]</code>不会对<code>$HOME</code>进行变量替换。如果你想要使用shell处理，那么就用shell格式或者直接执行shell，比如：<code>ENTRYPOINT [ &quot;sh&quot;, &quot;-c&quot;, &quot;echo $HOME&quot; ]</code>。当使用exec形式并直接执行shell时，正如shell形式的情况，它是做环境变量扩展的shell，而不是docker。</p>
+</blockquote>
+<h4 id="Shell形式ENTRYPOINT的示例"><a href="#Shell形式ENTRYPOINT的示例" class="headerlink" title="Shell形式ENTRYPOINT的示例"></a>Shell形式ENTRYPOINT的示例</h4><p>您可以为ENTRYPOINT指定一个纯字符串，它将在<code>/bin/sh -c</code>中执行。这中形式将使用shell处理来替换shell环境变量，并且将忽略任何CMD或<code>docker run</code>命令行参数。要确保<code>docker stop</code>将正确地发出任何长时间运行的ENTRYPOINT可执行文件，您需要记住用exec启动它：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENTRYPOINT exec top -b</span></pre></td></tr></table></figure>
+
+<p>当你运行这个景象，你会看到单独一个<code>PID 1</code>进程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker run -it --rm --name test top</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Mem: 1704520K used, 352148K free, 0K shrd, 0K buff, 140368121167873K cached</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">CPU:   5% usr   0% sys   0% nic  94% idle   0% io   0% irq   0% sirq</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">Load average: 0.08 0.03 0.05 2&#x2F;98 6</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">  PID  PPID USER     STAT   VSZ %VSZ %CPU COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    1     0 root     R     3164   0%   0% top -b</span></pre></td></tr></table></figure>
+
+<p>这些会在<code>docker stop</code>的时候干净利落的退出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ &#x2F;usr&#x2F;bin&#x2F;time docker stop test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">real	0m 0.20s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">user	0m 0.02s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">sys	0m 0.04s</span></pre></td></tr></table></figure>
+
+<p>如果你忘记在ENTRYPOINT的开头加上<code>exec</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ENTRYPOINT top -b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">CMD --ignored-param1</span></pre></td></tr></table></figure>
+
+<p>你可以运行它（为了下一步的运行，需要给它个名字）:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker run -it --name test top --ignored-param2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Mem: 1704184K used, 352484K free, 0K shrd, 0K buff, 140621524238337K cached</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">CPU:   9% usr   2% sys   0% nic  88% idle   0% io   0% irq   0% sirq</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">Load average: 0.01 0.02 0.05 2&#x2F;101 7</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">  PID  PPID USER     STAT   VSZ %VSZ %CPU COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    1     0 root     S     3168   0%   0% &#x2F;bin&#x2F;sh -c top -b cmd cmd2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    7     1 root     R     3164   0%   0% top -b</span></pre></td></tr></table></figure>
+
+<p>你可以看到<code>top</code>的输出信息中指定的ENTRYPOINT不是<code>PID 1</code>。</p>
+<p>如果你运行了<code>docker stop test</code>，容器不会退出的很干净，<code>stop</code>命令会在超时之后强制发送一个<code>SIGKILL</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker exec -it test ps aux</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">PID   USER     COMMAND</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    1 root     &#x2F;bin&#x2F;sh -c top -b cmd cmd2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    7 root     top -b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    8 root     ps aux</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">$ &#x2F;usr&#x2F;bin&#x2F;time docker stop test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">test</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">real	0m 10.19s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">user	0m 0.04s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">sys	0m 0.03s</span></pre></td></tr></table></figure>
+
+<h4 id="理解CMD和ENTRYPOINT是如何交互的"><a href="#理解CMD和ENTRYPOINT是如何交互的" class="headerlink" title="理解CMD和ENTRYPOINT是如何交互的"></a>理解CMD和ENTRYPOINT是如何交互的</h4><p>CMD和ENTRYPOINT指令都定义了容器运行的时候命令是如何执行的，下面有几条规则描述了他们的关系：</p>
+<ol>
+<li>Dockerfile应当是定至少一条CMD或者ENTRYPOINT命令。</li>
+<li>使用容器作为一个可执行文件的时候，ENTRYPOINT应当被定义。</li>
+<li>CMD应该作为一种为ENTRYPOINT命令定义默认参数的方法，或者作为容器中执行临时命令的方式。</li>
+<li>在使用交互式参数运行容器的时候，CMD将会被重写。</li>
+</ol>
+<p>下表展示了不同的ENTRYPOINT/CMD组合是如何执行的：<br>||No ENTRYPOINT|ENTRYPOINT exec_entry p1_entry|ENTRYPOINT [“exec_entry”, “p1_entry”]<br>-|-|-|-<br>No CMD|error,not allowed|/bin/sh -c exec_entry p1_entry|exec_entry p1_entry<br>CMD [“exec_cmd”, “p1_cmd”]|exec_cmd p1_cmd|/bin/sh -c exec_entry p1_entry|exec_entry p1_entry exec_cmd p1_cmd<br>CMD [“p1_cmd”, “p2_cmd”]|p1_cmd p2_cmd|/bin/sh -c exec_entry p1_entry|exec_entry p1_entry p1_cmd p2_cmd<br>CMD exec_cmd p1_cmd|/bin/sh -c exec_cmd p1_cmd|/bin/sh -c exec_entry p1_entry|exec_entry p1_entry /bin/sh -c exec_cmd p1_cmd</p>
+<h3 id="VOLUME"><a href="#VOLUME" class="headerlink" title="VOLUME"></a>VOLUME</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">VOLUME [&quot;&#x2F;data&quot;]</span></pre></td></tr></table></figure>
+
+<p>VOLUME指令创建了一个挂载点，并且指定了一个名字，然后标记这个挂载点来承载来自原生宿主机或者其他容器的额外被挂载数据卷。它的值可以使一个JSON数组，<code>VOLUME [&quot;/var/log/&quot;]</code>，或者一个普通的有多个参数的字符串，比如<code>VOLUME /var/log</code>或<code>VOLUME /var/log /var/db</code>。想看更多的信息/举例和通过Docker客户端进行挂载的指令，可以参考<a href="https://docs.docker.com/engine/admin/volumes/volumes/" target="_blank" rel="noopener">Share Directories via Volumes</a>文档。</p>
+<p><code>docker run</code>命令用基础映像中指定位置存在的任何数据初始化新创建的卷。比如，思考下例Dockerfile片段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RUN mkdir &#x2F;myvol</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">RUN echo &quot;hello world&quot; &gt; &#x2F;myvol&#x2F;greeting</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">VOLUME &#x2F;myvol</span></pre></td></tr></table></figure>
+
+<p>这个Dockerfile产生了一个镜像使<code>docker run</code>创建了一个新的在<code>/myvol</code>的挂载点而且复制<code>greeting</code>文件到新创建的数据卷上。</p>
+<h4 id="注意指定数据卷"><a href="#注意指定数据卷" class="headerlink" title="注意指定数据卷"></a>注意指定数据卷</h4><p>记住下列关于Dockerfile中关于数据卷的内容：</p>
+<ul>
+<li>基于Windows的容器的数据卷：当你使用基于Windows的容器的时候，容器的数据卷的目标地址必须是下列之一：<ul>
+<li>一个不存在的或者是空的目录</li>
+<li>除了<code>C:</code>的驱动</li>
+</ul>
+</li>
+<li>改变Dockerfile内的数据卷：如果任何构建步骤在被声明之前修改了数据卷内的数据，那么这些改变将被抛弃。</li>
+<li>JSON格式化：这个列表会被解析为一个JSON数组，所以你必须用双引号(“)包含字符，而不是用单引号(“)。</li>
+<li>宿主目录是在docker运行时声明：宿主路径(挂载点)，源于它自身的特性，依赖于宿主。这是为了保护镜像的可移植性，因为一个指定的宿主路径不能保证在所有主机上可得。基于这个原因，你不能在Dockerfile中挂载主机目录。VOLUMN指令不支持制定一个<code>host-dir</code>参数。你必须在创建或者运行容器的时候指定一个挂载点。</li>
+</ul>
+<h3 id="USER"><a href="#USER" class="headerlink" title="USER"></a>USER</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">USER &lt;user&gt;[:&lt;group&gt;] or</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">USER &lt;UID&gt;[:&lt;GID&gt;]</span></pre></td></tr></table></figure>
+
+<p>USER指令在使用CMD、RUN或者ENTRYPOINT命令启动一个镜像的时候，设置用户名(或者UID)并且可选择指定用户组(或者GID)。</p>
+<blockquote>
+<p><strong>注意：</strong> 当一个用户没有一个首选用户组的时候，镜像（或者下一个指令）将会用<code>root</code>用户组来运行。</p>
+</blockquote>
+<blockquote>
+<p>在Windows下，必须先创建用户，如果不是內建用户的情况。这可以通过作为Dockerfile的一部分调用的net user命令来完成。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM microsoft&#x2F;windowsservercore</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"># Create Windows user in the container</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">RUN net user &#x2F;add patrick</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"># Set it for subsequent commands</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">USER patrick</span></pre></td></tr></table></figure>
+<h3 id="WORKDIR"><a href="#WORKDIR" class="headerlink" title="WORKDIR"></a>WORKDIR</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">WORKDIR &#x2F;path&#x2F;to&#x2F;workdir</span></pre></td></tr></table></figure>
+
+<p>WORKDIR指令为Dockerfile中后续的RUN、CMD、ENTRYPOINT、COPY和ADD指令设置工作路径。如果WORKDIR不存在，那么即便没使用Dockerfile中的任何指令，也会被创建。</p>
+<p>WORKDIR指令会在Dockerfile中被多次使用。如果提供了一个相关的路径，那么它就会与前面的WORKDIR指令的路径相关联。比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">WORKDIR &#x2F;a</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">WORKDIR b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">WORKDIR c</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">RUN pwd</span></pre></td></tr></table></figure>
+
+<p>最终<code>pwd</code>命令的输出结果会是<code>/a/b/c</code>。</p>
+<p>WORKDIR指令可以处理之前使用ENV命令设置的环境变量。你可以只使用Dockerfile中明确设置的环境变量。比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ENV DIRPATH &#x2F;path</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">WORKDIR $DIRPATH&#x2F;$DIRNAME</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">RUN pwd</span></pre></td></tr></table></figure>
+
+<p>最终<code>pwd</code>命令的输出结果会是<code>/path/$DIRNAME</code></p>
+<h3 id="ARG"><a href="#ARG" class="headerlink" title="ARG"></a>ARG</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ARG &lt;name&gt;[&#x3D;&lt;default value&gt;]</span></pre></td></tr></table></figure>
+
+<p>ARG指令定义了一个变量，用户可以使用<code>--build-arg &lt;varname&gt; = &lt;value&gt;</code>标志在构建器中通过<code>docker build</code>命令将其传递给构建器。如果用户指定了一个在Dockerfile中没有定义的构建参数，那么构建器会输出一个警告。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[Warning] One or more build-args [foo] were not consumed.</span></pre></td></tr></table></figure>
+
+<p>一个Dockerfile可以包含一个或者多个ARG指令，比如，下面是一个合法的Dockerfile:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM busybox</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ARG user1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ARG buildno</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong> 不推荐使用构建阶段的变量传递密钥比如github的keys，用户证书等，构建阶段变量对任何用户都是可见的，只要使用<code>docker history</code>命令。</p>
+</blockquote>
+<h4 id="默认值"><a href="#默认值" class="headerlink" title="默认值"></a>默认值</h4><p>一个ARG指令可以选择包含一个默认值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM busybox</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ARG user1&#x3D;someuser</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ARG buildno&#x3D;1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr></table></figure>
+
+<p>如果一个ARG指令有一个默认值，而且没有其他值在构建阶段传递，那么构建器就会使用默认值。</p>
+<h4 id="作用范围"><a href="#作用范围" class="headerlink" title="作用范围"></a>作用范围</h4><p>一个ARG变量的定义从它被定义的哪一行开始生效，而不是从命令行或其他地方使用参数的时候开始。比如，考虑下面这个Dockerfile:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">1 FROM busybox</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2 USER $&#123;user:-some_user&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">3 ARG user</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">4 USER $user</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr></table></figure>
+
+<p>一个用户用下面的命令构建了这个文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker build --build-arg user&#x3D;what_user .</span></pre></td></tr></table></figure>
+
+<p>在这种情况下，RUN指令使用<code>v1.0.0</code>而不是用户传递的ARG设置：<code>v2.0.1</code>这种行为类似于一个shell脚本，其中一个本地作用域变量覆盖作为参数传递的变量或从环境继承的变量，定义点。</p>
+<p>使用上面的示例，但使用不同的ENV规范，您可以在ARG和ENV指令之间创建更有用的交互：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">1 FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2 ARG CONT_IMG_VER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">3 ENV CONT_IMG_VER $&#123;CONT_IMG_VER:-v1.0.0&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">4 RUN echo $CONT_IMG_VER</span></pre></td></tr></table></figure>
+
+<p>与ARG指令不通，ENV的值会在构建镜像的阶段一直存在。考虑一个docker不使用<code>--build-arg</code>参数的构建：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$ docker build .</span></pre></td></tr></table></figure>
+
+<p>使用这个Dockerfile为例，<code>CONT_IMG_VER</code>仍然在镜像中持续存在，但是它的值会是<code>v1.0.0</code>，如同第三行中ENV指令设定的那样。</p>
+<p>这个例子中的变量扩展技术允许你从命令行中传递一个参数，并通过利用ENV指令将其保存在最终镜像中。变量扩展只支持<a href="https://docs.docker.com/engine/reference/builder/#environment-replacement" target="_blank" rel="noopener">有限的Dockerfile指令</a>。</p>
+<h4 id="预定义的ARGs"><a href="#预定义的ARGs" class="headerlink" title="预定义的ARGs"></a>预定义的ARGs</h4><p>Docker 有一组预定义的ARG变量，您可以在Dockerfile中使用没有相应的ARG指令的变量。</p>
+<ul>
+<li><code>HTTP_PROXY</code></li>
+<li><code>http_proxy</code></li>
+<li><code>HTTPS_PROXY</code></li>
+<li><code>https_proxy</code></li>
+<li><code>FTP_PROXY</code></li>
+<li><code>ftp_proxy</code></li>
+<li><code>NO_PROXY</code></li>
+<li><code>no_proxy</code></li>
+</ul>
+<p>想要使用它们，只需要使用命令行传递它们：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">--build-arg &lt;varname&gt;&#x3D;&lt;value&gt;</span></pre></td></tr></table></figure>
+
+<p>默认的，这些预定义变量会被<code>docker history</code>的输出结果排除。将它们排除在外可以减少在HTTP_PROXY变量中意外泄漏敏感身份验证信息的风险。</p>
+<p>举个栗子，考虑使用下面的语句构建Dockerfile：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">--build-arg HTTP_PROXY&#x3D;http:&#x2F;&#x2F;user:pass@proxy.lon.example.com</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RUN echo &quot;Hello World&quot;</span></pre></td></tr></table></figure>
+
+<p>在这种情况下，<code>HTTP_PROXY</code>变量的值在<code>docker history</code>中不可见，而且没有被缓存。如果你本地作了修改，而且你的代理服务器设置成了<code>http://user:pass@proxy.sfo.example.com</code>，后续的构建不会导致缓存未命中。</p>
+<p>如果你需要重写这种状况，你可能需要在Dockerfile中添加一个ARG声明，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ARG HTTP_PROXY</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">RUN echo &quot;Hello World&quot;</span></pre></td></tr></table></figure>
+
+<p>当构建这个Dockerfile的时候，<code>HTTP_PROXY</code>被保存在了<code>docker history</code>中，而且改变了它的值使构建缓存失效。</p>
+<h4 id="对构建缓存的影响"><a href="#对构建缓存的影响" class="headerlink" title="对构建缓存的影响"></a>对构建缓存的影响</h4><p>作为ENV变量，ARG变量不会保留在构建的镜像中。但是，ARG变量确实会以类似的方式影响构建缓存。如果Dockerfile定义了一个ARG变量，其值与以前的版本不同，那么在第一次使用时会发生“缓存未命中”，而不是其定义。尤其是，ARG指令之后的所有RUN指令隐式使用ARG变量（作为环境变量），因此可能导致缓存未命中。除非在Dockerfile中存在匹配的ARG语句，否则所有预定义的ARG变量都可以免于缓存。</p>
+<p>举个栗子，考虑下面两个Dockerfile：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">1 FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2 ARG CONT_IMG_VER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">3 RUN echo $CONT_IMG_VER</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">1 FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2 ARG CONT_IMG_VER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">3 RUN echo hello</span></pre></td></tr></table></figure>
+
+<p>如果在命令行中指定<code>--build-arg CONT_IMG_VER = &lt;value&gt;</code>，则在这两种情况下，第2行的规范不会导致缓存未命中;第3行确实导致缓存未命中.<code>ARG CONT_IMG_VER</code>导致RUN行被识别为与运行<code>CONT_IMG_VER = &lt;value&gt;</code>echo hello相同，因此如果<code>&lt;value&gt;</code>发生更改，则会导致缓存未命中。</p>
+<p>考虑同一个命令行下的另一个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">1 FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2 ARG CONT_IMG_VER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">3 ENV CONT_IMG_VER $CONT_IMG_VER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">4 RUN echo $CONT_IMG_VER</span></pre></td></tr></table></figure>
+
+<p>在这个例子中，高速缓存未命中发生在第3行。发生未命中是因为ENV中的变量值引用了ARG变量，并且该变量通过命令行进行了更改。在这个例子中，ENV命令会使镜像包含该值。</p>
+<p>如果ENV指令覆盖同名的ARG指令，就像这个Dockerfile：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">1 FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2 ARG CONT_IMG_VER</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">3 ENV CONT_IMG_VER hello</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">4 RUN echo $CONT_IMG_VER</span></pre></td></tr></table></figure>
+
+<p>第3行不会导致缓存未命中，因为<code>CONT_IMG_VER</code>的值是常量（<code>hello</code>）。因此，RUN（第4行）上使用的环境变量和值在构建之间不会改变。</p>
+<h3 id="ONBUILD"><a href="#ONBUILD" class="headerlink" title="ONBUILD"></a>ONBUILD</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">ONBUILD [INSTRUCTION]</span></pre></td></tr></table></figure>
+
+<p>ONBUILD指令为镜像添加一个触发器指令，稍后将该镜像用作另一个构建的基础。触发器将在下游构建的上下文中执行，就像它已经在下游Dockerfile中的FROM指令之后立即插入一样。</p>
+<p>任何构建指令都可以注册为触发器。</p>
+<p>如果您正在构建将用作构建其他映像的基础的映像，那么这非常有用，例如可以使用用户特定配置自定义的应用程序构建环境或守护程序。</p>
+<p>例如，如果您的映像是可重用的Python应用程序构建器，则需要将应用程序源代码添加到特定目录中，并且可能需要在此之后调用构建脚本。你现在不能只调用ADD和RUN，因为你还没有访问应用程序的源代码，每个应用程序的版本都不一样。您可以简单地向应用程序开发人员提供样板化的Dockerfile以复制粘贴到他们的应用程序中，但效率低下，容易出错，难以更新，因为它与特定于应用程序的代码混合在一起。</p>
+<p>解决方案是使用ONBUILD注册先行指令，以便在以后的构建阶段运行。</p>
+<p>这是它如何工作的：</p>
+<ol>
+<li>当遇到ONBUILD指令时，构建器会为正在构建的映像的元数据添加一个触发器。该指令不会影响当前的构建。</li>
+<li>在构建结束时，所有触发器的列表都存储在图像清单中的OnBuild键下。可以使用<code>docker inspect</code>命令检查它们。</li>
+<li>稍后，可以使用FROM指令将镜像用作新构建的基础。作为处理FROM指令的一部分，下游构建器会查找ONBUILD触发器，并按照它们所注册的相同顺序执行它们。如果任何触发器失败，则FROM指令将被中止，从而导致构建失败。如果所有触发器都成功，则FROM指令完成，构建将像往常一样继续。</li>
+<li>触发器在执行后从最终图像中清除。换句话说，他们不是由“大孩子”构建的遗传。</li>
+</ol>
+<p>例如，你可能会添加这样的东西：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[...]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">ONBUILD ADD . &#x2F;app&#x2F;src</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">ONBUILD RUN &#x2F;usr&#x2F;local&#x2F;bin&#x2F;python-build --dir &#x2F;app&#x2F;src</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">[...]</span></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong> 不允许使用<code>ONBUILD ONBUILD</code>链接<code>ONBUILD</code>。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：</strong> <code>ONBUILD</code>指令可能不会触发<code>FROM</code>或者<code>MAINTAINER</code>指令。</p>
+</blockquote>
+<h3 id="STOPSIGNAL"><a href="#STOPSIGNAL" class="headerlink" title="STOPSIGNAL"></a>STOPSIGNAL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">STOPSIGNAL signal</span></pre></td></tr></table></figure>
+
+<p>STOPSIGNAL指令设置将被发送到容器的系统调用信号以退出。该信号可以是一个有效的无符号数字，与内核的syscall表中的一个位置（例如9）匹配，或者是一个SIGNAME格式的信号名称，例如SIGKILL。</p>
+<h3 id="HEALTHCHECK"><a href="#HEALTHCHECK" class="headerlink" title="HEALTHCHECK"></a>HEALTHCHECK</h3><p>HEALTHCHECK指令有两种形式：</p>
+<ul>
+<li><code>HEALTHCHECK [选项] CMD命令</code>（通过在容器中运行一个命令来检查容器的健康状况）</li>
+<li><code>HEALTHCHECK NONE</code>（禁用从基础映像继承的任何健康检查）</li>
+</ul>
+<p>HEALTHCHECK指令告诉Docker如何测试一个容器来检查它是否还在工作。这可以检测到一些情况，例如一个陷入无限循环的web服务器，即使服务器进程仍在运行，也无法处理新的连接。</p>
+<p>当容器指定了健康状况检查时，除了正常状态之外，还有一个健康状态。这个状态是最初开始的。每当健康检查通过，它变得健康（无论以前在哪个状态）。经过一定次数的连续失败后，变得不健康。</p>
+<p>可以在CMD之前出现的选项是：</p>
+<ul>
+<li><code>--interval = DURATION</code>（默认：30秒）</li>
+<li><code>--timeout = DURATION</code>（默认：30s）</li>
+<li><code>--start-period = DURATION</code>（默认值：0s）</li>
+<li><code>--retries = N</code>（默认值：3）</li>
+</ul>
+<p>运行状况检查将首先在容器启动后的间隔秒内运行，然后在每次前一次检查完成后再次间隔几秒。</p>
+<p>如果单次运行检查花费的时间超过了超过秒数，则认为检查失败。</p>
+<p>多次连续的健康检查失败的容器被认为是不健康的。</p>
+<p>启动周期为需要时间启动的容器提供初始化时间。在此期间的探测失败不会计入最大重试次数。但是，如果在启动期间运行状况检查成功，则认为容器已启动，并且所有连续的故障都将计入最大重试次数。</p>
+<p>Dockerfile中只能有一个HEALTHCHECK指令。如果您列出多个，则只有最后一个HEALTHCHECK将生效。</p>
+<p>CMD关键字之后的命令可以是shell命令（例如，HEALTHCHECK CMD / bin / check-running）或exec阵列（与其他Dockerfile命令一样;例如参见ENTRYPOINT以获得详细信息）。</p>
+<p>该命令的退出状态表示容器的健康状态。可能的值是：</p>
+<ul>
+<li>0：成功 - 容器很健康而且随时可以使用</li>
+<li>1：不健康 - 容器运行状态不正常</li>
+<li>2：保留 - 不要使用这个退出状态码</li>
+</ul>
+<p>例如，要每隔五分钟检查一次，网络服务器是否能够在三秒内为网站的主页提供服务：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">HEALTHCHECK --interval &#x3D; 5m --timeout &#x3D; 3s \</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  CMD curl -f http：&#x2F;&#x2F; localhost &#x2F; ||exit 1</span></pre></td></tr></table></figure>
+
+<p>为了帮助调试失败的探测器，命令在stdout或stderr上写入的任何输出文本（UTF-8编码）都将存储在健康状态中，并且可以通过docker检查进行查询。这样的输出应该保持简短（目前只有前4096个字节被存储）。</p>
+<p>当容器的运行状况发生变化时，会以新状态生成一个<code>health_status</code>事件。</p>
+<p>在Docker 1.12中添加了HEALTHCHECK功能。</p>
+<h3 id="SHELL"><a href="#SHELL" class="headerlink" title="SHELL"></a>SHELL</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">SHELL [&quot;executable&quot;, &quot;parameters&quot;]</span></pre></td></tr></table></figure>
+
+<p>SHELL指令允许覆盖用于shell命令形式的默认shell。 Linux上的默认shell是<code>[&quot;/bin/sh&quot;，&quot;-c&quot;]</code>，在Windows上是<code>[&quot;cmd&quot;，&quot;/S&quot;，&quot;/C&quot;]</code>。 SHELL指令必须以JSON格式写入Dockerfile中。</p>
+<p>SHELL指令在Windows中有两个常用和完全不同的本机shell特别有用：cmd和powershell，以及可用的备用shell，包括sh。</p>
+<p>SHELL指令可以出现多次。每个SHELL指令将覆盖所有先前的SHELL指令，并影响所有后续指令。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">FROM microsoft&#x2F;windowsservercore</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"># Executed as cmd &#x2F;S &#x2F;C echo default</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">RUN echo default</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"># Executed as cmd &#x2F;S &#x2F;C powershell -command Write-Host default</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">RUN powershell -command Write-Host default</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"># Executed as powershell -command Write-Host hello</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">SHELL [&quot;powershell&quot;, &quot;-command&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">RUN Write-Host hello</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"># Executed as cmd &#x2F;S &#x2F;C echo hello</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">SHELL [&quot;cmd&quot;, &quot;&#x2F;S&quot;&quot;, &quot;&#x2F;C&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">RUN echo hello</span></pre></td></tr></table></figure>
+
+
+<p>如果在Dockerfile中使用SHELL指令，则会影响以下指令：RUN，CMD和ENTRYPOINT。</p>
+<p>以下示例是在Windows上可以通过使用SHELL指令简化的常见模式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RUN powershell -command Execute-MyCmdlet -param1 &quot;c:\foo.txt&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr></table></figure>
+
+<p>docker调用的命令是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">cmd &#x2F;S &#x2F;C powershell -command Execute-MyCmdlet -param1 &quot;c:\foo.txt&quot;</span></pre></td></tr></table></figure>
+
+<p>这是低效率的，原因有两个。首先，调用一个不必要的cmd.exe命令处理器（又名shell）。其次，shell格式中的每条RUN指令都需要在命令前加上一个额外的powershell命令。</p>
+<p>为了提高效率，可以采用两种机制之一。一种是使用RUN命令的JSON格式，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RUN [&quot;powershell&quot;，&quot;-command&quot;，&quot;Execute-MyCmdlet&quot;，&quot;-param1 \&quot;c:\\foo.txt\&quot;&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">...</span></pre></td></tr></table></figure>
+
+<p>虽然JSON格式是明确的，并且不使用不必要的cmd.exe，但是通过双引号和转义确实需要更多的冗长。另一种机制是使用SHELL指令和shell形式，为Windows用户提供更自然的语法，特别是与<code>escape</code>转义指令结合使用时：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># escape&#x3D;&#96;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">FROM microsoft&#x2F;nanoserver</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">SHELL [&quot;powershell&quot;,&quot;-command&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">RUN New-Item -ItemType Directory C:\Example</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">ADD Execute-MyCmdlet.ps1 c:\example\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">RUN c:\example\Execute-MyCmdlet -sample &#39;hello world&#39;</span></pre></td></tr></table></figure>
+<p>结果是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">PS E:\docker\build\shell&gt; docker build -t shell .</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon 4.096 kB</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Step 1&#x2F;5 : FROM microsoft&#x2F;nanoserver</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 22738ff49c6d</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">Step 2&#x2F;5 : SHELL powershell -command</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Running in 6fcdb6855ae2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 6331462d4300</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">Removing intermediate container 6fcdb6855ae2</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">Step 3&#x2F;5 : RUN New-Item -ItemType Directory C:\Example</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Running in d0eef8386e97</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    Directory: C:\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">Mode                LastWriteTime         Length Name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">----                -------------         ------ ----</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">d-----       10&#x2F;28&#x2F;2016  11:26 AM                Example</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 3f2fbf1395d9</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">Removing intermediate container d0eef8386e97</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">Step 4&#x2F;5 : ADD Execute-MyCmdlet.ps1 c:\example\</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line"> ---&gt; a955b2621c31</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">Removing intermediate container b825593d39fc</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">Step 5&#x2F;5 : RUN c:\example\Execute-MyCmdlet &#39;hello world&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line"> ---&gt; Running in be6d8e63fe75</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">hello world</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line"> ---&gt; 8e559e9bf424</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">Removing intermediate container be6d8e63fe75</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">Successfully built 8e559e9bf424</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">PS E:\docker\build\shell&gt;</span></pre></td></tr></table></figure>
+
+
+<p>SHELL指令也可以用来修改shell的运行方式。例如，在Windows上使用<code>SHELL cmd /S /C /V:ON|OFF</code>，可以修改延迟的环境变量扩展语义。</p>
+<p>SHELL指令也可以在Linux上使用，如果需要备用shell，如zsh，csh，tcsh等。</p>
+<p>SHELL功能是在Docker 1.12中添加的。</p>
+<h2 id="Dockerfile-示例"><a href="#Dockerfile-示例" class="headerlink" title="Dockerfile 示例"></a>Dockerfile 示例</h2><p>在你可以看到Dockerfile语法之前，如果你对更多的实例感兴趣，可以参考<a href="https://docs.docker.com/engine/examples/" target="_blank" rel="noopener">docker文档</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># Nginx</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">#</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"># VERSION               0.0.1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">FROM      ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">LABEL Description&#x3D;&quot;This image is used to start the foobar executable&quot; Vendor&#x3D;&quot;ACME Products&quot; Version&#x3D;&quot;1.0&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">RUN apt-get update &amp;&amp; apt-get install -y inotify-tools nginx apache2 openssh-server</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># Firefox over VNC</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">#</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"># VERSION               0.3</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"># Install vnc, xvfb in order to create a &#39;fake&#39; display and firefox</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">RUN apt-get update &amp;&amp; apt-get install -y x11vnc xvfb firefox</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">RUN mkdir ~&#x2F;.vnc</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"># Setup a password</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">RUN x11vnc -storepasswd 1234 ~&#x2F;.vnc&#x2F;passwd</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"># Autostart firefox (might not be the best way, but it does the trick)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">RUN bash -c &#39;echo &quot;firefox&quot; &gt;&gt; &#x2F;.bashrc&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">EXPOSE 5900</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">CMD    [&quot;x11vnc&quot;, &quot;-forever&quot;, &quot;-usepw&quot;, &quot;-create&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"># Multiple images example</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">#</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line"># VERSION               0.1</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">RUN echo foo &gt; bar</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line"># Will output something like &#x3D;&#x3D;&#x3D;&gt; 907ad6c2736f</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">RUN echo moo &gt; oink</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line"># Will output something like &#x3D;&#x3D;&#x3D;&gt; 695d7793cbe4</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line"># You&#39;ll now have two images, 907ad6c2736f with &#x2F;bar, and 695d7793cbe4 with</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line"># &#x2F;oink.</span></pre></td></tr></table></figure>
+
+<h2 id="Dockerfile-最佳实践"><a href="#Dockerfile-最佳实践" class="headerlink" title="Dockerfile 最佳实践"></a>Dockerfile 最佳实践</h2><p>Docker可以通过从Dockerfile中阅读</p>
+<h3 id="一般参考和建议"><a href="#一般参考和建议" class="headerlink" title="一般参考和建议"></a>一般参考和建议</h3><h4 id="容器应该是短暂的"><a href="#容器应该是短暂的" class="headerlink" title="容器应该是短暂的"></a>容器应该是短暂的</h4><p>你Dockerfile中定义的镜像所产生的容器应该是尽可能短暂的。提到“短暂“，我们的意思是它可以停止和被销毁，而且可以用一个最小化的启动和配置流程来构建一个新的替代它。</p>
+<h4 id="使用-dockerignore文件"><a href="#使用-dockerignore文件" class="headerlink" title="使用.dockerignore文件"></a>使用.dockerignore文件</h4><p>当您发出docker build命令时，您所在的当前工作目录称为构建上下文，并且Dockerfile必须位于此构建上下文中的某个位置。默认情况下，它假定位于当前目录中，但是可以使用<code>-f</code>标志指定不同的位置。无论Dockerfile实际存在于哪里，当前目录中的所有文件和目录的递归内容都会作为构建上下文发送到Docker守护进程。无意中包含构建映像所不需要的文件会产生较大的构建上下文和较大的映像大小。这些反过来可以增加构建时间，拉和推图像的时间以及容器的运行时间大小。要查看构建上下文有多大，在构建Dockerfile时查找如下消息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Sending build context to Docker daemon  187.8MB</span></pre></td></tr></table></figure>
+
+<p>要排除与构建无关的文件，而不重构源代码库，请使用.dockerignore文件。该文件支持类似于.gitignore文件的排除模式。有关创建一个的信息，请参阅<a href="https://docs.docker.com/engine/reference/builder/#dockerignore-file" target="_blank" rel="noopener">.dockerignore</a>文件。除了使用.dockerignore文件之外，请查看以下关于<a href="https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#use-multi-stage-builds" target="_blank" rel="noopener">多阶段构建</a>的信息。</p>
+<h4 id="使用多阶段构建"><a href="#使用多阶段构建" class="headerlink" title="使用多阶段构建"></a>使用多阶段构建</h4><p>如果你使用Docker 17.05或者更高版本，你可以使用<a href="https://docs.docker.com/engine/userguide/eng-image/multistage-build/" target="_blank" rel="noopener">多阶段构建</a>来彻底减少最终镜像的大小。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/Dockerfile/" rel="tag"># Dockerfile</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/05/07/Java-%E5%A4%9A%E7%BA%BF%E7%A8%8B-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/" rel="prev" title="Java 多线程 常见面试问题">
+      <i class="fa fa-chevron-left"></i> Java 多线程 常见面试问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/01/26/ELK%E5%BA%94%E7%94%A8%E6%A0%88%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E6%B5%8B%E8%AF%95/" rel="next" title="ELK应用栈的搭建和测试">
+      ELK应用栈的搭建和测试 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker的内核基础"><span class="nav-number">1.</span> <span class="nav-text">Docker的内核基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker自底向上的结构"><span class="nav-number">1.1.</span> <span class="nav-text">Docker自底向上的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Dockerfile定义一个容器"><span class="nav-number">1.2.</span> <span class="nav-text">使用Dockerfile定义一个容器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dockerfile指南"><span class="nav-number">2.</span> <span class="nav-text">Dockerfile指南</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#用法"><span class="nav-number">2.1.</span> <span class="nav-text">用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#格式"><span class="nav-number">2.2.</span> <span class="nav-text">格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析指令-Parse-directives"><span class="nav-number">2.3.</span> <span class="nav-text">解析指令 Parse directives</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#escape"><span class="nav-number">2.4.</span> <span class="nav-text">escape</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环境替换"><span class="nav-number">2.5.</span> <span class="nav-text">环境替换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dockerignore-file"><span class="nav-number">2.6.</span> <span class="nav-text">.dockerignore file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FROM"><span class="nav-number">2.7.</span> <span class="nav-text">FROM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#理解ARG和FROM是如何相互需作用的"><span class="nav-number">2.8.</span> <span class="nav-text">理解ARG和FROM是如何相互需作用的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RUN"><span class="nav-number">2.9.</span> <span class="nav-text">RUN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CMD"><span class="nav-number">2.10.</span> <span class="nav-text">CMD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LABEL"><span class="nav-number">2.11.</span> <span class="nav-text">LABEL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MAINTAINER-弃用"><span class="nav-number">2.12.</span> <span class="nav-text">MAINTAINER(弃用)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXPOSE"><span class="nav-number">2.13.</span> <span class="nav-text">EXPOSE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ENV"><span class="nav-number">2.14.</span> <span class="nav-text">ENV</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ADD"><span class="nav-number">2.15.</span> <span class="nav-text">ADD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COPY"><span class="nav-number">2.16.</span> <span class="nav-text">COPY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ENTRYPOPTINT"><span class="nav-number">2.17.</span> <span class="nav-text">ENTRYPOPTINT</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Exec格式的ENTRYPOINT示例"><span class="nav-number">2.17.1.</span> <span class="nav-text">Exec格式的ENTRYPOINT示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Shell形式ENTRYPOINT的示例"><span class="nav-number">2.17.2.</span> <span class="nav-text">Shell形式ENTRYPOINT的示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#理解CMD和ENTRYPOINT是如何交互的"><span class="nav-number">2.17.3.</span> <span class="nav-text">理解CMD和ENTRYPOINT是如何交互的</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VOLUME"><span class="nav-number">2.18.</span> <span class="nav-text">VOLUME</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#注意指定数据卷"><span class="nav-number">2.18.1.</span> <span class="nav-text">注意指定数据卷</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER"><span class="nav-number">2.19.</span> <span class="nav-text">USER</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WORKDIR"><span class="nav-number">2.20.</span> <span class="nav-text">WORKDIR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARG"><span class="nav-number">2.21.</span> <span class="nav-text">ARG</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#默认值"><span class="nav-number">2.21.1.</span> <span class="nav-text">默认值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#作用范围"><span class="nav-number">2.21.2.</span> <span class="nav-text">作用范围</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#预定义的ARGs"><span class="nav-number">2.21.3.</span> <span class="nav-text">预定义的ARGs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对构建缓存的影响"><span class="nav-number">2.21.4.</span> <span class="nav-text">对构建缓存的影响</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ONBUILD"><span class="nav-number">2.22.</span> <span class="nav-text">ONBUILD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#STOPSIGNAL"><span class="nav-number">2.23.</span> <span class="nav-text">STOPSIGNAL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HEALTHCHECK"><span class="nav-number">2.24.</span> <span class="nav-text">HEALTHCHECK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SHELL"><span class="nav-number">2.25.</span> <span class="nav-text">SHELL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dockerfile-示例"><span class="nav-number">3.</span> <span class="nav-text">Dockerfile 示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dockerfile-最佳实践"><span class="nav-number">4.</span> <span class="nav-text">Dockerfile 最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一般参考和建议"><span class="nav-number">4.1.</span> <span class="nav-text">一般参考和建议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#容器应该是短暂的"><span class="nav-number">4.1.1.</span> <span class="nav-text">容器应该是短暂的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-dockerignore文件"><span class="nav-number">4.1.2.</span> <span class="nav-text">使用.dockerignore文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用多阶段构建"><span class="nav-number">4.1.3.</span> <span class="nav-text">使用多阶段构建</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

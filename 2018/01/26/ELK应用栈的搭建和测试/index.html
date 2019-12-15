@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Mist',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="本篇记录搭建、测试ELK应用栈的过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK应用栈的搭建和测试">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2018&#x2F;01&#x2F;26&#x2F;ELK%E5%BA%94%E7%94%A8%E6%A0%88%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E6%B5%8B%E8%AF%95&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="本篇记录搭建、测试ELK应用栈的过程。">
+<meta property="og:image" content="https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;beats&#x2F;filebeat&#x2F;6.1&#x2F;images&#x2F;filebeat.png">
+<meta property="article:published_time" content="2018-01-26T10:17:10.000Z">
+<meta property="article:modified_time" content="2019-12-15T14:37:12.660Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="容器云">
+<meta property="article:tag" content="日志">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="运维">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;www.elastic.co&#x2F;guide&#x2F;en&#x2F;beats&#x2F;filebeat&#x2F;6.1&#x2F;images&#x2F;filebeat.png">
+
+<link rel="canonical" href="http://beritra.github.com/2018/01/26/ELK%E5%BA%94%E7%94%A8%E6%A0%88%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E6%B5%8B%E8%AF%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>ELK应用栈的搭建和测试 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2018/01/26/ELK%E5%BA%94%E7%94%A8%E6%A0%88%E7%9A%84%E6%90%AD%E5%BB%BA%E5%92%8C%E6%B5%8B%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ELK应用栈的搭建和测试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-26 18:17:10" itemprop="dateCreated datePublished" datetime="2018-01-26T18:17:10+08:00">2018-01-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-15 22:37:12" itemprop="dateModified" datetime="2019-12-15T22:37:12+08:00">2019-12-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index">
+                    <span itemprop="name">运维</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本篇记录搭建、测试ELK应用栈的过程。</p>
+<a id="more"></a>
+
+<h2 id="Logstash-安装和使用"><a href="#Logstash-安装和使用" class="headerlink" title="Logstash 安装和使用"></a>Logstash 安装和使用</h2><h3 id="安装运行"><a href="#安装运行" class="headerlink" title="安装运行"></a>安装运行</h3><p>Logstash依赖于Java，所以需要预先安装jre，建议1.8版本及以上。然后在官网可以直接下载二进制压缩文件，解压即可。</p>
+<h3 id="创建最简单的示例"><a href="#创建最简单的示例" class="headerlink" title="创建最简单的示例"></a>创建最简单的示例</h3><p>Logstash关到有两个最基本元素，输入和输出，和一个可选的元素，拦截器。输入插件从一个输入源中消费数据，拦截器插件按照你指定的方式修改数据，然后输出插件将数据写入到一个目的地。</p>
+<p>想要验证Logstash的安装是否成功，可以运行最基本的Logstash管道：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">cd logstash</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">bin&#x2F;logstash -e &#39;input &#123; stdin &#123; &#125; &#125; output &#123; stdout &#123;&#125; &#125;&#39;</span></pre></td></tr></table></figure>
+
+<p><code>-e</code>标志可以直接通过命令行指定配置，从而让你快速的测试配置而不用多次修改一个配置文件。这个示例中的管道从标准输入<code>stdin</code>中获取输入，然后用一个结构化的格式把数据移动到标准输出<code>stdout</code>。</p>
+<p>在启动Logstash完成之后，看到<code>Pipline started</code>提示后，可以在命令行中输入<code>hello world</code>，你会看到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">hello world</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">2018-01-25T09:26:53.134Z caih-OptiPlex-7050 hello world</span></pre></td></tr></table></figure>
+
+<p>Logstash在信息中添加了时间戳和主机名。</p>
+<h3 id="使用Logstash解析日志"><a href="#使用Logstash解析日志" class="headerlink" title="使用Logstash解析日志"></a>使用Logstash解析日志</h3><p>前例中，我们创建了一个最基本的Logstash管道用来测试Logstash是否启动成功。实际应用中，Logstash管道会复杂很多，它会有多个不同类型的输入，有拦截器，还有输出插件。</p>
+<h4 id="直接使用Logstash跟踪日志文件"><a href="#直接使用Logstash跟踪日志文件" class="headerlink" title="直接使用Logstash跟踪日志文件"></a>直接使用Logstash跟踪日志文件</h4><p>Logstash也可以不借助Filebeat，直接跟踪日志文件。</p>
+<p>这里我们写一个简单的shell脚本，名为log.sh，每一秒钟往日志文件里输出一个时间戳，然后跟踪这个日志文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"># &#x2F;bin&#x2F;bash</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">while :</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">do</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  current&#x3D;&#96;date &quot;+%Y-%m-%d %H:%M:%S&quot;&#96;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">  echo $current &gt;&gt; log.log</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">  sleep 1s</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">done</span></pre></td></tr></table></figure>
+
+<p>使用命令<code>nohup bash log.sh &amp;</code>让这个脚本在后台执行。然后<code>tail -f log.log</code>就可以看到日志文件在不断增加。</p>
+<p>回到logstash的目录下bin文件夹，创建一个简单的配置文件，名为logstash.conf:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">input &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  file &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    path &#x3D;&gt; [&quot;&#x2F;home&#x2F;caih&#x2F;docker&#x2F;logstash&#x2F;log&#x2F;log.log&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">output &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">  stdout&#123;&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这个配置非常简单，就是在追踪刚才写的日志作为输入，然后在命令行输出。<br>执行命令<code>./logstash -f logstash.conf</code>，稍等之后就可以看到日志中打印的时间戳出现啦，同时每一条日志前面会有logstash添加的时间戳和主机名。这时候遇到了一个问题，就是logstash运行之前的那些历史日志，会有乱序。我怀疑是多个线程同时收集日志导致的顺序问题。这时候修改config文件夹里面的logstash.yml，将pipieline.worker改为1，这个情况有了好转，但是仍然偶尔可见顺序问题，尚有待解决。</p>
+<p>可以注意到，每次重启logstash之后，日志都是从上次的结束为止开始输出的，那么如何每次都从日志文件的开头开始输出呐？可以修改配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">input &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  file &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    path &#x3D;&gt; [&quot;&#x2F;home&#x2F;caih&#x2F;docker&#x2F;logstash&#x2F;log&#x2F;log.log&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    start_position &#x3D;&gt; &quot;beginning&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    sincedb_path &#x3D;&gt; &quot;&#x2F;dev&#x2F;null&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">  &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">output &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">  stdout&#123;&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>Logstash跟踪日志的时候，标记追踪位置的数据存储在sincedb中，这里sincedb_path就是指定sincedb文件的位置，然后把它配置为linux中自带的空位置，就实现了每次从头开始的目的。<br>注意，start_position只是说每次从sincedb中标记的起点开始，不是从文件头开始，所以只添加这一项是不行的。</p>
+<p>然后同样的，可以把文件位置改为系统日志：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">input &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  file &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    path &#x3D;&gt; [&quot;&#x2F;var&#x2F;log&#x2F;*.log&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    type &#x3D;&gt; &quot;system&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    start_position &#x3D;&gt; &quot;beginning&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    sincedb_path &#x3D;&gt; &quot;&#x2F;dev&#x2F;null&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">  &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">output &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">  stdout&#123;&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看到系统日志的情况。</p>
+<h4 id="借助Filebeat采集日志"><a href="#借助Filebeat采集日志" class="headerlink" title="借助Filebeat采集日志"></a>借助Filebeat采集日志</h4><p>这部分我们创建一个Logstash管道，使用Filebeat将Apache的日志作为输入，解析这些日志，然后从中创建特定的、命名规范的字段，然后把数据输入到Elasticsearch集群中。这里使用配置文件来定义管道，而不是使用命令行参数。</p>
+<h5 id="关于Filebeat"><a href="#关于Filebeat" class="headerlink" title="关于Filebeat"></a>关于Filebeat</h5><p>Logstash可以Filebeat配合使用来收集日志，那么Filebeat是个什么东西呐？</p>
+<p>Filebeat是一个本地文件的日志信息收集器。安装后可以作为你服务端的代理，Filebeat监控日志目录或者指定的日志文件，不断输出文件然后将他们发送到Elasticsearch和Logstash进行索引。</p>
+<p>Filebeat的工作模式是这样的：你启动Filebeat之后，它会开启一个或者多个勘探者（prospector）来跟踪本地路径下你指定的日志文件。对于每一个勘探者定位到的文件，Filebeat会启动一个收割者（harvester）。每个收割者读取单个日志文件，发送到libbeat，libbeat会聚合所有时间，然后发送到你配置好的输出中。  </p>
+<p><img src="https://www.elastic.co/guide/en/beats/filebeat/6.1/images/filebeat.png" alt=""></p>
+<p>Filebeat的安装很简单，在Ubuntu上只需要执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">curl -L -O https:&#x2F;&#x2F;artifacts.elastic.co&#x2F;downloads&#x2F;beats&#x2F;filebeat&#x2F;filebeat-6.1.2-amd64.deb</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">sudo dpkg -i filebeat-6.1.2-amd64.deb</span></pre></td></tr></table></figure>
+
+<p>安装完成之后，可以在/etc/filebeat/filebeat.yml文件中查看和更改配置。在Docker环境中，这个文件的位置是在/usr/share/filebeat/filebeat.yml。</p>
+<p>这里以一个简单的配置为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">filebeat.prospectors:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">- type: log</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  enabled: true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  paths:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    - &#x2F;var&#x2F;log&#x2F;*.log</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    #- c:\programdata\elasticsearch\logs\*</span></pre></td></tr></table></figure>
+
+<p>更详细的文档格式可以参看<a href="http://www.elastic.co/guide/en/beats/libbeat/6.1/config-file-format.html" target="_blank" rel="noopener">官方文档</a>，这里只配置一个简单的栗子。</p>
+<h5 id="配置Filebeat来发送日志行到Logstash"><a href="#配置Filebeat来发送日志行到Logstash" class="headerlink" title="配置Filebeat来发送日志行到Logstash"></a>配置Filebeat来发送日志行到Logstash</h5><p>在创建Logstash管道之前，需要配置Filebeat用来发送日志到Logstash。Filebeat客户端是一个轻量级，资源友好型工具，用来从服务端的文件中收集日志，然后发送这些日志到Logstash实例中处理。Filebeat的设计理念是高可用和低延时。Filebeat有一个宿主机上轻量的资源占用，而且<code>Beats input</code>插件将Logstash实例上的资源需求做到了最小化。</p>
+<p>创建Filebeat的配置文件名为filebeat.yml，内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">filebeat.prospectors:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">- type: log</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  paths:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    - &#x2F;home&#x2F;caih&#x2F;docker&#x2F;logstash&#x2F;log&#x2F;log.log</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">output.logstash:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    hosts: [&quot;127.0.0.1:5044&quot;]</span></pre></td></tr></table></figure>
+
+<p>其中的paths就是需要跟踪的日志地址。</p>
+<p>然后修改Logstash的配置文件:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">input &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  beats &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    port &#x3D;&gt; &quot;5044&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">output &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    stdout &#123; codec &#x3D;&gt; rubydebug &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后分别启动两者就可以了，启动Filebeat：<code>filebeat -e -c /home/caih/docker/filebeat/filebeat.yml -d &quot;publish&quot;</code>；启动Logstash：<code>./logstash -f logstash.conf</code>，随后就可以看到日志源源不断地在命令行出现啦！</p>
+<h2 id="Elasticsearch-安装和使用"><a href="#Elasticsearch-安装和使用" class="headerlink" title="Elasticsearch 安装和使用"></a>Elasticsearch 安装和使用</h2><h3 id="安装运行-1"><a href="#安装运行-1" class="headerlink" title="安装运行"></a>安装运行</h3><p>Elasticsearch的安装非常简单，需要依赖只有Java 1.8之后的版本。然后在官网下载文件，解压文件即可。</p>
+<p>进入解压后的文件夹，bin目录下有名为Elasticsearch的可执行文件，执行<code>./elasticsearch</code>就可以启动了。</p>
+<p><code>./elasticsearch --help</code>查看命令帮助，可以使用<code>./elasticsearch -d</code>在后台执行，不在当前命令行输出日志。</p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>进入config文件夹可以看到配置文件，其中elasticsearch的配置是在elasticsearch.yml中，另外的jvm.options可以修改Java虚拟机的相关配置，log4j2.properties可以修改el本身的日志配置。</p>
+<p>在elasticsearch.yml中，修改netword.host的值为0.0.0.0，然后就可以其他主机访问了。其他常用的配置还包括集群名称，节点名称，日志地址，端口号等等，更多的信息不再赘述。</p>
+<p>在浏览器输入ip:9200，可以看到返回:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  &quot;name&quot; : &quot;t_ksdEI&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  &quot;cluster_name&quot; : &quot;elasticsearch&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  &quot;cluster_uuid&quot; : &quot;LdO3LVVyRPGwTARorxrNBA&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">  &quot;version&quot; : &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &quot;number&quot; : &quot;5.5.3&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    &quot;build_hash&quot; : &quot;9305a5e&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &quot;build_date&quot; : &quot;2017-09-07T15:56:59.599Z&quot;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    &quot;build_snapshot&quot; : false,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    &quot;lucene_version&quot; : &quot;6.6.0&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">  &#125;,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">  &quot;tagline&quot; : &quot;You Know, for Search&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这样表示Elasticsearch启动成功。</p>
+<h3 id="添加一条文档"><a href="#添加一条文档" class="headerlink" title="添加一条文档"></a>添加一条文档</h3><p>在命令行输入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">curl -XPUT &#39;localhost:9200&#x2F;customer&#x2F;doc&#x2F;1?pretty&amp;pretty&#39; -H &#39;Content-Type: application&#x2F;json&#39; -d&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&gt; &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&gt;   &quot;name&quot;: &quot;John Doe&quot;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&gt; &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&gt; &#39;</span></pre></td></tr></table></figure>
+
+<p>然后就添加了一条最简单的文档，稍后可以在Kibana中看到。</p>
+<h2 id="Kibana-安装和使用"><a href="#Kibana-安装和使用" class="headerlink" title="Kibana 安装和使用"></a>Kibana 安装和使用</h2><p>Kibana的安装同样简单，同样依赖于Java，官网下载tar包解压，然后进入bin目录，使用命令<code>./kibana --help</code>可以查看启动参数。</p>
+<p>输入<code>./kibana serve</code>即可启动，这里需要注意与Elasticsearch版本是否匹配。我这里用的都是最新版6.1.2。Kiana默认寻找得是本地9200端口的Elasticsearch，如果要指定别的地方的实例，可以在/config/kiban.yml中修改。还有一点，Kibana默认host是本地，所以要修改为0.0.0.0然后才能在其他机器上访问。</p>
+<p>输入ip:5601就可以看到Kibana的ui界面了，刚开始会让你输入一个index pattern，可以先输入*匹配所有索引，然后再Discover中就可以看到Elasticsearch中的数据了。</p>
+<h2 id="从日志文件到Kibana"><a href="#从日志文件到Kibana" class="headerlink" title="从日志文件到Kibana"></a>从日志文件到Kibana</h2><p>日志到Logstash已经联通，Elasticsearch和Kibana也连上了，现在只需要把Logstash的output设置为Elasticsearch。</p>
+<p>修改logstash.conf如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">input &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">  file &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    path &#x3D;&gt; [&quot;&#x2F;home&#x2F;caih&#x2F;docker&#x2F;logstash&#x2F;log&#x2F;log.log&quot;]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">  &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">output &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    elasticsearch &#123; hosts &#x3D;&gt; [&quot;localhost:9200&quot;] &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后Logstash默认的索引是以logstash-开头，所以把kibana中的index pattern修改为logstash-*就可以过滤结果了。这时候在discover部分就可以看到每秒钟一条的时间戳。</p>
+<p>Kibana默认的配置中，这里的信息是不自动刷新的，所以想要修改刷新频率，在Management -&gt; advance中，把<code>timepicker:refreshIntervalDefaults</code>这一项修改为<code>{ &quot;display&quot;: &quot;5 seconds&quot;, &quot;pause&quot;: false, &quot;value&quot;: 5000 }</code>，然后就可以看到日志五秒刷新一次，不断更新。</p>
+<p>以上就是ELK栈收集、处理、展示日志最简单的demo。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%B9%E5%99%A8%E4%BA%91/" rel="tag"># 容器云</a>
+              <a href="/tags/%E6%97%A5%E5%BF%97/" rel="tag"># 日志</a>
+              <a href="/tags/ELK/" rel="tag"># ELK</a>
+              <a href="/tags/%E8%BF%90%E7%BB%B4/" rel="tag"># 运维</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/11/dockerfile%E6%8C%87%E5%8D%97%E5%8F%8A%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="prev" title="dockerfile指南及最佳实践">
+      <i class="fa fa-chevron-left"></i> dockerfile指南及最佳实践
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/06/Rancher-CI-CD-Pipeline-%E5%88%9D%E6%AD%A5%E5%AD%A6%E4%B9%A0/" rel="next" title="Rancher CI/CD Pipeline 初步学习">
+      Rancher CI/CD Pipeline 初步学习 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Logstash-安装和使用"><span class="nav-number">1.</span> <span class="nav-text">Logstash 安装和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装运行"><span class="nav-number">1.1.</span> <span class="nav-text">安装运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建最简单的示例"><span class="nav-number">1.2.</span> <span class="nav-text">创建最简单的示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Logstash解析日志"><span class="nav-number">1.3.</span> <span class="nav-text">使用Logstash解析日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#直接使用Logstash跟踪日志文件"><span class="nav-number">1.3.1.</span> <span class="nav-text">直接使用Logstash跟踪日志文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#借助Filebeat采集日志"><span class="nav-number">1.3.2.</span> <span class="nav-text">借助Filebeat采集日志</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#关于Filebeat"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">关于Filebeat</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置Filebeat来发送日志行到Logstash"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">配置Filebeat来发送日志行到Logstash</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-安装和使用"><span class="nav-number">2.</span> <span class="nav-text">Elasticsearch 安装和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装运行-1"><span class="nav-number">2.1.</span> <span class="nav-text">安装运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置"><span class="nav-number">2.2.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加一条文档"><span class="nav-number">2.3.</span> <span class="nav-text">添加一条文档</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kibana-安装和使用"><span class="nav-number">3.</span> <span class="nav-text">Kibana 安装和使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从日志文件到Kibana"><span class="nav-number">4.</span> <span class="nav-text">从日志文件到Kibana</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

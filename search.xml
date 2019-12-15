@@ -116,7 +116,6 @@
     <title>离线环境下安装高可用FastDFS</title>
     <url>/2019/12/01/FastDFS%E5%AE%89%E8%A3%85%E6%96%87%E6%A1%A3/</url>
     <content><![CDATA[<p>记录一次离线环境下安装高可用 FastDFS 的过程</p>
-<p>本文大部分内容摘抄至《MySQL技术内幕（InnoDB存储引擎）第二版》，小部分来源于自己理解和网络博客。</p>
 <a id="more"></a>
 
 <h4 id="FastDFS安装文档"><a href="#FastDFS安装文档" class="headerlink" title="FastDFS安装文档"></a>FastDFS安装文档</h4><p>需准备2台机器（安装Centos7操作系统），A,B</p>

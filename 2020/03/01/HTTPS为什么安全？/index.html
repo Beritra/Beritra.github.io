@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTPS为什么安全？">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;03&#x2F;01&#x2F;HTTPS%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%89%E5%85%A8%EF%BC%9F&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;2b9b90ea9f8dfdff2274335d198f04e5.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;47374473deecb326870d3b993bc37707.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;843931a17deddf3b0e03f276578dab56.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;af5bb15f4644cff034f6c4627b0542b3.png">
+<meta property="article:published_time" content="2020-03-01T15:52:45.000Z">
+<meta property="article:modified_time" content="2020-03-01T15:54:03.878Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="https">
+<meta property="article:tag" content="计算机网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;2b9b90ea9f8dfdff2274335d198f04e5.png">
+
+<link rel="canonical" href="http://beritra.github.com/2020/03/01/HTTPS%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%89%E5%85%A8%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>HTTPS为什么安全？ | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/03/01/HTTPS%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%89%E5%85%A8%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HTTPS为什么安全？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-01 23:52:45 / 修改时间：23:54:03" itemprop="dateCreated datePublished" datetime="2020-03-01T23:52:45+08:00">2020-03-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">计算机网络</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。</p>
+<a id="more"></a>
+
+<p>惯例，上 Wiki，什么是 HTTPS?</p>
+<blockquote>
+<p><strong>超文本传输安全协议</strong>（英语：<strong>H</strong>yper<strong>T</strong>ext <strong>T</strong>ransfer <strong>P</strong>rotocol <strong>S</strong>ecure，缩写：<strong>HTTPS</strong>；常称为HTTP over TLS、HTTP over SSL或HTTP Secure）是一种通过<a href="https://zh.wikipedia.org/wiki/計算機網絡" target="_blank" rel="noopener">计算机网络</a>进行安全通信的<a href="https://zh.wikipedia.org/wiki/網路傳輸協定" target="_blank" rel="noopener">传输协议</a>。HTTPS经由<a href="https://zh.wikipedia.org/wiki/HTTP" target="_blank" rel="noopener">HTTP</a>进行通信，但利用<a href="https://zh.wikipedia.org/wiki/传输层安全" target="_blank" rel="noopener">SSL/TLS</a>来<a href="https://zh.wikipedia.org/wiki/加密" target="_blank" rel="noopener">加密</a>数据包。HTTPS开发的主要目的，是提供对<a href="https://zh.wikipedia.org/wiki/網站" target="_blank" rel="noopener">网站</a>服务器的<a href="https://zh.wikipedia.org/wiki/身份验证" target="_blank" rel="noopener">身份认证</a>，保护交换数据的隐私与<a href="https://zh.wikipedia.org/wiki/完整性" target="_blank" rel="noopener">完整性</a>。这个协议由<a href="https://zh.wikipedia.org/wiki/網景" target="_blank" rel="noopener">网景</a>公司（Netscape）在1994年首次提出，随后扩展到<a href="https://zh.wikipedia.org/wiki/網際網路" target="_blank" rel="noopener">互联网</a>上。</p>
+</blockquote>
+<p>可以看出，Https 之所以安全，是经过了加密，那么新的问题又来了，SSL 和 TLS 分别是什么？是怎么加密的？</p>
+<h2 id="SSL-和-TLS"><a href="#SSL-和-TLS" class="headerlink" title="SSL 和 TLS"></a>SSL 和 TLS</h2><p>SSL：（Secure Socket Layer，安全套接字层），位于可靠的面向连接的<strong>网络层协议</strong>和<strong>应用层协议</strong>之间的一种协议层。SSL通过互相认证、使用数字签名确保完整性、使用加密确保私密性，以实现客户端和服务器之间的安全通讯。该协议由两层组成：SSL记录协议和SSL握手协议。</p>
+<p>TLS：(Transport Layer Security，传输层安全协议)，用于两个应用程序之间提供保密性和数据完整性。该协议由两层组成：TLS 记录协议和 TLS 握手协议。</p>
+<p>SSL 和 TLS 是一种能够在服务器，machines 和通过网络运行的应用程序（列如，客户端连接到 web 服务器）之间提供身份认证和数据加密的加密协议。SSL是TLS的前世。多年来，新版本的发布用来解决漏洞，提供更强大支持，更安全的密码套件和算法。</p>
+<p>SSL最初是由 Netscape 开发的，早在1995年以SSL 2.0的方式发布（1.0从未对公众发布）。在一些漏洞被发现之后，版本2.0在1996年很快被3.0所取代。注意：版本2.0和3.0有时会写成 SSLv2 和 SSLv3。</p>
+<p><a href="https://tools.ietf.org/html/rfc2246" target="_blank" rel="noopener">TLS</a>以SSL 3.0为基础于1999年作为SSL的新版本推出。</p>
+<h3 id="应该选-SSL-还是-TLS？"><a href="#应该选-SSL-还是-TLS？" class="headerlink" title="应该选 SSL 还是 TLS？"></a>应该选 SSL 还是 TLS？</h3><p>SSL2.0和SSL3.0已经被IEFT组织废弃（分别在2011年，2015年）多年来，在被废弃的SSL协议中一直存在漏洞并被发现 (e.g. <a href="https://www.globalsign.com/en/blog/poodle-vulnerability-in-ssl-30/" target="_blank" rel="noopener">POODLE</a>, <a href="https://www.globalsign.com/en/blog/drown-attack-sslv2/" target="_blank" rel="noopener">DROWN</a>)。大多数现代浏览器遇到使用废弃协议的 web 服务时，会降低用户体验（红线穿过挂锁标志或者https表示警告）来表现。因为这些原因，你应该在服务端禁止使用 SSL 协议，仅仅保留 TLS 协议开启。</p>
+<h2 id="为什么要用-TLS-SSL？"><a href="#为什么要用-TLS-SSL？" class="headerlink" title="为什么要用 TLS/SSL？"></a>为什么要用 TLS/SSL？</h2><p>要想规避风险，要先知道风险点在哪。我们要知道 HTTPS 想要解决哪些问题，具体通过什么手段解决的。 </p>
+<p>常规的 HTTP 通信，有以下的问题。</p>
+<ol>
+<li><p><strong>窃听风险</strong>（eavesdropping）：第三方可以获知通信内容。</p>
+</li>
+<li><p><strong>篡改风险</strong>（tampering）：第三方可以修改通信内容。</p>
+</li>
+<li><p><strong>冒充风险</strong>（pretending）：第三方可以冒充他人身份参与通信。</p>
+</li>
+</ol>
+<p>因此，SSL/TLS 协议就是为了解决这三大风险而设计的，希望达到：</p>
+<ol>
+<li>所有信息都是<strong>加密传播</strong>，第三方无法窃听。</li>
+<li>具有<strong>校验机制</strong>，一旦被篡改，通信双方会立刻发现。</li>
+<li>配备<strong>身份证书</strong>，防止身份被冒充。</li>
+</ol>
+<h2 id="运行过程"><a href="#运行过程" class="headerlink" title="运行过程"></a>运行过程</h2><p>SSL/TLS 协议的基本思路是采用<a href="http://en.wikipedia.org/wiki/Public-key_cryptography" target="_blank" rel="noopener">公钥加密法</a>，也就是说，客户端先向服务器端索要公钥，然后用公钥加密信息，服务器收到密文后，用自己的私钥解密。</p>
+<blockquote>
+<p><strong>公开密钥密码学</strong>（英语：<strong>Public-key cryptography</strong>）也称<strong>非对称式密码学</strong>（英语：<strong>Asymmetric cryptography</strong>）是<a href="https://zh.wikipedia.org/wiki/密碼學" target="_blank" rel="noopener">密码学</a>的一种<a href="https://zh.wikipedia.org/wiki/演算法" target="_blank" rel="noopener">算法</a>，它需要两个<a href="https://zh.wikipedia.org/wiki/密钥" target="_blank" rel="noopener">密钥</a>，一个是公开密钥，另一个是私有密钥；公钥用作加密，私钥则用作解密。使用其中一个密钥把<a href="https://zh.wikipedia.org/wiki/明文" target="_blank" rel="noopener">明文</a>加密后所得的<a href="https://zh.wikipedia.org/wiki/密文" target="_blank" rel="noopener">密文</a>，只能用相对应的另一个密钥才能解密得到原本的明文；连最初用来加密的密钥也不能用作解密。由于加密和解密需要两个不同的密钥，故被称为非对称加密；不同于加密和解密都使用同一个密钥的<a href="https://zh.wikipedia.org/wiki/对称加密" target="_blank" rel="noopener">对称加密</a>。其中一个密钥可以公开，称为公钥，可任意向外发布；不公开的密钥为私钥，必须由用户自行严格秘密保管，绝不透过任何途径向任何人提供，也不会透露给被信任的要通信的另一方。</p>
+</blockquote>
+<p>简单来说，非对称加密就是两个密码，公钥交给对方，私钥自己藏好，把想要传输的信息用私钥加密，然后交给对方，对方用公钥解密。这里仍然有两个问题：</p>
+<h4 id="如何保证公钥不被篡改？"><a href="#如何保证公钥不被篡改？" class="headerlink" title="如何保证公钥不被篡改？"></a>如何保证公钥不被篡改？</h4><p>解决方法：将公钥放在<a href="http://en.wikipedia.org/wiki/Digital_certificate" target="_blank" rel="noopener">数字证书</a>中。只要证书是可信的，公钥就是可信的。</p>
+<p>那么怎么验证数字证书可不可信呐？答案是 CA 来给你鉴定。</p>
+<p>CA（Certificate Authority）是证书颁发机构，即颁发数字证书的机构，是负责发放和管理数字证书的权威机构。业界比较大的 CA 机构会被客户端软件广泛承认。比如一个浏览器承认某个 CA 的信用，就把这家机构的根证书（root certificate）内置在客户端当中，作为信任链的源头，后续的其他数字证书只要通过根证书的认证，就会认定为是可信的。根证书如何来判断是否信任某个数字证书？就得从数字证书的结构说起。</p>
+<h4 id="数字证书的认证"><a href="#数字证书的认证" class="headerlink" title="数字证书的认证"></a>数字证书的认证</h4><p>有过部署 HTTPS 服务经历的同学都知道，将自己的网站改为 HTTPS 需要做的第一步就是申请一个数字证书放在 web 服务器下面。数字证书主要包括以下内容：</p>
+<ul>
+<li>证书颁发机构的名称</li>
+<li>证书持有者公钥</li>
+<li>证书签名用到的Hash算法</li>
+<li>有效期等等其他信息</li>
+</ul>
+<p>这些内容都是明文，然后将明文通过摘要算法获取 hash，通过<strong>证书颁发机构</strong>的私钥进行非对称加密，得到签名信息，这个步骤叫做数字签名。明文+hash+数字签名共同组成了这个数字证书。</p>
+<p>现在客户端拿到了这个数字证书，使用证书里说明的 hash 算法对明文进行摘要运算，得到的 hash 值应该和证书里是一样的。然后客户端会查询这个证书的颁发机构名称，从自己内置的信任列表里找该机构的证书，这里有两种情况：</p>
+<ol>
+<li>找到了，说明是自己信任的 CA 颁发的，从该机构的数字证书中可以找到证书的公钥，用这个公钥解密之前拿到的数字证书，如果能成功解密，证明证书可信。会添加到信任列表。</li>
+<li>没找到，也不一定说明证书是假的，因为数字证书是一条信任链，A 信任 B，B 信任 C，就算内置了 A ，也不能直接用 A 验证 C。所幸 C 的证书内容里会包含 B 的名称和地址，浏览器会自动去找 B 的证书，然后再看看 B 是否可信，直到达到了根节点。或者到了根节点仍然不可信，整个信任链就没有建立，所有证书被浏览器判断为不可信。</li>
+</ol>
+<p>如此以来，数字证书的认证就完成了，有两个结果，浏览器信任证书和不信任证书。前者一般会有标示，比如 Chrome 浏览器会在地址栏有个小锁。后者就会提示连接有风险。</p>
+<p><img src="http://nas.beritra.com:18081/uploads/big/2b9b90ea9f8dfdff2274335d198f04e5.png" alt="test"></p>
+<p><img src="http://nas.beritra.com:18081/uploads/big/47374473deecb326870d3b993bc37707.png" alt=""></p>
+<p>这一步完成之后，客户端只是拿到了一个准确、可信的服务端的公钥。而实际上的数据传输还没开始。</p>
+<p>客户端拿到公钥之后（或之前，我也不确定），也会把自己的公钥发送过去，双方会运行 Diffie Hellman 算法，简称 DH 算法。DH 算法的作用是这样：通过二者的公钥推导出一个个一样的密码出来。通俗地说：双方会协商一个master-key，这个master-key 不会在网络上传输、交换，它们独立计算出来的，其值是相同的，只有它们自己双方知道。</p>
+<p>然后以master-key 推导出 session-key，用于双方 SSL 数据流的加密/解密，采用对称加密，保证数据不被偷窥，加密算法一般用 AES。</p>
+<p>同时以 master-key 推导出 hash-key，用于数据完整性检查（Integrity Check Verification）的加密密钥，HASH 算法一般有：MD5、SHA。</p>
+<p>为什么要搞这么麻烦呐？因为非对称加密算法很消耗资源，所以只有前置的互相认证的步骤用非对称加密，后续的步骤都用更省资源的对称加密。</p>
+<p>到这里，HTTPS 的大致流程就完成了，当然实际上的步骤会更加复杂，客户端和服务端的连接还会有随机数，为了减少资源消耗还会有一些缓存机制。</p>
+<p>再回顾一下整个简化的流程：</p>
+<ol>
+<li>客户端请求服务端的数字证书。</li>
+<li>客户端根据内置的根证书校验服务端发来的证书。</li>
+<li>如果证书可信，客户端把自己的公钥发给服务端，然后用双方的公钥推导出一个会话密钥。</li>
+<li>后续的请求内容都用会话密钥进行加密和解密。</li>
+</ol>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>截了个知乎的证书，可以看到是三级的信任链，知乎的证书签发机构是<code>GeoTrust RSA CA 2018</code>，而 GeoTrust 的签发机构是<code>DigiCert Global Root CA</code>，就到根证书了。</p>
+<p><img src="http://nas.beritra.com:18081/uploads/medium/843931a17deddf3b0e03f276578dab56.png" alt=""></p>
+<p><img src="http://nas.beritra.com:18081/uploads/medium/af5bb15f4644cff034f6c4627b0542b3.png" alt=""></p>
+<p>另外注意风险：</p>
+<ol>
+<li>把公钥交给对方的时候要注意安全，公钥有可能被劫持。</li>
+<li>数字证书的认证步骤也不是绝对安全，有“中间人攻击”。当然这个也需要一定条件，就不细说了。</li>
+</ol>
+<p>参考文章：</p>
+<p><a href="https://juejin.im/post/5b213a0ae51d4506d47dff0d" target="_blank" rel="noopener">TLS与SSL之间关系</a></p>
+<p><a href="https://www.ruanyifeng.com/blog/2014/02/ssl_tls.html" target="_blank" rel="noopener">SSL/TLS协议运行机制的概述</a></p>
+<p><a href="[http://www.wxtlife.com/2016/03/27/%E8%AF%A6%E8%A7%A3https%E6%98%AF%E5%A6%82%E4%BD%95%E7%A1%AE%E4%BF%9D%E5%AE%89%E5%85%A8%E7%9A%84%EF%BC%9F/](http://www.wxtlife.com/2016/03/27/详解https是如何确保安全的？/)">详解https是如何确保安全的？</a></p>
+<p><a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1304227905273889" target="_blank" rel="noopener">密钥交换算法</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/https/" rel="tag"># https</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"># 计算机网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/26/%E5%85%B3%E4%BA%8ERedis%E5%BA%94%E8%AF%A5%E7%9F%A5%E9%81%93%E7%9A%84/" rel="prev" title="关于Redis应该知道的">
+      <i class="fa fa-chevron-left"></i> 关于Redis应该知道的
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/05/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E9%95%BF%E6%96%87%E6%80%BB%E7%BB%93/" rel="next" title="23种设计模式长文总结">
+      23种设计模式长文总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-和-TLS"><span class="nav-number">1.</span> <span class="nav-text">SSL 和 TLS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#应该选-SSL-还是-TLS？"><span class="nav-number">1.1.</span> <span class="nav-text">应该选 SSL 还是 TLS？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要用-TLS-SSL？"><span class="nav-number">2.</span> <span class="nav-text">为什么要用 TLS&#x2F;SSL？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行过程"><span class="nav-number">3.</span> <span class="nav-text">运行过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何保证公钥不被篡改？"><span class="nav-number">3.0.1.</span> <span class="nav-text">如何保证公钥不被篡改？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数字证书的认证"><span class="nav-number">3.0.2.</span> <span class="nav-text">数字证书的认证</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展"><span class="nav-number">4.</span> <span class="nav-text">扩展</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">256k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:07</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

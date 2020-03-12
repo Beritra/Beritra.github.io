@@ -60,7 +60,7 @@
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;a694fc404774cb03d0a60f51afd316d1.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;17e4a5d77426df4bb5549bc5316112bb.jpg">
 <meta property="article:published_time" content="2019-01-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2019-12-18T16:14:45.761Z">
+<meta property="article:modified_time" content="2020-03-12T16:53:49.087Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -250,7 +250,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-12-19 00:14:45" itemprop="dateModified" datetime="2019-12-19T00:14:45+08:00">2019-12-19</time>
+                <time title="修改时间：2020-03-13 00:53:49" itemprop="dateModified" datetime="2020-03-13T00:53:49+08:00">2020-03-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -300,7 +300,7 @@
 <h4 id="二、虚拟机栈"><a href="#二、虚拟机栈" class="headerlink" title="二、虚拟机栈"></a>二、虚拟机栈</h4><p>和程序计数器一样，Java虚拟机栈(Java Virtual Machine Stacks)也是线程私有的，它的生命周期和线程相同。虚拟机栈描述的是Java方法执行的内存模型：每个方法在执行的同时都会创建一个帧栈(Stack Frame)用来存储局部变量表、操作数栈、动态链接、方法出口等信息。每一个方法从调用直至执行完成，都对应着一个栈帧在虚拟机中入栈到出栈的过程。</p>
 <p>常规把Java内存区分为堆内存和栈内存的方法过于粗糙，实际上的区域划分更加复杂。</p>
 <p>局部变量表存放了编译期可知的各种基本类型(boolean、byte、char、short、int、float、long、double)、对象引用(reference类型，它不等同于对象本身，可能是一个指向对象起始地址的引用指针，也可能是指向一个代表对象的句柄或其他与此对象相关的位置)、和<code>returnAddress</code>类型（指向一条字节码指令的地址）。</p>
-<p>64位长度的long和double类型会占用两个局部变量空间（Slot）,其余的数据类型占用一个。进入一个方法的时候，局部表量表的打小就是确定的，运行期间不会在改变。</p>
+<p>64位长度的long和double类型会占用两个局部变量空间（Slot）,其余的数据类型占用一个。进入一个方法的时候，局部表量表的大小就是确定的，运行期间不会在改变。</p>
 <p>Java虚拟机规范中对这个区域规定了两种异常状况：如果线程请求的栈深度大于虚拟机所允许的深度，将会抛出<code>StackOverFlowError</code>异常。如果虚拟机栈可以动态扩展，扩展时无法申请足够内存，会抛出<code>OutOfMemoryError</code>异常。</p>
 <p>总空间一定的情况下，局部变量表内容越多，栈帧越大，栈深度越小。进行大量递归的时候就有可能导致栈溢出。</p>
 <h4 id="三、本地方法栈"><a href="#三、本地方法栈" class="headerlink" title="三、本地方法栈"></a>三、本地方法栈</h4><p>本地方法栈(Native Method Stack)和虚拟机栈作用很相似，两者区别是后者为Java方法（字节码）服务，前者则为虚拟机使用到的Native方法服务。有的虚拟机就干脆合二为一（Sun HotSpot虚拟机），本地方法栈可能抛出的异常也是上面那两个。</p>
@@ -334,36 +334,36 @@
 <li>使用CAS搭配失败重试的方式保证更新操作的原子性。</li>
 <li>或者把内存的分配动作按照线程划分在不同的空间之中进行，即每个线程在堆中预先分配一小块内存，成为本地内存分配缓冲区（Thread Local Allocation Buffer，TLAB），虚拟机是否启用TLAB可以用参数<code>-XX:+/-TLAB</code>来设定。</li>
 </ul>
-<h4 id="初始化信息"><a href="#初始化信息" class="headerlink" title="初始化信息"></a>初始化信息</h4><p>内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头），如果使用TLAB，这一工作过程也可以提前至TLAB分配时进行。这一操作保证了对象的实例字段在Java代码中可以不赋初值就直接使用。</p>
-<p> 然后，虚拟机需要对对象进行必要的设置，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息。这些信息存放在对象的对象头（Object Header）中，根据虚拟机当前的运行状态不同，比如是否启用偏向锁等，对象头会有不同的设置方式。</p>
-<p>从虚拟机的视角，一个新的对象已经产生，但是从Java程序的视角来看，对象创建才刚刚开始，init方法还没执行，所有字段还都为零。所以，执行new指令之后会接着执行init方法，把对象按照程序员意愿进行初始化。</p>
-<h3 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h3><p>在HotSpot虚拟机中，对象可以分为三个区域：对象头（Header）、实例数据（Instance Date）和对齐填充（Padding）。</p>
-<h4 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h4><p>HotSpot虚拟机的对象头包括两部分信息：</p>
+<h4 id="初始化信息"><a href="#初始化信息" class="headerlink" title="初始化信息"></a>初始化信息</h4><p>内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头），如果使用<code>TLAB</code>，这一工作过程也可以提前至<code>TLAB</code>分配时进行。这一操作保证了对象的实例字段在Java代码中可以不赋初值就直接使用。</p>
+<p> 然后，虚拟机需要对对象进行必要的设置，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的 GC 分代年龄等信息。这些信息存放在对象的对象头（Object Header）中，根据虚拟机当前的运行状态不同，比如是否启用偏向锁等，对象头会有不同的设置方式。</p>
+<p>从虚拟机的视角，一个新的对象已经产生，但是从 Java 程序的视角来看，对象创建才刚刚开始，init 方法还没执行，所有字段还都为零。所以，执行 new 指令之后会接着执行 init 方法，把对象按照程序员意愿进行初始化。</p>
+<h3 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h3><p>在 HotSpot 虚拟机中，对象可以分为三个区域：对象头（Header）、实例数据（Instance Date）和对齐填充（Padding）。</p>
+<h4 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h4><p>HotSpot 虚拟机的对象头包括两部分信息：</p>
 <ul>
-<li>对象自身的运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等，这部分数据在32位和64位虚拟机上分别为32bit和64bit，官方称它为“Mark Word”。当对象需要存储的运营时数据很多时，它会根据对象的状态复用自己的存储空间。</li>
+<li>对象自身的运行时数据，如哈希码、GC 分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等，这部分数据在 32 位和 64 位虚拟机上分别为 32bit 和 64bit，官方称它为“Mark Word”。当对象需要存储的运营时数据很多时，它会根据对象的状态复用自己的存储空间。</li>
 <li>类型指针，即对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。</li>
-<li>如果对象是一个Java数组，那在对象头中还必须有一块记录数组长度的数据，因为虚拟机可以通过普通Java对象的原数据确定Java对象的大小，但是从数组的原数据中却无法确定。</li>
+<li>如果对象是一个 Java 数组，那在对象头中还必须有一块记录数组长度的数据，因为虚拟机可以通过普通 Java 对象的原数据确定 Java 对象的大小，但是从数组的原数据中却无法确定。</li>
 </ul>
 <h4 id="实例数据"><a href="#实例数据" class="headerlink" title="实例数据"></a>实例数据</h4><p>实例数据是对象真正存储的有效信息，也就是在程序代码中所定义的各种类型的字段信息，无论从父类继承下来的，还是在子类中定义的，都需要记录起来。这部分的存储顺序收到虚拟机分配策略参数和在源码中定义的顺序影响。</p>
-<h4 id="对齐填充"><a href="#对齐填充" class="headerlink" title="对齐填充"></a>对齐填充</h4><p>这部分不是必然存在，没有特殊的含义，仅仅起着占位符的作用。HotSpot VM的自动内存管理系统要求对象其实地址必须是8字节的整数倍，因此当对象实例数据部分没有对齐的时候，就需要通过对齐填充来补全。</p>
-<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><p>对象建立之后，Java程序需要通过栈上的reference数据来操作堆上的具体内容。由于reference类型在Java虚拟机规范中之规定了一个指向对象的引用，并没有定义这个引用应该如何定位、访问堆中对象的具体位置，所以对象访问方式取决于虚拟机如何实现，当前主流有使用句柄和直接指针两种。</p>
+<h4 id="对齐填充"><a href="#对齐填充" class="headerlink" title="对齐填充"></a>对齐填充</h4><p>这部分不是必然存在，没有特殊的含义，仅仅起着占位符的作用。HotSpot VM 的自动内存管理系统要求对象其实地址必须是8字节的整数倍，因此当对象实例数据部分没有对齐的时候，就需要通过对齐填充来补全。</p>
+<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><p>对象建立之后，Java 程序需要通过栈上的 reference 数据来操作堆上的具体内容。由于 reference 类型在 Java 虚拟机规范中之规定了一个指向对象的引用，并没有定义这个引用应该如何定位、访问堆中对象的具体位置，所以对象访问方式取决于虚拟机如何实现，当前主流有使用句柄和直接指针两种。</p>
 <ul>
-<li><p>使用句柄访问的话，Java堆中会单独划分一部分区域作为句柄池，reference中存储的就是对象的句柄地址，而句柄中包含了对象实例数据和类型数据各自的具体地址信息。</p>
+<li><p>使用句柄访问的话，Java 堆中会单独划分一部分区域作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据和类型数据各自的具体地址信息。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/a51a8ecfaf1803cb16c4ea5f15600527.png" alt=""></p>
 </li>
-<li><p>如果使用直接指针访问，那么Java对对象的布局中就必须考虑如何放置访问类型数据的相关信息，而reference中存储的直接就是对象地址。</p>
+<li><p>如果使用直接指针访问，那么 Java 对对象的布局中就必须考虑如何放置访问类型数据的相关信息，而 reference 中存储的直接就是对象地址。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/b260fa468819f8dcb85ecf9cf51c73dd.png" alt=""></p>
 </li>
 </ul>
-<p>这两种方式各有优势，使用句柄的好处是reference中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而reference本身不需要修改。</p>
-<p>使用直接指针的最大好处是速度更快，节省了一次指针定位的开销。HotSpot使用的是第二种方式。</p>
-<h2 id="垃圾收集器和内存分配策略"><a href="#垃圾收集器和内存分配策略" class="headerlink" title="垃圾收集器和内存分配策略"></a>垃圾收集器和内存分配策略</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>垃圾收集出现的时间远比Java要早，从出现起，垃圾收集就需要考虑三个问题：</p>
+<p>这两种方式各有优势，使用句柄的好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。</p>
+<p>使用直接指针的最大好处是速度更快，节省了一次指针定位的开销。HotSpot 使用的是第二种方式。</p>
+<h2 id="垃圾收集器和内存分配策略"><a href="#垃圾收集器和内存分配策略" class="headerlink" title="垃圾收集器和内存分配策略"></a>垃圾收集器和内存分配策略</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>垃圾收集出现的时间远比 Java 要早，从出现起，垃圾收集就需要考虑三个问题：</p>
 <ul>
 <li>哪些内存需要回收</li>
 <li>什么时候回收</li>
 <li>如何回收</li>
 </ul>
-<p>在Java内存运行时区域里，程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭；栈中的栈帧随着方法的进入和退出有条不紊的进行出栈和入栈操作。每个栈帧中分配的内存基本是在类结构确定下来的时候就是已知的。Java堆和方法区不一样，只有在运行时才知道创建那些对象，所以这部分内存的分配和回收都是动态的，垃圾收集器所关注的也是这部分内存。</p>
+<p>在Java内存运行时区域里，程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭；栈中的栈帧随着方法的进入和退出有条不紊的进行出栈和入栈操作。每个栈帧中分配的内存基本是在类结构确定下来的时候就是已知的。Java 堆和方法区不一样，只有在运行时才知道创建那些对象，所以这部分内存的分配和回收都是动态的，垃圾收集器所关注的也是这部分内存。</p>
 <h3 id="哪些内存需要回收"><a href="#哪些内存需要回收" class="headerlink" title="哪些内存需要回收"></a>哪些内存需要回收</h3><h4 id="引用计数器法"><a href="#引用计数器法" class="headerlink" title="引用计数器法"></a>引用计数器法</h4><p>引用计数器法是这样的：给对象添加一个引用计数器，每当有一个地方引用它时，计数器+1，引用失效的时候，计数器-1，任何时刻计数器为0的对象就不可能再被使用。</p>
 <p>主流的Java虚拟机中没有选用这个方法来管理内存的，最主要的原因是很难解决对象循环引用的问题。</p>
 <h4 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h4><p>主流的商用程序语言的主流实现中，都是通过可达性分析（Reachability Analysis）来判定对象是否存活的。这个算法的基本思路是通过一系列的成为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称之为引用链（Reference Chain），当一个对象到达GC Roots没有任何引用链相连时，证明此对象不可用。</p>
@@ -769,7 +769,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <ul>
 <li>从 ZIP 包中读取，这很常见，最终成为日后 JAR、EAR、WAR 格式的基础。</li>
 <li>从网络中获取，这种场景最典型的应用就是 Applet。</li>
-<li>运行时计算生成，这种场景使用得最多的就是动态代理技术，在<code>java.lang.reflect.Proxy</code>中，就是利用<code>ProxyGenerator.generateProxyClass</code>来为特定接口生成形式为<code>*$Proxy</code>的代理类二进制字节流。</li>
+<li>运行时计算生成，这种场景使用得最多的就是动态代理技术，在<code>java.lang.reflect.Proxy</code>中，就是利用<code>ProxyGenerator.generateProxyClass</code>来为特定接口生成形式为<code>$Proxy</code>的代理类二进制字节流。</li>
 <li>从其他文件中读取，典型场景是 JSP 引用，即由 JSP 文件生成对应的 Class 类。</li>
 <li>从数据库中读取，这种场景相对少见，例如有些中间件服务器（如 SAP Netweaver）可以选择把程序安装到数据库中来完成程序代码在集群见的分发。</li>
 </ul>
@@ -990,12 +990,12 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">273k</span>
+    <span title="站点总字数">274k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">7:34</span>
+    <span title="站点阅读时长">7:36</span>
 </div>
 
         

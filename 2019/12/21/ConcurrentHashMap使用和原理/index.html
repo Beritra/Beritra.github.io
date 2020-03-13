@@ -46,22 +46,22 @@
   };
 </script>
 
-  <meta name="description" content="ConcurrentHashMap是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本文所有的讨论基于 JDK1.8。">
+  <meta name="description" content="ConcurrentHashMap是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本节所有的讨论基于 JDK1.8。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ConcurrentHashMap使用和原理">
-<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;01&#x2F;ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86&#x2F;index.html">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;21&#x2F;ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
-<meta property="og:description" content="ConcurrentHashMap是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本文所有的讨论基于 JDK1.8。">
-<meta property="og:image" content="http:&#x2F;&#x2F;10.10.10.120:8081&#x2F;uploads&#x2F;big&#x2F;dd9c8949bded2a52e865cdb1cdc668e0.png">
-<meta property="article:published_time" content="2019-12-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2020-03-12T16:50:41.602Z">
+<meta property="og:description" content="ConcurrentHashMap是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本节所有的讨论基于 JDK1.8。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;dd9c8949bded2a52e865cdb1cdc668e0.png">
+<meta property="article:published_time" content="2019-12-21T04:12:12.000Z">
+<meta property="article:modified_time" content="2020-03-13T19:13:30.322Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;10.10.10.120:8081&#x2F;uploads&#x2F;big&#x2F;dd9c8949bded2a52e865cdb1cdc668e0.png">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;dd9c8949bded2a52e865cdb1cdc668e0.png">
 
-<link rel="canonical" href="http://beritra.github.com/2019/12/01/ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86/">
+<link rel="canonical" href="http://beritra.github.com/2019/12/21/ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86/">
 
 
 <script id="page-configurations">
@@ -213,7 +213,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2019/12/01/ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86/">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2019/12/21/ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avator.jpg">
@@ -236,14 +236,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2019-12-01 12:12:12" itemprop="dateCreated datePublished" datetime="2019-12-01T12:12:12+08:00">2019-12-01</time>
+              <time title="创建时间：2019-12-21 12:12:12" itemprop="dateCreated datePublished" datetime="2019-12-21T12:12:12+08:00">2019-12-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-13 00:50:41" itemprop="dateModified" datetime="2020-03-13T00:50:41+08:00">2020-03-13</time>
+                <time title="修改时间：2020-03-14 03:13:30" itemprop="dateModified" datetime="2020-03-14T03:13:30+08:00">2020-03-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -263,14 +263,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.1k</span>
+              <span>7.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>8 分钟</span>
+              <span>12 分钟</span>
             </span>
 
         </div>
@@ -282,24 +282,24 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><code>ConcurrentHashMap</code>是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本文所有的讨论基于 JDK1.8。</p>
+        <p><code>ConcurrentHashMap</code>是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本节所有的讨论基于 JDK1.8。</p>
 <a id="more"></a>
 
-<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p><img src="http://10.10.10.120:8081/uploads/big/dd9c8949bded2a52e865cdb1cdc668e0.png" alt=""></p>
-<p><strong>ConcurrentHashMap</strong>内部维护了一个<code>Node</code>类型的数组，也就是<strong><em>table\</em></strong>：</p>
+<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p><img src="http://nas.beritra.com:18081/uploads/big/dd9c8949bded2a52e865cdb1cdc668e0.png" alt=""></p>
+<p><strong>ConcurrentHashMap</strong>内部维护了一个<code>Node</code>类型的数组，也就是<strong>table</strong>：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">transient volatile Node[] table;</span></pre></td></tr></table></figure>
 
-<p>数组的每一个位置<code>table[i]</code>代表了一个桶，当插入键值对时，会根据键的hash值映射到不同的桶位置，table一共可以包含<strong>4种不同类型</strong>的桶：<strong>Node</strong>、<strong>TreeBin</strong>、<strong>ForwardingNode</strong>、<strong>ReservationNode</strong>。上图中，不同的桶用不同颜色表示。可以看到，有的桶链接着<strong>链表</strong>，有的桶链接着<strong>树</strong>。</p>
-<p><strong>TreeBin</strong>所链接的是一颗红黑树，红黑树的结点用<strong>TreeNode</strong>表示，所以ConcurrentHashMap中实际上一共有<strong>五种不同类型</strong>的Node结点。</p>
+<p>数组的每一个位置<code>table[i]</code>代表了一个桶，当插入键值对时，会根据键的hash值映射到不同的桶位置，table 一共可以包含 4 种不同类型的桶：<strong>Node</strong>、<strong>TreeBin</strong>、<strong>ForwardingNode</strong>、<strong>ReservationNode</strong>。上图中，不同的桶用不同颜色表示。可以看到，有的桶链接着链表，有的桶链接着树。</p>
+<p><strong>TreeBin *<em>所链接的是一颗红黑树，红黑树的结点用 *</em>TreeNode</strong> 表示，所以 ConcurrentHashMap 中实际上一共有五种不同类型的 Node 结点。</p>
 <p><em>之所以用<strong>TreeBin</strong>而不是直接用<strong>TreeNode</strong>，是因为红黑树的操作比较复杂，包括构建、左旋、右旋、删除，平衡等操作，用一个代理结点TreeBin来包含这些复杂操作，其实是一种“职责分离”的思想。另外TreeBin中也包含了一些加/解锁的操作。</em></p>
-<h2 id="节点定义"><a href="#节点定义" class="headerlink" title="节点定义"></a>节点定义</h2><h3 id="Node节点"><a href="#Node节点" class="headerlink" title="Node节点"></a>Node节点</h3><p>Node结点的定义非常简单，也是其它四种类型结点的父类。</p>
+<h2 id="节点定义"><a href="#节点定义" class="headerlink" title="节点定义"></a>节点定义</h2><h3 id="Node-节点"><a href="#Node-节点" class="headerlink" title="Node 节点"></a>Node 节点</h3><p>Node 结点的定义非常简单，也是其它四种类型结点的父类。</p>
 <blockquote>
-<p>默认链接到<code>table[i]</code>——桶上的结点就是Node结点。<br>当出现hash冲突时，Node结点会首先以<strong>链表</strong>的形式链接到table上，当结点数量超过一定数目时，链表会转化为红黑树。因为链表查找的平均时间复杂度为<code>O(n)</code>，而红黑树是一种平衡二叉树，其平均时间复杂度为<code>O(logn)</code>。</p>
+<p>默认链接到<code>table[i]</code>——桶上的结点就是 Node 结点。<br>当出现 hash 冲突时，Node 结点会首先以<strong>链表</strong>的形式链接到 table 上，当结点数量超过一定数目时，链表会转化为红黑树。因为链表查找的平均时间复杂度为<code>O(n)</code>，而红黑树是一种平衡二叉树，其平均时间复杂度为<code>O(logn)</code>。</p>
 </blockquote>
-<h3 id="TreeNode结点"><a href="#TreeNode结点" class="headerlink" title="TreeNode结点"></a>TreeNode结点</h3><p>TreeNode就是红黑树的结点，TreeNode不会直接链接到<code>table[i]</code>——桶上面，而是由TreeBin链接，TreeBin会指向红黑树的根结点。</p>
-<h3 id="TreeBin结点"><a href="#TreeBin结点" class="headerlink" title="TreeBin结点"></a>TreeBin结点</h3><p>TreeBin相当于TreeNode的代理结点。TreeBin会直接链接到<code>table[i]</code>——桶上面，该结点提供了一系列红黑树相关的操作，以及加锁、解锁操作。</p>
-<h3 id="ForwardingNode结点"><a href="#ForwardingNode结点" class="headerlink" title="ForwardingNode结点"></a>ForwardingNode结点</h3><p>ForwardingNode结点仅仅在扩容时才会使用</p>
-<h3 id="ReservationNode结点"><a href="#ReservationNode结点" class="headerlink" title="ReservationNode结点"></a>ReservationNode结点</h3><p>保留结点，ConcurrentHashMap中的一些特殊方法会专门用到该类结点。</p>
+<h3 id="TreeNode-结点"><a href="#TreeNode-结点" class="headerlink" title="TreeNode 结点"></a>TreeNode 结点</h3><p>TreeNode就是红黑树的结点，TreeNode 不会直接链接到<code>table[i]</code>——桶上面，而是由TreeBin 链接，TreeBin 会指向红黑树的根结点。</p>
+<h3 id="TreeBin-结点"><a href="#TreeBin-结点" class="headerlink" title="TreeBin 结点"></a>TreeBin 结点</h3><p>TreeBin 相当于 TreeNode 的代理结点。TreeBin 会直接链接到<code>table[i]</code>——桶上面，该结点提供了一系列红黑树相关的操作，以及加锁、解锁操作。</p>
+<h3 id="ForwardingNode-结点"><a href="#ForwardingNode-结点" class="headerlink" title="ForwardingNode 结点"></a>ForwardingNode 结点</h3><p>ForwardingNode 结点仅仅在扩容时才会使用</p>
+<h3 id="ReservationNode-结点"><a href="#ReservationNode-结点" class="headerlink" title="ReservationNode 结点"></a>ReservationNode 结点</h3><p>保留结点，ConcurrentHashMap 中的一些特殊方法会专门用到该类结点。</p>
 <h2 id="常量定义"><a href="#常量定义" class="headerlink" title="常量定义"></a>常量定义</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 最大容量.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">30</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 默认初始容量</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_CAPACITY = <span class="number">16</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * The largest possible (non-power of two) array size.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * Needed by toArray and related methods.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_ARRAY_SIZE = Integer.MAX_VALUE - <span class="number">8</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 负载因子，为了兼容JDK1.8以前的版本而保留。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * JDK1.8中的ConcurrentHashMap的负载因子恒定为0.75</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> LOAD_FACTOR = <span class="number">0.75f</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 链表转树的阈值，即链接结点数大于8时， 链表转换为树.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TREEIFY_THRESHOLD = <span class="number">8</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 树转链表的阈值，即树结点树小于6时，树转换为链表.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> UNTREEIFY_THRESHOLD = <span class="number">6</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 在链表转变成树之前，还会有一次判断：</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 即只有键值对数量大于MIN_TREEIFY_CAPACITY，才会发生转换。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 这是为了避免在Table建立初期，多个键值对恰好被放入了同一个链表中而导致不必要的转化。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">37</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">38</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MIN_TREEIFY_CAPACITY = <span class="number">64</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">39</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">40</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">41</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 在树转变成链表之前，还会有一次判断：</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">42</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 即只有键值对数量小于MIN_TRANSFER_STRIDE，才会发生转换.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">43</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">44</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MIN_TRANSFER_STRIDE = <span class="number">16</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">45</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">46</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">47</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 用于在扩容时生成唯一的随机数.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">48</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">49</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> RESIZE_STAMP_BITS = <span class="number">16</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">50</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">51</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">52</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 可同时进行扩容操作的最大线程数.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">53</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">54</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_RESIZERS = (<span class="number">1</span> &lt;&lt; (<span class="number">32</span> - RESIZE_STAMP_BITS)) - <span class="number">1</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">55</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">56</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">57</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * The bit shift for recording size stamp in sizeCtl.</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">58</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">59</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RESIZE_STAMP_SHIFT = <span class="number">32</span> - RESIZE_STAMP_BITS;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">60</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">61</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MOVED = -<span class="number">1</span>;                <span class="comment">// 标识ForwardingNode结点（在扩容时才会出现，不存储实际数据）</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">62</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TREEBIN = -<span class="number">2</span>;              <span class="comment">// 标识红黑树的根结点</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">63</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RESERVED = -<span class="number">3</span>;             <span class="comment">// 标识ReservationNode结点（）</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">64</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> HASH_BITS = <span class="number">0x7fffffff</span>;    <span class="comment">// usable bits of normal node hash</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">65</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">66</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">67</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * CPU核心数，扩容时使用</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">68</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">69</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> NCPU = Runtime.getRuntime().availableProcessors();</span></pre></td></tr></table></figure>
 
 
@@ -308,38 +308,82 @@
 
 
 
-<h2 id="put操作"><a href="#put操作" class="headerlink" title="put操作"></a>put操作</h2><p>put方法内部调用了<code>putVal</code>这个私有方法</p>
-<p><code>putVal</code>的逻辑还是很清晰的，首先根据<strong>key</strong>计算<strong>hash</strong>值，然后通过<strong>hash</strong>值与<strong>table</strong>容量进行运算，计算得到key所映射的索引——也就是对应到<strong>table</strong>中桶的位置。</p>
+<h2 id="get-操作"><a href="#get-操作" class="headerlink" title="get 操作"></a>get 操作</h2><p>get 方法的逻辑很简单，首先根据 key 的 hash 值计算映射到 table 的哪个桶——<code>table[i]</code>。</p>
+<ol>
+<li>如果<code>table[i]</code>的 key 和待查找 key 相同，那直接返回；</li>
+<li>如果<code>table[i]</code>对应的结点是特殊结点（hash值小于0），则通过<code>find</code>方法查找；</li>
+<li>如果<code>table[i]</code>对应的结点是普通链表结点，则按链表方式查找。</li>
+</ol>
+<p>第二种情况下，<code>table[i]</code>是不同的节点，处理方式也会不同：</p>
+<h3 id="Node-结点的查找"><a href="#Node-结点的查找" class="headerlink" title="Node 结点的查找"></a>Node 结点的查找</h3><p>当槽<code>table[i]</code>被普通 Node 结点占用，说明是链表链接的形式，直接从链表头开始查找。</p>
+<h3 id="TreeBin-结点的查找"><a href="#TreeBin-结点的查找" class="headerlink" title="TreeBin 结点的查找"></a>TreeBin 结点的查找</h3><p>TreeBin 的查找比较特殊，我们知道当槽<code>table[i]</code>被 TreeBin 结点占用时，说明链接的是一棵红黑树。由于红黑树的插入、删除会涉及整个结构的调整，所以通常存在读写并发操作的时候，是需要加锁的。</p>
+<blockquote>
+<p>ConcurrentHashMap 采用了一种<strong>类似读写锁</strong>的方式：当线程持有写锁（修改红黑树）时，如果读线程需要查找，不会像传统的读写锁那样阻塞等待，而是转而以链表的形式进行查找（TreeBin本身时Node类型的子类，所有拥有 Node 的所有字段）</p>
+</blockquote>
+<h3 id="ForwardingNode-结点的查找"><a href="#ForwardingNode-结点的查找" class="headerlink" title="ForwardingNode 结点的查找"></a>ForwardingNode 结点的查找</h3><p>ForwardingNode 是一种临时结点，在扩容进行中才会出现，所以查找也在扩容的table上进行。</p>
+<h3 id="ReservationNode-结点的查找"><a href="#ReservationNode-结点的查找" class="headerlink" title="ReservationNode 结点的查找"></a>ReservationNode 结点的查找</h3><p>ReservationNode 是保留结点，不保存实际数据，所以直接返回<code>null</code>。</p>
+<h2 id="put-操作"><a href="#put-操作" class="headerlink" title="put 操作"></a>put 操作</h2><p>put 方法内部调用了<code>putVal</code>这个私有方法</p>
+<p><code>putVal</code>的逻辑还是很清晰的，首先根据<code>key</code>计算<code>hash</code>值，然后通过<code>hash</code>值与<code>table</code>容量进行运算，计算得到<code>key</code>所映射的索引——也就是对应到<strong>table</strong>中桶的位置。</p>
 <p>这里需要注意的是计算索引的方式：<code>i = (n - 1) &amp; hash</code></p>
 <p><code>n - 1 == table.length - 1</code>，<code>table.length</code> 的大小必须为<strong>2的幂次</strong>的原因就在这里。</p>
-<p>读者可以自己计算下，当<code>table.length</code>为2的幂次时，<code>(table.length-1)</code>的二进制形式的特点是<strong><em>除最高位外全部是1\</em></strong>，配合这种索引计算方式可以<strong>实现key在table中的均匀分布，减少hash冲突</strong>——出现hash冲突时，结点就需要以链表或红黑树的形式链接到table[i]，这样无论是插入还是查找都需要额外的时间。</p>
-<p><strong>putVal</strong>方法一共处理四种情况：</p>
-<h3 id="1、首次初始化table-懒加载"><a href="#1、首次初始化table-懒加载" class="headerlink" title="1、首次初始化table-懒加载"></a>1、首次初始化table-懒加载</h3><p><strong>ConcurrentHashMap</strong>在构造的时候并不会初始化table数组，首次初始化就在这里通过<strong>initTable</strong>方法完成。</p>
-<h3 id="2、table-i-对应的桶为空"><a href="#2、table-i-对应的桶为空" class="headerlink" title="2、table[i]对应的桶为空"></a>2、table[i]对应的桶为空</h3><p>最简单的情况，直接CAS操作占用桶<code>table[i]</code>即可。</p>
-<h3 id="3、发现ForwardingNode结点，说明此时table正在扩容，则尝试协助进行数据迁移"><a href="#3、发现ForwardingNode结点，说明此时table正在扩容，则尝试协助进行数据迁移" class="headerlink" title="3、发现ForwardingNode结点，说明此时table正在扩容，则尝试协助进行数据迁移"></a>3、发现<strong>ForwardingNode</strong>结点，说明此时table正在扩容，则尝试协助进行数据迁移</h3><p><strong>ForwardingNode</strong>结点是ConcurrentHashMap中的五类结点之一，相当于一个占位结点，表示当前table正在进行扩容，当前线程可以尝试协助数据迁移。</p>
-<h3 id="4、出现hash冲突-也就是table-i-桶中已经有了结点"><a href="#4、出现hash冲突-也就是table-i-桶中已经有了结点" class="headerlink" title="4、出现hash冲突,也就是table[i]桶中已经有了结点"></a>4、出现hash冲突,也就是table[i]桶中已经有了结点</h3><p>当两个不同key映射到同一个<code>table[i]</code>桶中时，就会出现这种情况：</p>
+<p>读者可以自己计算下，当<code>table.length</code>为2的幂次时，<code>(table.length-1)</code>的二进制形式的特点是除最高位外全部是 1，配合这种索引计算方式可以实现 key 在 table 中的均匀分布，减少 hash 冲突——出现 hash 冲突时，结点就需要以链表或红黑树的形式链接到<code>table[i]</code>，这样无论是插入还是查找都需要额外的时间。</p>
+<p><code>putVal</code>方法一共处理四种情况：</p>
+<h3 id="1、首次初始化-table-懒加载"><a href="#1、首次初始化-table-懒加载" class="headerlink" title="1、首次初始化 table 懒加载"></a>1、首次初始化 table 懒加载</h3><p><strong>ConcurrentHashMap</strong>在构造的时候并不会初始化 table 数组，首次初始化就在这里通过<code>initTable</code>方法完成。首次加载的时候，会通过<code>sizeCtl</code>变量来控制，只有变量修改成功后才开始初始化，避免了多线程同时初始化的问题。</p>
+<h3 id="2、table-i-对应的桶为空"><a href="#2、table-i-对应的桶为空" class="headerlink" title="2、table[i] 对应的桶为空"></a>2、table[i] 对应的桶为空</h3><p>最简单的情况，直接 CAS 操作占用桶<code>table[i]</code>即可。</p>
+<h3 id="3、发现-ForwardingNode-结点，说明此时-table-正在扩容，则尝试协助进行数据迁移"><a href="#3、发现-ForwardingNode-结点，说明此时-table-正在扩容，则尝试协助进行数据迁移" class="headerlink" title="3、发现 ForwardingNode 结点，说明此时 table 正在扩容，则尝试协助进行数据迁移"></a>3、发现 ForwardingNode 结点，说明此时 table 正在扩容，则尝试协助进行数据迁移</h3><p>ForwardingNode 结点是 ConcurrentHashMap 中的五类结点之一，相当于一个占位结点，表示当前 table 正在进行扩容，当前线程可以尝试协助数据迁移。</p>
+<h3 id="4、出现-hash-冲突-也就是table-i-桶中已经有了结点"><a href="#4、出现-hash-冲突-也就是table-i-桶中已经有了结点" class="headerlink" title="4、出现 hash 冲突,也就是table[i]桶中已经有了结点"></a>4、出现 hash 冲突,也就是<code>table[i]</code>桶中已经有了结点</h3><p>ConcurrentHashMap 就是在最后一种情况这里加锁的。</p>
+<p>当两个不同<code>key</code>映射到同一个<code>table[i]</code>桶中时，就会出现这种情况：</p>
 <ul>
-<li>当table[i]的结点类型为Node——链表结点时，就会将新结点以<strong>“尾插法”</strong>的形式插入链表的尾部。</li>
-<li>当table[i]的结点类型为TreeBin——红黑树代理结点时，就会将新结点通过红黑树的插入方式插入。</li>
+<li>当<code>table[i]</code>的结点类型为 Node——链表结点时，就会将新结点以“尾插法”的形式插入链表的尾部。</li>
+<li>当<code>table[i]</code>的结点类型为 TreeBin——红黑树代理结点时，就会将新结点通过红黑树的插入方式插入。</li>
 </ul>
-<p><strong>putVal</strong>方法的最后，涉及将链表转换为红黑树 —— <strong>treeifyBin</strong> ，<strong>但实际情况并非立即就会转换，当table的容量小于64时，出于性能考虑，只是对table数组扩容1倍</strong>——<strong>tryPresize</strong></p>
-<h2 id="get操作"><a href="#get操作" class="headerlink" title="get操作"></a>get操作</h2><p><strong>get</strong>方法的逻辑很简单，首先根据key的hash值计算映射到table的哪个桶——<code>table[i]</code>。</p>
+<p>再然后，涉及将链表转换为红黑树 —— <code>treeifyBin</code>，但实际情况并非立即就会转换，当 table 的容量小于 64 时，出于性能考虑，只是对 table 数组扩容1倍——<code>tryPresize</code>。</p>
+<h3 id="addCount-操作"><a href="#addCount-操作" class="headerlink" title="addCount 操作"></a>addCount 操作</h3><p>在<code>putVal</code>的最后一步，就是调用<code>addCount</code>方法，把计数器增加，但是并发环境下也不是一个简简单单的操作，我们看下这个方法都做了什么。</p>
+<p>在看这个方法之前，必须了解<code>ConcurrentHashMap</code>进行数量统计的基本方法，它引入了两个变量<code>baseCount</code>、<code>counterCells</code>。<code>baseCount</code>负责简单计数，直接 CAS 操作，用于在没有出现竞争的情况下统计，操作失败的再用<code>counterCells</code>进行补充，补充方式有点复杂，这里先不展开，改天值得单独开文解读，总的来说思路是跟 LongAdder 类似。最终计数结果是<code>baseCount</code>、<code>counterCells</code>两个变量取和。</p>
 <ol>
-<li>如果table[i]的key和待查找key相同，那直接返回；</li>
-<li>如果table[i]对应的结点是特殊结点（hash值小于0），则通过<code>find</code>方法查找；</li>
-<li>如果table[i]对应的结点是普通链表结点，则按链表方式查找。</li>
+<li>判断计数盒子属性是否是空，如果是空，就尝试修改 baseCount 变量，对该变量进行加 X。</li>
+<li>如果计数盒子不是空，或者修改 baseCount 变量失败了，则放弃对 baseCount 进行操作。</li>
+<li>如果计数盒子是<code>null</code>或者计数盒子的 length 是 0，或者随机取一个位置取于数组长度是<code>null</code>，那么就对刚刚的元素进行 CAS 赋值。</li>
+<li>如果赋值失败，或者满足上面的条件，则调用<code>fullAddCount</code>方法重新死循环插入。</li>
+<li>这里如果操作 baseCount 失败了（或者计数盒子不是<code>null</code>），且对计数盒子赋值成功，那么就检查 check 变量，如果该变量小于等于 1。直接结束。否则，计算一下 count 变量。</li>
+<li>如果 check 大于等于 0 ，说明需要对是否扩容进行检查。</li>
+<li>如果 map 的 size 大于<code>sizeCtl</code>（扩容阈值），且 table 的长度没到最大值，那么就进行扩容。</li>
+<li>根据 length 得到一个标识符，然后，判断<code>sizeCtl</code>状态，如果小于 0 ，说明其他线程在初始化或者在扩容。</li>
+<li>如果正在扩容，那么就校验一下数据是否变化了。如果检验数据不通过，break。</li>
+<li>如果校验数据通过了，那么将<code>sizeCtl</code>加一，表示多了一个线程帮助扩容。然后进行扩容。</li>
+<li>如果没有在扩容，但是需要扩容。那么就将<code>sizeCtl</code>更新，赋值为标识符左移 16 位 —— 一个负数。然后加 2。 表示已经有一个线程开始扩容了，然后进行扩容。然后再次更新 count，看看是否还需要扩容。</li>
 </ol>
-<p>第二种情况下，table[i]是不同的节点，处理方式也会不同：</p>
-<h3 id="Node结点的查找"><a href="#Node结点的查找" class="headerlink" title="Node结点的查找"></a>Node结点的查找</h3><p>当槽<code>table[i]</code>被普通<strong>Node</strong>结点占用，说明是链表链接的形式，直接从链表头开始查找。</p>
-<h3 id="TreeBin结点的查找"><a href="#TreeBin结点的查找" class="headerlink" title="TreeBin结点的查找"></a>TreeBin结点的查找</h3><p>TreeBin的查找比较特殊，我们知道当槽<code>table[i]</code>被TreeBin结点占用时，说明链接的是一棵红黑树。由于红黑树的插入、删除会涉及整个结构的调整，所以通常存在读写并发操作的时候，是需要加锁的。</p>
-<blockquote>
-<p>ConcurrentHashMap采用了一种<strong>类似读写锁</strong>的方式：当线程持有写锁（修改红黑树）时，如果读线程需要查找，不会像传统的读写锁那样阻塞等待，而是转而以链表的形式进行查找（TreeBin本身时Node类型的子类，所有拥有Node的所有字段）</p>
-</blockquote>
-<h3 id="ForwardingNode结点的查找"><a href="#ForwardingNode结点的查找" class="headerlink" title="ForwardingNode结点的查找"></a>ForwardingNode结点的查找</h3><p><strong>ForwardingNode</strong>是一种临时结点，在扩容进行中才会出现，所以查找也在扩容的table上进行</p>
-<h3 id="ReservationNode结点的查找"><a href="#ReservationNode结点的查找" class="headerlink" title="ReservationNode结点的查找"></a>ReservationNode结点的查找</h3><p>ReservationNode是保留结点，不保存实际数据，所以直接返回null</p>
-<h2 id="ConcurrentHashMap的计数"><a href="#ConcurrentHashMap的计数" class="headerlink" title="ConcurrentHashMap的计数"></a>ConcurrentHashMap的计数</h2><p>size方法内部实际调用了<strong>sumCount</strong>方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">long</span> <span class="title">sumCount</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    CounterCell[] as = counterCells;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    CounterCell a;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">long</span> sum = baseCount;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> (as != <span class="keyword">null</span>) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; as.length; ++i) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">if</span> ((a = as[i]) != <span class="keyword">null</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">                sum += a.value;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">return</span> sum;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-
+<h3 id="transfer-扩容操作"><a href="#transfer-扩容操作" class="headerlink" title="transfer 扩容操作"></a>transfer 扩容操作</h3><p>扩容同样是非常重要的步骤，也是很容易发生线程安全问题的部分，让我们看看<code>ConcurrentHashMap</code>怎么做的：</p>
+<ol>
+<li>通过计算 CPU 核心数和 Map 数组的长度得到每个线程（CPU）要帮助处理多少个桶，并且这里每个线程处理都是平均的。默认每个线程处理 16 个桶。因此，如果长度是 16 的时候，扩容的时候只会有一个线程扩容。</li>
+<li>初始化临时变量<code>nextTable</code>。将其在原有基础上扩容两倍。</li>
+<li>死循环开始转移。多线程并发转移就是在这个死循环中，根据一个<code>finishing</code>变量来判断，该变量为 true 表示扩容结束，否则继续扩容。<ul>
+<li>进入一个 while 循环，分配数组中一个桶的区间给线程，默认是 16。</li>
+<li>出 while 循环，进 if 判断，判断扩容是否结束，如果扩容结束，清空临死变量，更新 table 变量，更新扩容阈值。如果没完成，但已经无法领取区间（没了），该线程退出该方法，并将 sizeCtl 减一，表示扩容的线程少一个了。如果减完这个数以后，sizeCtl 回归了初始状态，表示没有线程再扩容了，该方法所有的线程扩容结束了。（这里主要是判断扩容任务是否结束，如果结束了就让线程退出该方法，并更新相关变量）。然后检查所有的桶，防止遗漏。 </li>
+<li>如果没有完成任务，且 i 对应的槽位是空，尝试 CAS 插入占位符，让<code>putVal</code>方法的线程感知。 </li>
+<li>如果<code>i</code>对应的槽位不是空，且有了占位符，那么该线程跳过这个槽位，处理下一个槽位。</li>
+<li>如果以上都是不是，说明这个槽位有一个实际的值。开始同步处理这个。</li>
+<li>到这里，都还没有对桶内数据进行转移，只是计算了下标和处理区间，然后一些完成状态判断。同时，如果对应下标内没有数据或已经被占位了，就跳过了。</li>
+</ul>
+</li>
+<li>处理每个桶的行为都是同步的，此处加了<code>synchronized</code>关键字。防止<code>putVal</code>的时候向链表插入数据。 <ul>
+<li>如果这个桶是链表，那么就将这个链表根据<code>length</code>取于拆成两份，取于结果是 0 的放在新表的低位，取于结果是 1 放在新表的高位。 </li>
+<li>如果这个桶是红黑数，那么也拆成 2 份，方式和链表的方式一样，然后，判断拆分过的树的节点数量，如果数量小于等于 6，改造成链表。反之，继续使用红黑树结构。 </li>
+<li>到这里，就完成了一个桶从旧表转移到新表的过程。</li>
+</ul>
+</li>
+</ol>
+<p>多线程无锁扩容的关键就是通过 CAS 设置 sizeCtl 与 transferIndex 变量，协调多个线程对 table 数组中的 node 进行迁移。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>由上面种种可以看到，<code>ConcurrentHashMap</code>对比<code>HashMap</code>和<code>HashTable</code>成功处理线程安全的关键有几个：</p>
+<ol>
+<li>关键操作加锁。这个说起来简单，但是优化起来很复杂，添加修改删除元素、扩容，<code>HashTable</code>也是这么做的。</li>
+<li>善用锁升级，从无锁到偏向锁，再到自旋锁和重量级锁，一步步加码，保证低并发的时候最大效率。</li>
+<li>空间换时间，在面对超大并发，自旋锁大量重复消耗的时候，让多个线程同步进行修改，增加效率。</li>
+<li>多余线程参与扩容、计数等工作，能不闲着绝不闲着。</li>
+</ol>
+<p>ConcurrentHashMap 六千多行代码，五十三个内部类，都是精华代码，Doug Lea 大神果然厉害。</p>
+<p>参考文章：</p>
+<p>简书博主<a href="https://www.jianshu.com/u/434239413000" target="_blank" rel="noopener">莫那一鲁道</a>对<code>ConcurrentHashMap</code>进行了非常细致的总结，本文学习和抄袭了大量文字，更详细的内容建议直接去看原文：<a href="https://www.jianshu.com/p/29d8e66bc3bf" target="_blank" rel="noopener">ConcurrentHashMap 源码阅读小结</a></p>
 
     </div>
 
@@ -425,7 +469,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本结构"><span class="nav-number">1.</span> <span class="nav-text">基本结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节点定义"><span class="nav-number">2.</span> <span class="nav-text">节点定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node节点"><span class="nav-number">2.1.</span> <span class="nav-text">Node节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeNode结点"><span class="nav-number">2.2.</span> <span class="nav-text">TreeNode结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeBin结点"><span class="nav-number">2.3.</span> <span class="nav-text">TreeBin结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ForwardingNode结点"><span class="nav-number">2.4.</span> <span class="nav-text">ForwardingNode结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReservationNode结点"><span class="nav-number">2.5.</span> <span class="nav-text">ReservationNode结点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常量定义"><span class="nav-number">3.</span> <span class="nav-text">常量定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字段定义"><span class="nav-number">4.</span> <span class="nav-text">字段定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#put操作"><span class="nav-number">5.</span> <span class="nav-text">put操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、首次初始化table-懒加载"><span class="nav-number">5.1.</span> <span class="nav-text">1、首次初始化table-懒加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、table-i-对应的桶为空"><span class="nav-number">5.2.</span> <span class="nav-text">2、table[i]对应的桶为空</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、发现ForwardingNode结点，说明此时table正在扩容，则尝试协助进行数据迁移"><span class="nav-number">5.3.</span> <span class="nav-text">3、发现ForwardingNode结点，说明此时table正在扩容，则尝试协助进行数据迁移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、出现hash冲突-也就是table-i-桶中已经有了结点"><span class="nav-number">5.4.</span> <span class="nav-text">4、出现hash冲突,也就是table[i]桶中已经有了结点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#get操作"><span class="nav-number">6.</span> <span class="nav-text">get操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node结点的查找"><span class="nav-number">6.1.</span> <span class="nav-text">Node结点的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeBin结点的查找"><span class="nav-number">6.2.</span> <span class="nav-text">TreeBin结点的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ForwardingNode结点的查找"><span class="nav-number">6.3.</span> <span class="nav-text">ForwardingNode结点的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReservationNode结点的查找"><span class="nav-number">6.4.</span> <span class="nav-text">ReservationNode结点的查找</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConcurrentHashMap的计数"><span class="nav-number">7.</span> <span class="nav-text">ConcurrentHashMap的计数</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本结构"><span class="nav-number">1.</span> <span class="nav-text">基本结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节点定义"><span class="nav-number">2.</span> <span class="nav-text">节点定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-节点"><span class="nav-number">2.1.</span> <span class="nav-text">Node 节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeNode-结点"><span class="nav-number">2.2.</span> <span class="nav-text">TreeNode 结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeBin-结点"><span class="nav-number">2.3.</span> <span class="nav-text">TreeBin 结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ForwardingNode-结点"><span class="nav-number">2.4.</span> <span class="nav-text">ForwardingNode 结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReservationNode-结点"><span class="nav-number">2.5.</span> <span class="nav-text">ReservationNode 结点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常量定义"><span class="nav-number">3.</span> <span class="nav-text">常量定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字段定义"><span class="nav-number">4.</span> <span class="nav-text">字段定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#get-操作"><span class="nav-number">5.</span> <span class="nav-text">get 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-结点的查找"><span class="nav-number">5.1.</span> <span class="nav-text">Node 结点的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeBin-结点的查找"><span class="nav-number">5.2.</span> <span class="nav-text">TreeBin 结点的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ForwardingNode-结点的查找"><span class="nav-number">5.3.</span> <span class="nav-text">ForwardingNode 结点的查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReservationNode-结点的查找"><span class="nav-number">5.4.</span> <span class="nav-text">ReservationNode 结点的查找</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#put-操作"><span class="nav-number">6.</span> <span class="nav-text">put 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、首次初始化-table-懒加载"><span class="nav-number">6.1.</span> <span class="nav-text">1、首次初始化 table 懒加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、table-i-对应的桶为空"><span class="nav-number">6.2.</span> <span class="nav-text">2、table[i] 对应的桶为空</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、发现-ForwardingNode-结点，说明此时-table-正在扩容，则尝试协助进行数据迁移"><span class="nav-number">6.3.</span> <span class="nav-text">3、发现 ForwardingNode 结点，说明此时 table 正在扩容，则尝试协助进行数据迁移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、出现-hash-冲突-也就是table-i-桶中已经有了结点"><span class="nav-number">6.4.</span> <span class="nav-text">4、出现 hash 冲突,也就是table[i]桶中已经有了结点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addCount-操作"><span class="nav-number">6.5.</span> <span class="nav-text">addCount 操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#transfer-扩容操作"><span class="nav-number">6.6.</span> <span class="nav-text">transfer 扩容操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -498,12 +542,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">274k</span>
+    <span title="站点总字数">276k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">7:36</span>
+    <span title="站点阅读时长">7:39</span>
 </div>
 
         

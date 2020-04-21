@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="SpringBoot 是怎么处理事务？事务注解怎么用？有哪些需要注意的问题？我们自己动手一步一步的从实验中学习。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot中的事务">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;04&#x2F;21&#x2F;SpringBoot%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="SpringBoot 是怎么处理事务？事务注解怎么用？有哪些需要注意的问题？我们自己动手一步一步的从实验中学习。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;598e93545f0cc1539b063849dfd379c1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;e899c8713bc69fd99236c0d39160b083.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;64a7d9fb9aa45b62140b89f23453af5e.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;11f36f795a39114e6b2c73789448cdc9.png">
+<meta property="article:published_time" content="2020-04-21T15:13:37.000Z">
+<meta property="article:modified_time" content="2020-04-21T15:14:07.150Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="Spring">
+<meta property="article:tag" content="framework">
+<meta property="article:tag" content="SpringBoot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;598e93545f0cc1539b063849dfd379c1.png">
+
+<link rel="canonical" href="http://beritra.github.com/2020/04/21/SpringBoot%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>SpringBoot中的事务 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/04/21/SpringBoot%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot中的事务
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-21 23:13:37 / 修改时间：23:14:07" itemprop="dateCreated datePublished" datetime="2020-04-21T23:13:37+08:00">2020-04-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index">
+                    <span itemprop="name">Spring</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>21 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>SpringBoot 是怎么处理事务？事务注解怎么用？有哪些需要注意的问题？我们自己动手一步一步的从实验中学习。</p>
+<a id="more"></a>
+
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>众所周知 SpringBoot 支持声明式事务和编程式事务，本文讨论的是基于声明式事务，或者叫注解式事务。</p>
+<p>为了方便同步，文章中的代码用到了以下框架和类库：</p>
+<ul>
+<li>spring-boot-starter</li>
+<li>spring-boot-starter-web</li>
+<li>mybatis-plus-boot-starter</li>
+<li>mysql-connector-java</li>
+</ul>
+<p>首先我们复习下前置知识点。</p>
+<p>数据库事务有 ACID 四大原则：</p>
+<ul>
+<li>原子性（Atomicity）指事务包含的所有操作要么全部成功，要么全部失败回滚，这和前面两篇博客介绍事务的功能是一样的概念，因此事务的操作如果成功就必须要完全应用到数据库，如果操作失败则不能对数据库有任何影响。</li>
+<li>一致性（Consistency）指事务必须使数据库从一个一致性状态变换到另一个一致性状态，也就是说一个事务执行之前和执行之后都必须处于一致性状态。</li>
+<li>隔离性（Isolation）隔离性是当多个用户并发访问数据库时，比如操作同一张表时，数据库为每一个用户开启的事务，不能被其他事务的操作所干扰，多个并发事务之间要相互隔离。即要达到这么一种效果：对于任意两个并发的事务 T1 和 T2，在事务 T1 看来，T2 要么在 T1 开始之前就已经结束，要么在 T1 结束之后才开始，这样每个事务都感觉不到有其他事务在并发地执行。</li>
+<li>持久性（Durability）指一个事务一旦被提交了，那么对数据库中的数据的改变就是永久性的，即便是在数据库系统遇到故障的情况下也不会丢失提交事务的操作。</li>
+</ul>
+<p>还有数据库经常出现的几种错误情况：</p>
+<ul>
+<li><p>脏读：是指在一个事务处理过程里读取了另一个未提交的事务中的数据。比如一个人的名字叫张三，事务 A 这时候修改为了李四，但是没有提交事务，事务 B 此时读取姓名，如果读到了张三，就产生了脏读，一旦事务 A 回滚了，B 读到的李四就是脏数据。</p>
+</li>
+<li><p>不可重复读：是指在对于数据库中的某个数据，一个事务范围内多次查询却返回了不同的数据值，这是由于在查询间隔，被另一个事务修改并提交了。不可重复读和脏读的区别是，脏读是某一事务读取了另一个事务未提交的脏数据，而不可重复读则是读取了前一事务提交的数据。比如事务 A，读取<code>id=1</code>的人的名字，得到是张三，这时候事务 B 把<code>id=1</code>的人的名字改为了李四，并且提交了事务。这时候事务 A 再查询一遍<code>id=1</code>的人的名字，发现变成了李四。</p>
+</li>
+<li><p>幻读(虚读)：幻读是事务非独立执行时发生的一种现象，是指操作记录数的变化。幻读的定义其实经常引起争议。</p>
+<p>高性能 mysql 中这么定义幻读：</p>
+<blockquote>
+<p>事务A读取某个范围的记录，事务B在该范围插入了新的记录，事务A再次读取该范围的记录，会产生幻行。</p>
+<p>InnoDB 使用 mvcc 解决了幻读的问题。</p>
+</blockquote>
+<p>在这种意义下，InnoDB 中的 Repeatable Read 隔离级别是直接解决了幻读的，但是还有如下情况：</p>
+<p>事务 A 对先查询一条不存在的数据，结果显示为空，然后插入该数据，在事务 A 插入之前，事务 B 率先插入了数据，导致事务 A 插入失败，就现了幻觉。也有人将这种情况称之为幻读，但是我觉得高性能 MySQL 中的定义更准确，另外后面这种情况可以用<code>for update</code>解决。</p>
+</li>
+</ul>
+<p>然后就是事务的隔离级别，MySQL 中的隔离级别和 SpringBoot 是一样的（或者应该反过来说），为了解决以上三种问题，有四种不同的隔离级别，具体作用如图：</p>
+<p><img src="http://nas.beritra.com:18081/uploads/medium/598e93545f0cc1539b063849dfd379c1.png" alt=""></p>
+<h2 id="Transactional-注解"><a href="#Transactional-注解" class="headerlink" title="Transactional 注解"></a>Transactional 注解</h2><p>Spring 事务最简单方便的使用方式是使用<code>Transactional</code>注解，可以被应用于接口定义和接口方法、类定义和类的 public 方法上。但是不推荐用在接口上面，因为一旦标注在 Interface 上并且配置了Spring AOP 使用 CGLib 动态代理，将会导致<code>Transactional</code>注解失效。</p>
+<p>Transactional 注解的原理是这样：</p>
+<p>在应用系统调用声明<code>@Transactional</code>的目标方法时，Spring Framework 默认使用 AOP 代理，在代码运行时生成一个代理对象，根据<code>@Transactional</code>的属性配置信息，这个代理对象决定该声明<code>@Transactional</code>的目标方法是否由拦截器 <code>TransactionInterceptor</code>来使用拦截，在<code>TransactionInterceptor</code>拦截时，会在在目标方法开始执行之前创建并加入事务，并执行目标方法的逻辑, 最后根据执行情况是否出现异常，利用抽象事务管理器<code>AbstractPlatformTransactionManager</code>操作数据源 DataSource 提交或回滚事务。</p>
+<p>注解的所有属性如下：</p>
+<p><img src="http://nas.beritra.com:18081/uploads/medium/e899c8713bc69fd99236c0d39160b083.png" alt=""></p>
+<p>第一个属性<code>value</code>的作用是：当在配置文件中有多个<code>TransactionManager</code>，可以用该属性指定选择哪个事务管理器。</p>
+<p>事务的传播和隔离级别下面详细叙述。</p>
+<p><code>readOnly</code>和<code>timeout</code>都很好理解。</p>
+<p>最后面的四个是指定事务回滚规则，事务回滚规则定义了哪些异常会导致事务回滚而哪些不会。默认情况下，只有未检查异常（<code>RuntimeException</code>和<code>Error</code>类型的异常）会导致事务回滚。</p>
+<h2 id="事务的隔离级别"><a href="#事务的隔离级别" class="headerlink" title="事务的隔离级别"></a>事务的隔离级别</h2><p>Spring 事务支持四种隔离级别：</p>
+<ol>
+<li><p>ISOLATION_DEFAULT： 这是一个<code>PlatfromTransactionManager</code>默认的隔离级别，使用数据库默认的事务隔离级别。另外四个与 JDBC 的隔离级别相对应。MySQL 默认的事务处理级别是<code>REPEATABLE-READ</code>。</p>
+</li>
+<li><p>ISOLATION_READ_UNCOMMITTED： 这是事务最低的隔离级别，它充许令外一个事务可以看到这个事务未提交的数据。这种隔离级别会产生脏读，不可重复读和幻像读。</p>
+</li>
+<li><p>ISOLATION_READ_COMMITTED：保证一个事务修改的数据提交后才能被另外一个事务读取。另外一个事务不能读取该事务未提交的数据。这种隔离级别有可能产生不可重复读和幻读。</p>
+</li>
+<li><p>ISOLATION_REPEATABLE_READ： 这种事务隔离级别可以防止脏读，不可重复读。但是可能出现幻像读。</p>
+</li>
+<li><p>ISOLATION_SERIALIZABLE： 这是花费最高代价但是最可靠的事务隔离级别。事务被处理为顺序执行。除了防止脏读，不可重复读外，还避免了幻像读。</p>
+</li>
+</ol>
+<p>好，原理看完了，开始实验。SpringBoot 的项目搭建就不赘述了，我们先准备一个表：</p>
+<p><img src="http://nas.beritra.com:18081/uploads/big/64a7d9fb9aa45b62140b89f23453af5e.png" alt=""></p>
+<p>图省事只有三个字段，自增主键<code>id</code>和姓名年龄。</p>
+<p>我们先看默认的情况，添加一个开启事务的插入操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>()</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testInsert</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    TestTable data = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    data.setName(<span class="string">"张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    data.setAge(<span class="number">20</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">int</span> result = testTableMapper.insert(data);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> (result == <span class="number">1</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        logger.info(<span class="string">"添加数据&#123;&#125;成功"</span>, data);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"RuntimeException"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看到日志提示添加成功，然后去数据库里没有这条，因为抛出异常回滚了。</p>
+<p>如果在这个事务已经添加，但是没提交的情况下，另一个会话去读的话会发生什么？</p>
+<p>我们添加一个读去全部数据的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    List&lt;TestTable&gt; list = testTableMapper.selectList(Wrappers.emptyWrapper());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, list.toString());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后在上面那个插入的方法中添加线程休眠，模拟事务未提交的情况。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>()</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testInsert</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    TestTable data = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    data.setName(<span class="string">"张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    data.setAge(<span class="number">20</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">int</span> result = testTableMapper.insert(data);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> (result == <span class="number">1</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        logger.info(<span class="string">"添加数据&#123;&#125;成功"</span>, data);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        Thread.sleep(<span class="number">10000000</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"RuntimeException"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这时候你会发现，不光第一个插入的方法阻塞了，查询的方法也阻塞了。这是因为虽然你没开启事务，但是数据库实际上用了默认的隔离级别。</p>
+<p>我们切换到最低的隔离级别：<code>READ_UNCOMMITTED</code>。就是说一个事务可以看到另一个事务未提交的数据。</p>
+<p>把查询方法也加上事务，并且切换隔离级别：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(isolation = Isolation.READ_UNCOMMITTED)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    List&lt;TestTable&gt; list = testTableMapper.selectList(Wrappers.emptyWrapper());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, list.toString());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看到，这次就读到了插入事务里未提交的张三。<code>READ_UNCOMMITTED</code>作为级别最低的隔离级别，一般很少会用。</p>
+<p>然后我们来测试<code>READ_COMMITTED</code>，还是上面完全一样的代码，把查询方法的隔离级别改成<code>READ_COMMITTED</code>，就会发现张三看不到了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(isolation = Isolation.READ_COMMITTED)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    List&lt;TestTable&gt; list = testTableMapper.selectList(Wrappers.emptyWrapper());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, list.toString());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后我们插入一条张三的数据：</p>
+<p><img src="http://nas.beritra.com:18081/uploads/big/11f36f795a39114e6b2c73789448cdc9.png" alt=""></p>
+<p>写一个更新的方法，把张三改名为李四：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testUpdate</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">int</span> result = testTableMapper.update(<span class="keyword">null</span>, Wrappers.lambdaUpdate(TestTable<span class="class">.<span class="keyword">class</span>)</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">            .set(TestTable::getName,"李四").eq(TestTable::getName, "张三"));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> (result == <span class="number">1</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        logger.info(<span class="string">"更新数据成功"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>我们把查询方法查询两次，分别打印查询到的数据，中间休眠五秒，休眠期间执行更新方法，看看两次有什么区别（注意，要把 mybatis-plus 的一个配置<code>local-cache-scope</code>改成<code>statement</code>，不然通过 id 查询数据的话，第二次会直接走缓存，没有实际去数据库查。）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(isolation = Isolation.READ_COMMITTED)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    TestTable data = testTableMapper.selectById(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, data);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        Thread.sleep(<span class="number">3000</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    data = testTableMapper.selectById(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, data);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>从日志里可以看出，查询方法第一次查询的时候，名字还是张三，执行更新方法之后，就变成了李四。也就是说，在事务还没提交的时候，受到了其他事务的影响。</p>
+<p>当我们把查询方法的隔离级别改成<code>REPEATABLE_READ</code>的时候，这个问题就不复存在了，你会发现两次查询都是张三。</p>
+<p>由于实质上的幻读已经被 InnoDB 干掉了，我们就先不看怎么用<code>SERIALIZABLE</code>级别来解决幻读了，而是直接看<code>SERIALIZABLE</code>级别能做什么吧。</p>
+<p>这个代码比较简单</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(isolation = Isolation.SERIALIZABLE)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"进入testSelect方法"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    List&lt;TestTable&gt; list = testTableMapper.selectList(Wrappers.emptyWrapper());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, list.toString());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        Thread.sleep(<span class="number">5000</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        e.printStackTrace();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>连续执行两次这个方法，你就会发现在第一次的线程休眠结束之前，第二次会阻塞。<code>SERIALIZABLE</code>的作用就是把事务串行化，所有该类型的事务都会排队一个一个的执行。同样的，如果另一个方法也是<code>SERIALIZABLE</code>级别，他和<code>testSelect</code>方法也是只能串行执行。比如下面这种，我们增加一个查询方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(isolation = Isolation.SERIALIZABLE)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect2</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    List&lt;TestTable&gt; list = testTableMapper.selectList(Wrappers.emptyWrapper());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, list.toString());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>同样的，<code>testSelect2</code>也会阻塞等待前一个事务的执行完毕。但是注意当我们把<code>testSelect2</code>的隔离级别改回默认，即<code>REPEATABLE_READ</code>，就不会阻塞等待了。</p>
+<h2 id="事务的传播级别"><a href="#事务的传播级别" class="headerlink" title="事务的传播级别"></a>事务的传播级别</h2><p>首先要清楚什么是事务的传播级别：用来描述由某一个事务传播行为修饰的方法被嵌套进另一个方法的时事务如何传播。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">methodA</span><span class="params">()</span></span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">   methodB();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">   <span class="comment">//doSomething</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transaction</span>(Propagation=XXX)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">methodB</span><span class="params">()</span></span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">   <span class="comment">//doSomething</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>代码中<code>methodA()</code>方法嵌套调用了<code>methodB()</code>方法，<code>methodB()</code>的事务传播行为由<code>@Transaction(Propagation=XXX)</code>设置决定。这里需要注意的是<code>methodA()</code>并没有开启事务，某一个事务传播行为修饰的方法并不是<strong>必须</strong>要在开启事务的外围方法中调用。</p>
+<p>Spring 中有七大传播级别：</p>
+<ul>
+<li>PROPAGATION_REQUIRED：如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。如果被调用端发生异常，那么调用端和被调用端事务都将回滚。这是最常见的选择。</li>
+<li>PROPAGATION_SUPPORTS：支持当前事务，如果当前没有事务，就以非事务的方式执行。</li>
+<li>PROPAGATION_MANDATORY：使用当前的事务，如果当前没有事务，就抛出异常。</li>
+<li>PROPAGATION_REQUIRES_NEW：新建事务，如果外部存在事务，把外部事务挂起。这个内部的事务将被完全提交或回滚而不依赖于外部事务，它拥有自己的隔离范围，自己的锁，等等。</li>
+<li>PROPAGATION_NOT_SUPPORTED：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。</li>
+<li>PROPAGATION_NEVER：以非事务方式执行，如果当前存在事务，就抛出异常。</li>
+<li>PROPAGATION_NESTED：如果当前方法正有一个事务在运行中，则该方法应该运行在一个嵌套事务中，被嵌套的事务可以独立于被封装的事务中进行提交或者回滚。</li>
+</ul>
+<p>好，我们开始一个一个的测试，加深理解。</p>
+<p><strong>注意，由于内部方法抛出运行时异常，会在外层方法里面继续抛出，导致预期外的结果，所以我们不能用抛出异常的方式进行使用。所以下面的测试都是手动回滚。</strong></p>
+<p>首先新建两个<code>ServiceA</code>和<code>ServiceB</code>，A 中注入 B，当然还有两个<code>mapper</code>，然后还是用之前的数据库表，先把表清空。两个类文件如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceA</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Resource</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    TestTableMapper testTableMapper;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Resource</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    ServiceB serviceB;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceB</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Resource</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    TestTableMapper testTableMapper;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>为什么需要两个<code>Service</code>而不是在同一个里面进行方法调用，这个涉及到<code>Spring</code>的依赖注入机制，这里先不展开。</p>
+<p>我们用插入方法来测试，先插入一条记录，然后抛出异常，通过看数据库中是否真正执行了插入，来判断事务的执行状态。当然也可以打开日志的<code>debug</code>级别，直接看数据库的执行日志。</p>
+<h3 id="PROPAGATION-REQUIRED"><a href="#PROPAGATION-REQUIRED" class="headerlink" title="PROPAGATION_REQUIRED"></a>PROPAGATION_REQUIRED</h3><p>如果没有事务，就新建事务，如果已经有了就加入。</p>
+<p>我们先测试 A 没有事务，B 有事务的情况：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">//这是ServiceA</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">     serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"> &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"> </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"> <span class="comment">//这是ServiceB</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"> <span class="meta">@Transactional</span>(propagation = Propagation.REQUIRED)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">     TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">     someOne.setId(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">     someOne.setName(<span class="string">"法外狂徒张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">     someOne.setAge(<span class="number">19</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">     testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"> &#125;</span></pre></td></tr></table></figure>
+
+<p>可以看出数据没有实际插入进去，事务进行了回滚。然后我们把<code>ServiceA</code>中的方法加上事务。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>一样的结果。</p>
+<p>如果调用端出错了呢？我们把<code>ServiceB</code>中的回滚去掉，让<code>ServiceA</code>中回滚试试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看出同样发生了回滚，两个事务其实合为一个了。</p>
+<h3 id="PROPAGATION-SUPPORTS"><a href="#PROPAGATION-SUPPORTS" class="headerlink" title="PROPAGATION_SUPPORTS"></a>PROPAGATION_SUPPORTS</h3><p>如果不存在外层事务，就不开启事务，如果有就加入外部事务运行。</p>
+<p>我们去掉<code>ServiceB</code>的事务，A 的还带着，在 A 中回滚。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"出错啦"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">  <span class="meta">@Transactional</span>(propagation = Propagation.SUPPORTS)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceB</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">19</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看出还是发生了回滚，证明 B 虽然自身没有异常，但是由于加入了 A 的事务，所以一起跟着回滚了。</p>
+<p>我们把 A 的事务也去掉。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"出错啦"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看到数据成功插入了，没有发生回滚。</p>
+<h3 id="PROPAGATION-MANDATORY"><a href="#PROPAGATION-MANDATORY" class="headerlink" title="PROPAGATION_MANDATORY"></a>PROPAGATION_MANDATORY</h3><p>必须要有事务，没有事务就抛异常。</p>
+<p>我们还是去掉 A 的事务和异常抛出，把 B 的传播级别改成<code>PROPAGATION_MANDATORY</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(propagation = Propagation.MANDATORY)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceB</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">19</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看到直接抛出了异常</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">org.springframework.transaction.IllegalTransactionStateException: No existing transaction found for transaction marked with propagation &#39;mandatory&#39;</span></pre></td></tr></table></figure>
+
+<p>我们给<code>ServiceA</code>加上事务：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>整个事务顺利完成，没有问题。</p>
+<h3 id="PROPAGATION-REQUIRES-NEW"><a href="#PROPAGATION-REQUIRES-NEW" class="headerlink" title="PROPAGATION_REQUIRES_NEW"></a>PROPAGATION_REQUIRES_NEW</h3><p>无论当前事务上下文中有没有事务，都会开启一个新的事务，如果有了外部事务就挂起，内部的事务将被完全提交或回滚而不依赖于外部事务。</p>
+<p>我们先写一个外部的事务 ServiceA，调用了内部事务 ServiceB，让事务 A 进行回滚：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA 中的方法，外部事务</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"执行ServiceA"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">2</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒李四"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">28</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(propagation = Propagation.REQUIRES_NEW)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceB 的方法，内部事务</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"执行ServiceB"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">18</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>执行可以看到，外部事务 ServiceA 插入的内容被回滚了，内部事务 ServiceB 的动作执行不受影响。</p>
+<p>类似的，如果我们反过来，B 中回滚而 A 不回滚，B 也不会影响到 A，二者相互独立。</p>
+<h3 id="PROPAGATION-NOT-SUPPORTED"><a href="#PROPAGATION-NOT-SUPPORTED" class="headerlink" title="PROPAGATION_NOT_SUPPORTED"></a>PROPAGATION_NOT_SUPPORTED</h3><p>这个传播级别下，内部事务总是以非事务的形式运行，不管外面有没有事务，自身都是没有事务。</p>
+<p>我们还是做测试，先让内部事务抛出异常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(propagation = Propagation.NOT_SUPPORTED)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceB 内部事务</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"执行ServiceB"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">18</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"RuntimeException"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA 外部事务</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"执行ServiceA"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">2</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒李四"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">28</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>可以看出内部事务由于没有事务，所以虽然抛出异常但是数据库操作正常结束，没有回滚。当然外面的事务收到了影响，因为  catch 到了内部事务的异常。</p>
+<p>类似的，如果外面事务抛出异常，内部事务也不会回滚。</p>
+<h3 id="PROPAGATION-NEVER"><a href="#PROPAGATION-NEVER" class="headerlink" title="PROPAGATION_NEVER"></a>PROPAGATION_NEVER</h3><p>这个级别更简单，外部不能有事务，有就抛异常。示例都不用写了，非常好理解，抛出的异常如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">org.springframework.transaction.IllegalTransactionStateException: Existing transaction found for transaction marked with propagation &#39;never&#39;</span></pre></td></tr></table></figure>
+
+
+
+<h3 id="PROPAGATION-NESTED"><a href="#PROPAGATION-NESTED" class="headerlink" title="PROPAGATION_NESTED"></a>PROPAGATION_NESTED</h3><p>这个级别很有意思，如果外面没有事务就创建事务，如果有的话就嵌套进去。这个嵌套的意思是指的“暂存点”，如果子事务发生异常，会直接回滚到这个暂存点，而不会导致整体事务的回滚。</p>
+<p>废话少说看测试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(propagation = Propagation.NESTED)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceB，内部事务，插入然后抛出异常</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"执行ServiceB"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒张三"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">18</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">   TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;<span class="comment">//ServiceA，外部事务，在调用 B 的前后分别插入。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"执行ServiceA"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    TestTable someOne = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">2</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"法外狂徒李四"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">28</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    serviceB.insert();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    someOne.setId(<span class="number">3</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">    someOne.setName(<span class="string">"王五"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    someOne.setAge(<span class="number">66</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    testTableMapper.insert(someOne);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这个例子里面，内部事务回滚了，但是外部没有回滚。但是外部事务回滚，内部事务也会跟着回滚。</p>
+<p>看出来跟<code>REQUIRED</code>，<code>REQUIRES_NEW</code>之间的不同了吗？区别如下：</p>
+<ul>
+<li>REQUIRED：内外是一个整体，无论内部还是外部的回滚，都会导致二者全回滚。</li>
+<li>REQUIRES_NEW：内外相互独立，互相完全不影响。</li>
+<li>NESTED：内部加入外部，但是外部不受内部影响。内部回滚的话外部正常，外部回滚的话内部会跟着回滚。</li>
+</ul>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
+<li>在需要事务管理的地方加<code>@Transactional</code>注解。<code>@Transactional</code>注解可以被应用于接口定义和接口方法、类定义和类的 <code>public</code>方法上。</li>
+<li><code>@Transactional</code>注解只能应用到<code>public</code>可见度的方法上。 如果你在<code>protected</code>、<code>private</code>或者<code>package-visible</code>的方法上使用<code>@Transactional</code>注解，它也不会报错， 但是这个被注解的方法将不会展示已配置的事务设置。</li>
+<li><code>@Transactional</code>的事务开启 ，或者是基于接口的 或者是基于类的代理被创建。所以在同一个类中一个方法调用另一个方法有事务的方法，事务是不会起作用的。</li>
+<li>在接口上使用<code>@Transactional</code>注解，只能当你设置了基于接口的代理时它才生效。</li>
+</ul>
+<h2 id="面试常见问题"><a href="#面试常见问题" class="headerlink" title="面试常见问题"></a>面试常见问题</h2><p>//TODO 后续补充</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+              <a href="/tags/framework/" rel="tag"># framework</a>
+              <a href="/tags/SpringBoot/" rel="tag"># SpringBoot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/23/Java%E5%B9%B6%E5%8F%91%E5%8C%85%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" rel="prev" title="Java并发包使用指南">
+      <i class="fa fa-chevron-left"></i> Java并发包使用指南
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概览"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transactional-注解"><span class="nav-number">2.</span> <span class="nav-text">Transactional 注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的隔离级别"><span class="nav-number">3.</span> <span class="nav-text">事务的隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的传播级别"><span class="nav-number">4.</span> <span class="nav-text">事务的传播级别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-REQUIRED"><span class="nav-number">4.1.</span> <span class="nav-text">PROPAGATION_REQUIRED</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-SUPPORTS"><span class="nav-number">4.2.</span> <span class="nav-text">PROPAGATION_SUPPORTS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-MANDATORY"><span class="nav-number">4.3.</span> <span class="nav-text">PROPAGATION_MANDATORY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-REQUIRES-NEW"><span class="nav-number">4.4.</span> <span class="nav-text">PROPAGATION_REQUIRES_NEW</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-NOT-SUPPORTED"><span class="nav-number">4.5.</span> <span class="nav-text">PROPAGATION_NOT_SUPPORTED</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-NEVER"><span class="nav-number">4.6.</span> <span class="nav-text">PROPAGATION_NEVER</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PROPAGATION-NESTED"><span class="nav-number">4.7.</span> <span class="nav-text">PROPAGATION_NESTED</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意事项"><span class="nav-number">5.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#面试常见问题"><span class="nav-number">6.</span> <span class="nav-text">面试常见问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">329k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">9:08</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -46,12 +46,12 @@
   };
 </script>
 
-  <meta name="description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。">
+  <meta name="description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL中的事务">
-<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;01&#x2F;MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1&#x2F;index.html">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;17&#x2F;MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
-<meta property="og:description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。">
+<meta property="og:description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;980e4507ab99e2a1f4a78fe7b4c954e8.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;dca2709fdeb84932ccae92cf405fbbe0.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;c90bcbd6ddbdd7f6b3571df115408746.png">
@@ -63,8 +63,8 @@
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;af386a3f56b941605de52eb437e33c32.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;60caac0b4782048229a8c172ec18b2d7.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;adac784b49794e6d6b386295158a4c02.png">
-<meta property="article:published_time" content="2019-12-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2019-12-16T05:14:26.589Z">
+<meta property="article:published_time" content="2019-12-17T10:11:12.000Z">
+<meta property="article:modified_time" content="2020-04-21T15:01:34.600Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
@@ -72,7 +72,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;980e4507ab99e2a1f4a78fe7b4c954e8.png">
 
-<link rel="canonical" href="http://beritra.github.com/2019/12/01/MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
+<link rel="canonical" href="http://beritra.github.com/2019/12/17/MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
 
 
 <script id="page-configurations">
@@ -224,7 +224,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2019/12/01/MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2019/12/17/MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avator.jpg">
@@ -247,14 +247,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2019-12-01 12:12:12" itemprop="dateCreated datePublished" datetime="2019-12-01T12:12:12+08:00">2019-12-01</time>
+              <time title="创建时间：2019-12-17 18:11:12" itemprop="dateCreated datePublished" datetime="2019-12-17T18:11:12+08:00">2019-12-17</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-12-16 13:14:26" itemprop="dateModified" datetime="2019-12-16T13:14:26+08:00">2019-12-16</time>
+                <time title="修改时间：2020-04-21 23:01:34" itemprop="dateModified" datetime="2020-04-21T23:01:34+08:00">2020-04-21</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -281,7 +281,7 @@
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>24 分钟</span>
+              <span>25 分钟</span>
             </span>
 
         </div>
@@ -293,7 +293,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。</p>
+        <p>本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。</p>
 <a id="more"></a>
 
 <p>事务（Transaction）是数据库区别于文件系统的重要特性之一。事务会把数据库从一种一致性状态转换为另一种一致状态。在数据库提交工作时，可以确保要么所有修改都已经保存了，要么所有修改都不保存。</p>
@@ -305,7 +305,7 @@
 <li>持久性（durability）</li>
 </ul>
 <p>本文主要关注事务的原子性这一概念，并说明怎么正确使用事务及编写正确的事务应用程序，避免在事务方面养成一些不好的习惯。</p>
-<h2 id="认识事务"><a href="#认识事务" class="headerlink" title="认识事务"></a>认识事务</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>事务可由一条非常简单的 SQL 语句组成，也可以由一组复杂的 SQL 语句组成。事务是访问并更新数据库中各种数据项的一个程序执行单元。在事务操作中，哟啊么都做修改，要么都不做，这就是事务的目的，也是事务模型区别于文件系统的重要特征之一。</p>
+<h2 id="认识事务"><a href="#认识事务" class="headerlink" title="认识事务"></a>认识事务</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>事务可由一条非常简单的 SQL 语句组成，也可以由一组复杂的 SQL 语句组成。事务是访问并更新数据库中各种数据项的一个程序执行单元。在事务操作中，要么都做修改，要么都不做，这就是事务的目的，也是事务模型区别于文件系统的重要特征之一。</p>
 <p>理论上说，事务有严格的定义，必须同时满足四个特性，即 ACID 特性。但是数据库厂商出于各种目的，并没有严格去满足事务的 ACID 标准。对于 InnoDB 存储引擎而言，其默认的事务隔离级别为<code>READ REPEATABLE</code> 完全遵循和满足事务的 ACID 特性。这里具体介绍事务的 AICD 特性，并给出相关概念。</p>
 <p>A（Atomicity）原子性。在计算机系统中，每个人都将原子性视为理所当然。例如在 C 语言中调用<code>SQRT</code>函数，要么返回正确的平方根值，要么返回错误的代码，而不会在不可预知的情况下改变任何的数据结构和参数。如果<code>SQRT</code>函数被多个程序同时调用，一个程序的返回值也不会是其他程序需要计算的平方根。</p>
 <p>然而在数据的事务中实现调用操作的原子性，就没那么简单了，例如一个 ATM 机取款的流程：</p>
@@ -317,7 +317,7 @@
 <li>ATM 机出款。</li>
 <li>用户取钱。</li>
 </ol>
-<p>整个取款流程应当视作原子操作，即要么都做，要么不做。不能用户钱未从 ATM 机上取得，但是银行卡上的钱已经被扣除了，相信这时任何人都不能接受的一种情况。而通过事务模型，可以保证操作的原子性。</p>
+<p>整个取款流程应当视作原子操作，即要么都做，要么不做。不能用户钱未从 ATM 机上取得，但是银行卡上的钱已经被扣除了，相信这是任何人都不能接受的一种情况。而通过事务模型，可以保证操作的原子性。</p>
 <p>原子性是指整个数据库事务是不可分割的工作单位。只有使事务中所有的数据库操作都执行成功，才算整个事务成功。任何一个 SQL 语句执行失败，已经执行成功的 SQL 语句也必须撤销，数据库状态应该退回到执行事务前的状态。</p>
 <p>C（consistency），一致性。一致性是指事务将数据库从一种状态转变为下一种一致的状态。在事务开始之前和结束之后，数据库的完整性约束没有被破坏。事务是一致性的单位，如果事务中某个动作失败了，系统可以自动撤销事务，返回初始化的状态。</p>
 <p>I（isolation），隔离性。隔离性还有其他称呼，如并发控制（consurrency control）、可串行化（serializability）、锁（locking）等。事务的隔离性要求每个读写事务的对象对其他事务的操作对象能相互分离，即该事务提交前对其他事务都不可见，通常这使用锁来实现。当前数据库系统中都提供了一种粒度锁（granular lock）的策略，允许事务仅锁住一个实体对象的子集，以此来提高事务之间的并发度。</p>
@@ -339,10 +339,10 @@
 <p>但是当用户执行到 S3 的时候，发现由于飞机到达米兰的时间台湾，已经没有当天的火车。这时用户希望在米兰当地住一晚，第二天出发去佛罗伦萨。这时如果事务为扁平事务，则需要回滚之前 S1、S2、S3 的三个操作，这个代价就显得有点大。因为当再次进行该事务的时候，S1、S2 的执行计划是不变的。也就是说，如果有支持计划的回滚操作，那么就不需要终止整个事务。因此就出现了带有保存点的扁平事务。</p>
 <p><strong>带有保存点的扁平事务（Flat Transaction with Savepoint）</strong>，除了支持扁平事务支持的操作外，允许在事务执行过程中回滚到同一事务中较早的一个状态。这是因为某霞事务可能在执行过程中出现的错误并不会导致所有的操作都无效，放弃整个事务不合乎要求，开销页太大。<strong>保存点（Savepoint）</strong>用来通知系统应该记住事务当前的状态，以便当以后发生错误时，事务能回到保存点当时的状态。对于扁平的事务来说，其隐式的设置了一个保存点。而在整个事务中，只有一个保存点，因此，回滚只能回滚到事务开始时的状态。保存点用<code>SAVE WORK</code>函数来建立，通知系统记录当前的处理状态。当出现问题的时候，保存点能用作内部的重启动点，根据应用逻辑，决定是回到最近一个保存点还是其他更早的保存点。下图显示了在事务中使用了保存点：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/medium/dca2709fdeb84932ccae92cf405fbbe0.png" alt=""></p>
-<p>上图显示了如何在事务中使用保存点。灰色背景部分的操作表示由<code>ROLLBACK WORK</code>而导致的部分回滚，实际并没有执行的操作。当用 BEGIN WORK 开启一个事务时，隐式地包含一个保存点，当事务通过<code>ROLLBACK WORK</code>：2 发出部分回滚命令的时候，事务回滚到保存点 2，接着一次执行，并再次执行到<code>ROLLBACK WORK</code>：7，知道最后的<code>COMMIT WORK</code>操作，这时表示事务结束，除灰色阴影部分的操作外，其他的操作都已经执行，并且提交。</p>
+<p>上图显示了如何在事务中使用保存点。灰色背景部分的操作表示由<code>ROLLBACK WORK</code>而导致的部分回滚，实际并没有执行的操作。当用 BEGIN WORK 开启一个事务时，隐式地包含一个保存点，当事务通过<code>ROLLBACK WORK：2</code> 发出部分回滚命令的时候，事务回滚到保存点 2，接着一次执行，并再次执行到<code>ROLLBACK WORK：7</code>，知道最后的<code>COMMIT WORK</code>操作，这时表示事务结束，除灰色阴影部分的操作外，其他的操作都已经执行，并且提交。</p>
 <p>另一点需要注意的是，保存点在事务内部是递增的，这从上图中也可以看出。有人可能会想，返回保存点 2 之后，下一个保存点可以是 3，因为之前的动作都终止了。然而新的保存点编号为 5，这意味着<code>ROLLBACK</code>不影响保存点的计数，并且单调递增的编号能保持事务执行的整个历史过程，包括在执行过程中想法的改变。</p>
 <p>此外，当事务通过<code>ROLLBACK WORK</code>：2 命令部分回滚命令时，要记住事务并没有完全被回滚，只是回滚到了保存点 2 而已。这代表当前事务还是活跃的，如果想要完全回滚事务，还需要再执行命令<code>ROLLBACK WORK</code>。</p>
-<p><strong>链事务（Chained Transaction）</strong>可以视为是保存点模式的一种变种。带有保存点的扁平事务，当事务发生崩溃的时候，所有保存点都将小时，因为其保存点是易失的（volatile），而非持久的（persistent）。这意味着当进行恢复时，事务需要从开始处重新执行，而不能从最近的一个保存点继续执行。</p>
+<p><strong>链事务（Chained Transaction）</strong>可以视为是保存点模式的一种变种。带有保存点的扁平事务，当事务发生崩溃的时候，所有保存点都将消失，因为其保存点是易失的（volatile），而非持久的（persistent）。这意味着当进行恢复时，事务需要从开始处重新执行，而不能从最近的一个保存点继续执行。</p>
 <p>链事务的思想是：在提交一个事务时，释放不需要的数据对象，将必要的数据处理上下文隐式地传给下一个要开始的事务。注意，提交事务操作和开始下一个事务操作将合并为一个原子操作。这意味着下一个事务将看到上一个事务的结果，就好像在一个事务中进行的一样。下图显示了链事务的工作方式：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/c90bcbd6ddbdd7f6b3571df115408746.png" alt=""></p>
 <p>链事务与带有保存点的扁平事务不同的是，带有保存点的扁平事务能回滚到任意正确的保存点。而链事务中的回滚仅限于当前事务，即只能恢复到最近的一个保存点。对于锁的处理，两者也不相同。链事务在执行<code>COMMIT</code>后即释放了当前事务所持有的锁，</p>
@@ -378,19 +378,19 @@
 <p>InnoDB 是事务的存储引擎，通过<code>Force Log at Commit</code>机制实现事务的持久性，即当事务提交（COMMIT）的时候，必须先把事务的所有日志写入到重做日志文件进行持久化，等事务的提交操作完成之后才算完成。这里的日志是指重做日志，在 InnoDB 存储引擎中，由两部分组成，即 redo log 和 undo log。redo log 用来保证事务的持久性，undo log 用来帮助事务回滚以及 MVCC 的功能。redo log 基本上都是顺序写的，在数据库运行时不需要对 redo log 的文件进行读取操作。而 undo log 是需要进行随机读写的。</p>
 <p>为了确保每次日志都写入重做日志文件，在每次日志缓冲写入重做日志文件之后，InnoDB 存储引擎都需要调用一次<code>fsync</code>操作。由于重做日志文件打开并没有使用<code>O_DIRECT</code>选项，因此重做日志缓冲先写入文件系统缓存。由于<code>fsync</code>的效率取决于磁盘性能，因此磁盘的性能决定了事务提交的性能，也就是数据库的性能。</p>
 <p>InnoDB 存储引擎允许用户手动设置非持久性的情况发生，因此提高数据库的性能。当事务提交的时候，日志不写入重做日志文件，而是等待一个时间周期后再执行<code>fsync</code>操作。由于并非强制在事务提交的时候进行一次<code>fync</code>操作，显然可以提高数据库性能。但是在数据库发生宕机的时候，由于部分日志未发刷新到磁盘，因此会丢失最后一段时间的事务。</p>
-<p>参数<code>inndob_flush_log_at_trx_commit</code>用来控制重做日志刷新到磁盘的策略，默认值是 1，表示每次都会调用<code>fsync</code>操作。这个参数还可以设置为 0 或者 2。0 表示事务提交时不进行写入重做日志操作，这个操作仅在 mater thread 中完成，而在 master thread 中每一秒会进行一次<code>fsync</code>操作。2 表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。在这个设置下，当 MySQL 数据库发生宕机而操作系统不发生宕机时，并不会导致事务的丢失。但是当操作系统宕机时，重启数据库后会丢失未从文件系统缓存刷新到重做日志文件那部分事务。</p>
+<p>参数<code>inndob_flush_log_at_trx_commit</code>用来控制重做日志刷新到磁盘的策略，默认值是 1，表示每次都会调用<code>fsync</code>操作。这个参数还可以设置为 0 或者 2。0 表示事务提交时不进行写入重做日志操作，这个操作仅在 master thread 中完成，而在 master thread 中每一秒会进行一次<code>fsync</code>操作。2 表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。在这个设置下，当 MySQL 数据库发生宕机而操作系统不发生宕机时，并不会导致事务的丢失。但是当操作系统宕机时，重启数据库后会丢失未从文件系统缓存刷新到重做日志文件那部分事务。</p>
 <p>下图是模拟插入 50 万行数据，参数为 1 是每插入一条就显示执行一次 COMMIT 操作，跟其他参数设置之间的数据库效率对比：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/d088781618cfc6c54fee66d97f5e098a.png" alt=""></p>
 <p>虽然用户可以通过设置参数<code>innodb_flush_log_at_trx_commit</code>为 0 或 2 来提高事务提交的性能，但是需要牢记的事，这种设置方法丧失了事务的 ACID 特性。而针对上述存储过程，为了提高事务的提交性能，应该在将 50 万行数据插入表后进行一次 COMMIT 操作，而不是在每插入一条记录之后进行一次 COMMIT 操作。</p>
 <p>在 MySQL 数据库中还有一种二进制日志（binlog），其用来进行 POINT-TIME（PIT）的恢复及主从复制（Replication）环境的建立。从表面上看其和重做日志非常相似，都是记录了对于数据库操作的日志。然而，从本质上来看，二者有着非常大的不同。</p>
 <p>首先，重做日志是在 InnoDB 存储引擎层产生，而二进制日志是在 MySQL 数据库的上层产生的，并且二进制日志不仅仅对于 InnoDB 引擎，MySQL 数据库中的任何存储引擎对于数据库的更改都会产生二进制日志。</p>
-<p>其次，两种日志记录的内容形式不同。MySQL 数据库上层的二进制日志是一种逻辑日志，其记录的是对应的 SQL 语句。而 InnoDB 存储引擎的重做日志在事务进行中不断地被写入，这表现为日志并不是随事务提交的顺序进行写入的。</p>
+<p>其次，两种日志记录的内容形式不同。MySQL 数据库上层的二进制日志是一种逻辑日志，其记录的是对应的 SQL 语句（注，这里不严谨，新版本的 MySQL 不完全是对应的 SQL）。而 InnoDB 存储引擎的重做日志在事务进行中不断地被写入，这表现为日志并不是随事务提交的顺序进行写入的。</p>
 <h3 id="undo"><a href="#undo" class="headerlink" title="undo"></a>undo</h3><p>重做日志记录的事务的行为，可以很好地通过其对页进行“重做”操作。但是事务有时候还会进行回滚操作，这时就需要 undo。因此在对数据库在进行修改的时候，InnoDB 存储引擎不但会产生 redo，还会产生一定量的 undo。这样如果用户执行的事务或语句由于某种原因失败了，又或者用户用一条<code>ROLLBACK</code>语句请求回滚，就可以利用这些 undo 信息将数据回滚到修改之前的样子。</p>
 <p>redo 存放在重做日志文件中，与 redo 不同，undo 存放在数据库内部的一个特殊段（segment）中，这个段称为 undo 段（undo segment）。undo 段位于共享表空间内。可以通过<code>py_innodb_page_info.py</code>工具来查看当前共享表空间中 undo 的数量。</p>
-<p>用户通常对 undo 有这样的误解：undo 用于将数据库物理的恢复到执行语句或事务之前的样子——但事实并非如此。undo是逻辑日志，因此只将数据库逻辑的恢复到原来的样子。所有修改都被逻辑地取消掉了，但是数据结构和页本身在回滚之后可能大不相同。这是因为在多用户并发系统中，可能会有数十、数百甚至数千个并发事务。数据库的主要任务就是协调堆数据记录的并发访问。比如，一个事务在修改当前一个页中某几条记录，同时还有别的事务在对同一个页中另几条记录进行修改。因此，不能将一个页回滚到事务刚开始的样子，因为这样会影响其他事务正在进行的工作。</p>
-<p>例如，用户执行了一个 INSERT 10w 条记录的事务，这个事务会导致分配一个新的段，即表空间会增大。在用户执行<code>ROLLBACK</code>时，会将插入的事务进行回滚，但是表空间的大小不会因此收缩。因此，当 InnoDB 存储引擎回滚时，它实际上做的是与先前相反的工作。对于每个 INSERT ，InnoDB 存储引擎会完成一个 DELETE；对于每个 DELETE，InnoDB 存储引擎会执行一个 INSERT；对于每个 UPDATE，InnoDB 引擎会执行一个相反的 UPDATE，将修改前的行放进去。</p>
+<p>用户通常对 undo 有这样的误解：undo 用于将数据库物理的恢复到执行语句或事务之前的样子——但事实并非如此。undo 是逻辑日志，因此只将数据库逻辑的恢复到原来的样子。所有修改都被逻辑地取消掉了，但是数据结构和页本身在回滚之后可能大不相同。这是因为在多用户并发系统中，可能会有数十、数百甚至数千个并发事务。数据库的主要任务就是协调堆数据记录的并发访问。比如，一个事务在修改当前一个页中某几条记录，同时还有别的事务在对同一个页中另几条记录进行修改。因此，不能将一个页回滚到事务刚开始的样子，因为这样会影响其他事务正在进行的工作。</p>
+<p>例如，用户执行了一个 INSERT 10 万条记录的事务，这个事务会导致分配一个新的段，即表空间会增大。在用户执行<code>ROLLBACK</code>时，会将插入的事务进行回滚，但是表空间的大小不会因此收缩。因此，当 InnoDB 存储引擎回滚时，它实际上做的是与先前相反的工作。对于每个 INSERT ，InnoDB 存储引擎会完成一个 DELETE；对于每个 DELETE，InnoDB 存储引擎会执行一个 INSERT；对于每个 UPDATE，InnoDB 引擎会执行一个相反的 UPDATE，将修改前的行放进去。</p>
 <p>除了回滚操作，undo 的另一个作用是 MVCC，即在 InnoDB 存储引擎中 MVCC 的实现是通过 undo 来完成。当用户读取一行记录时，若该记录已经被其他事务占用，当前事务可以通过 undo 读取之前的行版本信息，以此实现非锁定读取。</p>
-<p>最后也是最重要的一点是，undo log 会产生redo log，也就是 undo log 的产生会伴随着 redo log 的产生，这是因为 undo log 也需要持久性的保护。</p>
+<p>最后也是最重要的一点是，undo log 会产生 redo log，也就是 undo log 的产生会伴随着 redo log 的产生，这是因为 undo log 也需要持久性的保护。</p>
 <h3 id="pruge"><a href="#pruge" class="headerlink" title="pruge"></a>pruge</h3><p>delete 和 update 操作可能不会直接删除原有的数据。假设有如下表 t：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE TABLE t(</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">a INT，</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">b VARCHAR(32)，</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">PRIMARY KEY(a)，</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">KEY(n)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">)ENGINE&#x3D;Innodb;</span></pre></td></tr></table></figure>
 
@@ -436,7 +436,7 @@
 </ul>
 <p>InnoDB 存储引擎默认支持的隔离级别是 REPEATABLE READ，但与标准 SQL 不同的是，InnoDB 存储引擎在 REPEATABLE READ 事务隔离级别下，使用 Next-Key Lock 锁的算法，因此避免幻读的产生。所以说，InnoDB 存储引擎在默认的 REPEATABLE READ的事务隔离级别下，已经能完全保证事务的隔离性要求，即达到 SQL 标准的 SERIALIZABLE 隔离级别。</p>
 <p>隔离级别越低，事务请求的锁越少或保持锁的时间就越短，这也是为什么大多数数据库的默认隔离级别是 READ COMMITTED。</p>
-<p>大部分用户质疑 SERIALIZABLE 隔离级别带来的性能问题，但是两者的开销几乎是一样的，甚至SERIALIZABLE 可能更优！因此在 InnoDB 存储引擎中选择 REPEATABLE READ 的事务隔离级别并不会有任何性能的损失。同样的，即使使用 READ COMMITTED 的隔离级别，用户也不会得到性能的大幅提升。</p>
+<p>大部分用户质疑 SERIALIZABLE 隔离级别带来的性能问题，但是两者的开销几乎是一样的，甚至 SERIALIZABLE 可能更优！因此在 InnoDB 存储引擎中选择 REPEATABLE READ 的事务隔离级别并不会有任何性能的损失。同样的，即使使用 READ COMMITTED 的隔离级别，用户也不会得到性能的大幅提升。</p>
 <p>在 InnoDB 存储引擎中，可以使用以下命令来设置当前会话或全局的事务隔离级别：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">SET [GLOBAL|SESSION] TRANSACTION ISOLATION LEVEL&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">READ UNCOMMITTED</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">READ COMMITTED</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">REPEATABLE READ</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">SERIALIZABLE</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
@@ -449,7 +449,10 @@
 <p>查看全局的事务隔离级别，可以使用：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">SELECT @@global.transaction_isolation\G;</span></pre></td></tr></table></figure>
 
-<p>在 SERIALIABLE 的隔离级别下，InnoDB 引擎会堆没个 SELECT 语句后自动加上一个<code>LOCK IN SHARE MODE</code>，即为没个读取操作加一个共享锁。因此在这个事务隔离级别下，读占用了锁，对一致性的非锁定读不再予以支持。这时，事务隔离级别 SERIALIZABLE 符合数据库理论上的要求，即事务是 well-formed 的，并且是 two-phrased 的。</p>
+<blockquote>
+<p>注意，MySQL 8.0 之前查询当前事务隔离级别的语句是<code>select @@tx_isolation</code>，之后是上面用的<code>select @@transaction_isolation</code></p>
+</blockquote>
+<p>在 SERIALIABLE 的隔离级别下，InnoDB 引擎会对每个 SELECT 语句后自动加上一个<code>LOCK IN SHARE MODE</code>，即为每个读取操作加一个共享锁。因此在这个事务隔离级别下，读占用了锁，对一致性的非锁定读不再予以支持。这时，事务隔离级别 SERIALIZABLE 符合数据库理论上的要求，即事务是 well-formed 的，并且是 two-phrased 的。</p>
 <h2 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h2><h3 id="MySQL-数据库分布式事务"><a href="#MySQL-数据库分布式事务" class="headerlink" title="MySQL 数据库分布式事务"></a>MySQL 数据库分布式事务</h3><p>InnoDB 存储引擎提供了对 XA 事务的支持，并通过 XA 事务来支持分布式事务的实现。分布式事务指的是允许多个独立的事务资源（transaction resources）参与到一个全局事务中。事务资源通常是关系型数据库系统，但也可以是其他类型的资源。全局事务要求在其中的所有参与的事务要么都提交，要么都会滚，这对事务原有的 ACID 要求又有了提高。另外，在使用分布式事务时，InnoDB 存储引擎的事务隔离级别必须设置为 SERIALIZABLE。</p>
 <p>XA 事务允许你不同数据库之间的分布式事务，如一台数据库是 MySQL 数据库的，另一台是 Oracle 的，有可能还有一台是 SQL SERVER 数据库的，只要参与到全局事务中的每个节点都支持 XA 事务。</p>
 <p>XA 事务由一个或多个资源管理器（Resource  MAanagers）、一个事务管理器（Transaction Manager）以及一个应用程序（Application Program）组成。</p>
@@ -476,7 +479,7 @@
 <h3 id="使用自动提交"><a href="#使用自动提交" class="headerlink" title="使用自动提交"></a>使用自动提交</h3><p>使用自动提交不是一个好习惯，因为这会使初级 DBA 容易犯错，另外还可能是一些开发人员产生错误的理解。在编写程序开发时，最好把事务的控制权限交给开发人员，即在程序端进行事务的开始和结束。同时，开发人员必须了解是自动提交可能带来的问题。</p>
 <h3 id="使用自动回滚"><a href="#使用自动回滚" class="headerlink" title="使用自动回滚"></a>使用自动回滚</h3><p>InnoDB 存储引擎支持通过定义一个 HANDLER 来进行自动事务的回滚操作，如在一个存储过程中发生了错误会自动对其进行回滚操作。因此很多开发人员喜欢在应用程序的存储过程中使用自动回滚操作。</p>
 <p>在存储过程中使用自动回滚很容易丢失错误信息，所以应该在程序中控制而不是数据库中。在程序中控制事务的好处是用户可以得知发生错误的原因，然后根据发生的原因进一步调试程序。</p>
-<h2 id="长事务"><a href="#长事务" class="headerlink" title="长事务"></a>长事务</h2><p>长事务（Loing-Lived Transaction），顾名思义，就是执行时间较长的事务，比如，对于银行系统中的数据库，每过一个阶段可能需要更新对应账户的利息。如果对应账户的数量非常大，例如对有 1 亿用户的表进行更新操作，可能需要非常长的时间来完成，可能需要一个小时，也可能需要 4、5 个小时，这取决于数据库的硬件配置。然而，由于事务的 ACID 特性，这个操作被封装在一个事务中完成。这就产生了一个问题，在执行过程中，当数据库、操作系统或者硬件发生问题的时候，重新开始事务的代价变得不可接受。数据库需要回滚所有已经发生的变化，而这个过程可能比产生这些变化的时间还要长。因此，对于长事务的问题，有时候可以通过转化为小霹雳（mini batch）的事务来进行处理。当事务发生错误时，只需要回滚一部分数据，然后接着上次已完成的事务继续进行。</p>
+<h2 id="长事务"><a href="#长事务" class="headerlink" title="长事务"></a>长事务</h2><p>长事务（Loing-Lived Transaction），顾名思义，就是执行时间较长的事务，比如，对于银行系统中的数据库，每过一个阶段可能需要更新对应账户的利息。如果对应账户的数量非常大，例如对有 1 亿用户的表进行更新操作，可能需要非常长的时间来完成，可能需要一个小时，也可能需要 4、5 个小时，这取决于数据库的硬件配置。然而，由于事务的 ACID 特性，这个操作被封装在一个事务中完成。这就产生了一个问题，在执行过程中，当数据库、操作系统或者硬件发生问题的时候，重新开始事务的代价变得不可接受。数据库需要回滚所有已经发生的变化，而这个过程可能比产生这些变化的时间还要长。因此，对于长事务的问题，有时候可以通过转化为小批量（mini batch）的事务来进行处理。当事务发生错误时，只需要回滚一部分数据，然后接着上次已完成的事务继续进行。</p>
 <p>由一个小地方还需要注意，要保证事务在处理工程中，没有其他的事务来更新表中的数据，需要人工加一个共享锁。</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>我们了解了 InnoDB 存储引擎管理事务的许多方面。了解了事务如何工作以及如何使用。</p>
 <p>事务必须遵循 ACID 特性，即 Atomicity（原子性）、Consistency（一致性）、Isolation（隔离性）和 Durability（持久性）</p>
@@ -501,12 +504,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2019/12/01/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/" rel="prev" title="MySQL中的锁">
-      <i class="fa fa-chevron-left"></i> MySQL中的锁
+    <a href="/2019/12/01/FastDFS%E5%AE%89%E8%A3%85%E6%96%87%E6%A1%A3/" rel="prev" title="离线环境下安装高可用FastDFS">
+      <i class="fa fa-chevron-left"></i> 离线环境下安装高可用FastDFS
     </a></div>
       <div class="post-nav-item">
-    <a href="/2019/12/01/MySQL%E5%8E%9F%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96/" rel="next" title="MySQL原理和优化">
-      MySQL原理和优化 <i class="fa fa-chevron-right"></i>
+    <a href="/2019/12/21/ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86/" rel="next" title="ConcurrentHashMap使用和原理">
+      ConcurrentHashMap使用和原理 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -590,7 +593,7 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -640,12 +643,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">314k</span>
+    <span title="站点总字数">316k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">8:44</span>
+    <span title="站点阅读时长">8:47</span>
 </div>
 
         

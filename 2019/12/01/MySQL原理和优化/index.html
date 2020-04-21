@@ -46,16 +46,16 @@
   };
 </script>
 
-  <meta name="description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。">
+  <meta name="description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL原理和优化">
 <meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;01&#x2F;MySQL%E5%8E%9F%E7%90%86%E5%92%8C%E4%BC%98%E5%8C%96&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
-<meta property="og:description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。">
+<meta property="og:description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;0b0d90cb4b762609bbbd0ce373b25cc8.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;5a3086cee19057902e88e42f4653ba47.jpg">
 <meta property="article:published_time" content="2019-12-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2019-12-15T14:27:12.392Z">
+<meta property="article:modified_time" content="2020-04-21T15:08:56.083Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
@@ -245,7 +245,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-12-15 22:27:12" itemprop="dateModified" datetime="2019-12-15T22:27:12+08:00">2019-12-15</time>
+                <time title="修改时间：2020-04-21 23:08:56" itemprop="dateModified" datetime="2020-04-21T23:08:56+08:00">2020-04-21</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -265,14 +265,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>4k</span>
+              <span>4.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
+              <span>8 分钟</span>
             </span>
 
         </div>
@@ -284,20 +284,20 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。</p>
+        <p>本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。</p>
 <a id="more"></a>
 
 <h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><p>MySQL 5.0 支持的存储引擎包括 MyISAM、 InnoDB、 BDB、 MEMORY、 MERGE、 EXAMPLE、<br>NDB Cluster、ARCHIVE、CSV、BLACKHOLE、FEDERATED 等,其中 InnoDB 和 BDB 提供事务安<br>全表,其他存储引擎都是非事务安全表。</p>
 <p>使用<code>show engines</code>命令可以查看支持的存储引擎。我在MySQL 8.0中执行命令得到的结果如下：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/medium/0b0d90cb4b762609bbbd0ce373b25cc8.png" alt=""></p>
-<p>一般使用的都是InnoDB引擎，所以主要还是研究InnoDB的特性和原理。</p>
+<p>一般使用的都是 InnoDB 引擎，所以主要还是研究 InnoDB 的特性和原理。</p>
 <h3 id="自动增长列"><a href="#自动增长列" class="headerlink" title="自动增长列"></a>自动增长列</h3><p>InnoDB 表的自动增长列可以手工插入，但是插入的值如果是空或者 0，则实际插入的将是自动增长后的值。如果插入一个大于当前自增id的数的时候，自增id会变成这个数字，中间的就被跳过了。</p>
-<p>可以通过“ALTER TABLE *** AUTO_INCREMENT = n;”语句强制设置自动增长列的初识值，默认从 1 开始，但是该强制的默认值是保留在内存中的，如果该值在使用之前数据库重新启动，那么这个强制的默认值就会丢失，就需要在数据库启动以后重新设置。</p>
+<p>可以通过<code>ALTER TABLE *** AUTO_INCREMENT = n;</code>语句强制设置自动增长列的初识值，默认从 1 开始，但是该强制的默认值是保留在内存中的，如果该值在使用之前数据库重新启动，那么这个强制的默认值就会丢失，就需要在数据库启动以后重新设置。</p>
 <p>对于 InnoDB 表,自动增长列必须是索引。如果是组合索引,也必须是组合索引的第一列。</p>
 <h3 id="外键约束"><a href="#外键约束" class="headerlink" title="外键约束"></a>外键约束</h3><p>MySQL 支持外键的存储引擎只有 InnoDB，在创建外键的时候,要求父表必须有对应的索引，子表在创建外键的时候也会自动创建对应的索引。</p>
 <p>在创建索引的时候，可以指定在删除、更新父表时，对子表进行的相应操作，包括 RESTRICT、CASCADE、SET NULL 和 NO ACTION。其中 RESTRICT 和 NO ACTION 相同，是指限制在子表有关联记录的情况下父表不能更新； CASCADE 表示父表在更新或者删除时，更新或者删除子表对应记录；SET NULL 则表示父表在更新或者删除的时候，子表的对应字段被 SET NULL。选择后两种方式的时候要谨慎，可能会因为错误的操作导致数据的丢失。</p>
 <p>《阿里巴巴Java规范》中强制要求不能使用外键，所有表之间的关联逻辑应该在业务逻辑中实现。</p>
-<h3 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h3><p>在8.0里面，InnoDB把数据字典进行重构，大家应该知道数据字典是什么，就是表结构，你的用户定义，所有的跟DDL相关放到数据字典里面去。在8.0之前，数据字典有两份，一份是存储在.frm文件里，另一份是InnoDB的数据表里。在8.0之后.frm被干掉了，只保留了InnoDB中的数据。</p>
+<h3 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h3><p>在 8.0 里面，InnoDB 把数据字典进行重构，大家应该知道数据字典是什么，就是表结构，你的用户定义，所有的跟 DDL 相关放到数据字典里面去。在 8.0 之前，数据字典有两份，一份是存储在 .frm 文件里，另一份是 InnoDB 的数据表里。在8.0之后 .frm 被干掉了，只保留了 InnoDB 中的数据。8.0 中数据库的 innodb 表全部放至在 datadir 下的 mysql.ibd 中，不再把表结构放在 .frm 文件中，而是存放在元数据表中。</p>
 <h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><h4 id="索引概述"><a href="#索引概述" class="headerlink" title="索引概述"></a>索引概述</h4><p>所有 MySQL 列类型都可以被索引，对相关列使用索引是提高 SELECT 操作性能的最佳途径。根据存储引擎可以定义每个表的最大索引数和最大索引长度，每种存储引擎(如 MyISAM、InnoDB、BDB、MEMORY 等)对每个表至少支持 16 个索引，总索引长度至少为 256 字节。大多数存储引擎有更高的限制。</p>
 <p>InnoDB存储引擎支持以下几种常见的索引：</p>
 <ul>
@@ -314,7 +314,7 @@
 <li>不要过度索引。不要以为索引“越多越好”，什么东西都用索引是错误的。</li>
 <li>对于 InnoDB 存储引擎的表，记录默认会按照一定的顺序保存，如果有明确定义的主键,则按照主键顺序保存。如果没有主键，但是有唯一索引，那么就是按照唯一索引的顺序保存。如果既没有主键又没有唯一索引，那么表中会自动生成一个内部列，按照这个列的顺序保存。</li>
 <li>尽量的扩展索引，不要新建索引。比如表中已经有a的索引，现在要加(a,b)的索引，那么只需要修改原来的索引即可。</li>
-<li>=和in可以乱序，比如a = 1 and b = 2 and c = 3 建立(a,b,c)索引可以任意顺序，mysql的查询优化器会帮你优化成索引可以识别的形式。</li>
+<li>= 和 in 可以乱序，比如 a = 1 and b = 2 and c = 3 建立(a,b,c)索引可以任意顺序，mysql的查询优化器会帮你优化成索引可以识别的形式。</li>
 </ul>
 <h4 id="索引的操作"><a href="#索引的操作" class="headerlink" title="索引的操作"></a>索引的操作</h4><p>创建索引的详细定义如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE [UNIQUE | FULLTEXT | SPATIAL] INDEX index_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    [index_type]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    ON tbl_name (key_part,...)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    [index_option]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    [algorithm_option | lock_option] ...</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">key_part: &#123;col_name [(length)] | (expr)&#125; [ASC | DESC]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">index_option:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    KEY_BLOCK_SIZE [&#x3D;] value</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">  | index_type</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">  | WITH PARSER parser_name</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">  | COMMENT &#39;string&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">  | &#123;VISIBLE | INVISIBLE&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">index_type:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">    USING &#123;BTREE | HASH&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">algorithm_option:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    ALGORITHM [&#x3D;] &#123;DEFAULT | INPLACE | COPY&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">lock_option:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    LOCK [&#x3D;] &#123;DEFAULT | NONE | SHARED | EXCLUSIVE&#125;</span></pre></td></tr></table></figure>
@@ -364,8 +364,19 @@
 </li>
 </ol>
 <h4 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h4><p>联合索引是指对表上多个列进行索引，创建方法和单个索引一样，不同之处在于有多个索引列。</p>
-<p>需要注意的是，如果</p>
-<h4 id="索引优化和最佳实践"><a href="#索引优化和最佳实践" class="headerlink" title="索引优化和最佳实践"></a>索引优化和最佳实践</h4><p>参考文章：</p>
+<p>联合索引比对每个列分别建索引更有优势，因为索引建立得越多就越占磁盘空间，在更新数据的时候速度会更慢。另外建立多列索引时，顺序也是需要注意的，应该将严格的索引放在前面，这样筛选的力度会更大，效率更高。</p>
+<p>联合索引的优势：</p>
+<ol>
+<li><p>避免回表</p>
+<p>在执行计划中，table access by index rowid 代表是回表动作。如在user的id列建有索引，<code>select id from user</code>这个不用回表，直接从索引中读取id的值，而<code>select id,name from user</code>中，不能返回除 id 列其他的值，所以必须要回表。如果建有了 id 和 name 列的联合索引，则可以避免回表。</p>
+<p>另外，建立了 id 和 name 的联合索引(id列在在前)，则<code>select id from user</code>可以避免回表，而不用单独建立 id 列的单列索引</p>
+</li>
+<li><p>两个单列查询返回行较多，同时查返回行较少，联合索引更高效。</p>
+<p>如果 <code>select * from user where id=2</code> 和 <code>select * from user where name=&#39;tom&#39;</code> 各自返回的行数比较多，而 <code>select * from user where id=2 and name=&#39;tom&#39;</code> 返回的行数比较少，那么这个时候使用联合索引更加高效。</p>
+</li>
+</ol>
+<h4 id="索引优化和最佳实践"><a href="#索引优化和最佳实践" class="headerlink" title="索引优化和最佳实践"></a>索引优化和最佳实践</h4><p>//TODO 待补充</p>
+<p>参考文章：</p>
 <p><a href="https://tech.meituan.com/2014/06/30/mysql-index.html" target="_blank" rel="noopener">MySQL索引原理及慢查询优化</a></p>
 
     </div>
@@ -387,8 +398,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2019/12/01/MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/" rel="prev" title="MySQL中的事务">
-      <i class="fa fa-chevron-left"></i> MySQL中的事务
+    <a href="/2019/12/01/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/" rel="prev" title="MySQL中的锁">
+      <i class="fa fa-chevron-left"></i> MySQL中的锁
     </a></div>
       <div class="post-nav-item">
     <a href="/2019/12/01/InnoDB%E8%A1%A8%E7%BB%93%E6%9E%84/" rel="next" title="InnoDB 表结构">
@@ -476,7 +487,7 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -526,12 +537,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">314k</span>
+    <span title="站点总字数">316k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">8:44</span>
+    <span title="站点阅读时长">8:47</span>
 </div>
 
         

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="本方案要求：有一台有公网 IP 的服务器，可以是云服务器或者有公网 IP 的家庭网络。 如果事先了解 Docker、Nginx 等可能会更方便。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Minio+Nginx搭建图床一键上传博客图片">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;05&#x2F;10&#x2F;Minio-Nginx%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A%E4%B8%80%E9%94%AE%E4%B8%8A%E4%BC%A0%E5%8D%9A%E5%AE%A2%E5%9B%BE%E7%89%87&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="本方案要求：有一台有公网 IP 的服务器，可以是云服务器或者有公网 IP 的家庭网络。 如果事先了解 Docker、Nginx 等可能会更方便。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;705793b8gy1g5ruls77t2g208c08ct97.gif">
+<meta property="article:published_time" content="2020-05-09T18:27:39.000Z">
+<meta property="article:modified_time" content="2020-05-09T18:29:03.771Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="Blog">
+<meta property="article:tag" content="Typora">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;705793b8gy1g5ruls77t2g208c08ct97.gif">
+
+<link rel="canonical" href="http://beritra.github.com/2020/05/10/Minio-Nginx%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A%E4%B8%80%E9%94%AE%E4%B8%8A%E4%BC%A0%E5%8D%9A%E5%AE%A2%E5%9B%BE%E7%89%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Minio+Nginx搭建图床一键上传博客图片 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/05/10/Minio-Nginx%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A%E4%B8%80%E9%94%AE%E4%B8%8A%E4%BC%A0%E5%8D%9A%E5%AE%A2%E5%9B%BE%E7%89%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Minio+Nginx搭建图床一键上传博客图片
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-10 02:27:39 / 修改时间：02:29:03" itemprop="dateCreated datePublished" datetime="2020-05-10T02:27:39+08:00">2020-05-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Blog/" itemprop="url" rel="index">
+                    <span itemprop="name">Blog</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本方案要求：有一台有公网 IP 的服务器，可以是云服务器或者有公网 IP 的家庭网络。</p>
+<p>如果事先了解 Docker、Nginx 等可能会更方便。</p>
+<a id="more"></a>
+
+<h2 id="前因"><a href="#前因" class="headerlink" title="前因"></a>前因</h2><p>写博客的时候一大痛点就是图片的处理，MarkDown 格式好用是好用，但是没办法直接附带图片信息，只能放一个链接，图片存在本地的话发给别人的文档里图就没了，存在网上就涉及图床的选择问题，又是另一个麻烦事。大家分享出来的解决方案也是五花八门，有用公有云块存储的，有用收费图床的，前些年还有用微博当图床的，现在微博禁止外链了该方案也不行了，还有其他奇技淫巧比如放到 GitHub 上。</p>
+<p>作为不折腾会死星人+对广大乱七八糟免费服务抱着怀疑心态，我决定还是自己搭建，牺牲一点点稳定性和易用性（其实故障率也没多高）。自己的宽带是北京联通，恰好有公网 IP，只不过不是固定的，之前找了个 ddns 的脚本自己更新 IP 倒也没多大问题。</p>
+<p>开始我使用的方案是用的一个叫 Lychee 的图床，功能简单，用起来感觉还行，就是跟写博客的流程不能很好的配合，往往插入图片的时候步骤是这样的：</p>
+<ul>
+<li>准备好图片，剪切板上的话先保存到本地，网络图片粘贴一下url</li>
+<li>打开 Lychee，选择相应的方式上传</li>
+<li>上传完毕之后点开图片，右键选择图片地址</li>
+<li>把地址粘回 Typora 想要插入图片的位置</li>
+</ul>
+<p>可以看出来这个流程太蛋疼了，插入一张图片就得十几秒，这一点都不 geek。</p>
+<p>针对这个问题，Typora 最近更新了个功能，就是检测到插入图片之后会自动上传到指定的位置，可以是几种内置的服务，也可以自己写脚本。这种方式大大减少了插入图片的工作量，无论是剪切板上的图，还是网图，你只要粘贴到 Typora 上，就可以自动上传到图床，然后把图床中的链接替换掉开始的链接。这个功能的详细介绍可以去官网查看，或者看其他博主的介绍。下面分享下我用 Minio+Python 脚本实现的整个流程。</p>
+<h2 id="Minio"><a href="#Minio" class="headerlink" title="Minio"></a>Minio</h2><p>Minio 是亚马逊开源的一个文件存储系统，官方介绍这么说：</p>
+<blockquote>
+<p>MinIO 是一个基于Apache License v2.0开源协议的对象存储服务。它兼容亚马逊S3云存储服务接口，非常适合于存储大容量非结构化的数据，例如图片、视频、日志文件、备份数据和容器/虚拟机镜像等，而一个对象文件可以是任意大小，从几kb到最大5T不等。</p>
+</blockquote>
+<p>他的 API 非常简洁，而且如果你要求高的话，很方便做高可用，又提供了官方 Docker 镜像和一个简单的管理界面，所以我选择了他作为图床。</p>
+<p>废话少说，直接贴我的 Docker 命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">docker run  -itd -p 9000:9000 --name minio -v ~/docker/minio/data:/data -v ~/docker/minio/config:/root/.minio   -e <span class="string">"MINIO_ACCESS_KEY=你的账号"</span> -e <span class="string">"MINIO_SECRET_KEY=你的密码"</span>  minio/minio server /data</span></pre></td></tr></table></figure>
+
+<p>把里面 data 和 config 文件夹改成你想要存储数据和配置文件的文件夹，然后把账号密码填进去就行了。</p>
+<p>如果想用 docker-compose 或者 k8s 启动，请参考官方文档，挺详细的而且竟然还有中文版。</p>
+<p>启动之后，打开 9000 端口之后就可以看到自带的管理界面了。</p>
+<p>Minio 的存储逻辑很简单，分成多个 bucket（桶），没个桶内部就是以文件夹为层级，而且所有文件是直接存储在文件系统上的，没有分成小文件块之类的，因此你可以直接复制到你的 data 文件夹内。</p>
+<p>但是，你没办法直接用链接访问放在 Minio 中的文件，虽然它提供了分享等功能，但是提供的是一个下载链接，我们需要的是类似于图片预览，因此需要一个 Nginx 作为文件服务器。</p>
+<h2 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h2><p>Nginx 就不用赘述了，我也是用 Docker 启动的，命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">docker run -itd --name image -p 8081:80 -v ~/docker/image/conf:/etc/nginx/conf.d -v ~/docker/minio/data:/data nginx</span></pre></td></tr></table></figure>
+
+<p>可以看到，我把 Minio 的数据文件夹挂载进去了，挂载到了 Nginx 容器的<code>/data</code>目录。然后修改 Nginx 配置文件如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="attribute">listen</span>       <span class="number">80</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="attribute">server_name</span>  localhost;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="attribute">charset</span> koi8-r;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="attribute">access_log</span>  /var/log/nginx/host.access.log  main;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    <span class="attribute">location</span><span class="regexp"> ^~</span> /blog/ &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        <span class="attribute">root</span>   /data/;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这里，我是在 Minio 中创建了一个桶，名字叫 blog，它其实对应着 Minio 存储目录中的 blog文件夹。配置完 Nginx 之后，其实我如果想查看 Minio 中 blog 桶中的<code>/testpath/test.png</code>，只需要访问<code>http://localhost:8081/blog/testpath/test.png</code>就可以了。</p>
+<p>于是只要我向 blog 这个桶中上传文件，文件就可以直接通过 Nginx 预览了。</p>
+<h2 id="Typora-和-Python-脚本"><a href="#Typora-和-Python-脚本" class="headerlink" title="Typora 和 Python 脚本"></a>Typora 和 Python 脚本</h2><p>现在只需要准备一个脚本，让 Typora 能够向 Minio 上传文件就行了。选择 Python 是因为 Minio 官方提供了 API，而且我正好熟悉。</p>
+<p>Typora 上传的规则是这样，它会让你填写你的命令，比如你填写<code>python upload.py</code>，它就会执行<code>python upload.py &quot;image1-path&quot; &quot;image2-path&quot;</code>等等把图片位置作为参数穿进去。然后约定好需要你传回来上传完毕后的每张图片位置，每张图片占一行。比如上面的例子，传了两张，它就会自动从后往前查两行，作为 URL 替换掉原本的图片链接。</p>
+<p>于是我写了个脚本如下，写的比较糙，可以作为参考：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> uuid</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> minio <span class="keyword">import</span> Minio</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> minio.error <span class="keyword">import</span> ResponseError</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> warnings</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">warnings.filterwarnings(<span class="string">'ignore'</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">images = sys.argv[<span class="number">1</span>:]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">minioClient = Minio(<span class="string">"这里写你的Minio地址，格式为域名：端口，不带http://"</span>,</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">                    access_key=<span class="string">'你的Minio账号'</span>, secret_key=<span class="string">'你的Minio密码'</span>, secure=<span class="literal">False</span>)//secure为<span class="literal">True</span>的话第一项会填充为https://</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">result = <span class="string">"Upload Success:\n"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">date = time.strftime(<span class="string">"%Y%m"</span>, time.localtime())</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">download</span><span class="params">(image_url)</span>:</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    local_path = os.getcwd() + <span class="string">"/temp"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    r = requests.get(image_url, verify=<span class="literal">False</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">with</span> open(local_path, <span class="string">"wb"</span>) <span class="keyword">as</span> code:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">        code.write(r.content)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">return</span> local_path</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> image <span class="keyword">in</span> images:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> os.path.isfile(image):</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">        file_type = os.path.splitext(image)[<span class="number">-1</span>]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">        new_file_name = str(uuid.uuid1()).replace(<span class="string">'-'</span>, <span class="string">''</span>) + file_type</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">elif</span> image.startswith(<span class="string">"https://"</span>) <span class="keyword">or</span> image.startswith(<span class="string">"http://"</span>)://处理网络图片</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">if</span> image.endswith(<span class="string">".png"</span>) <span class="keyword">or</span> image.endswith(<span class="string">".jpg"</span>) <span class="keyword">or</span> image.endswith(<span class="string">".jpeg"</span>) <span class="keyword">or</span> image.endswith(<span class="string">".gif"</span>):</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">            url = image.split(<span class="string">"/"</span>)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">if</span> len(url) &gt; <span class="number">1</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">                image = download(image)//先把网图下载到本地了，然后在传到Minio</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">35</span></pre></td><td class="code"><pre><span class="line">                new_file_name = url[<span class="number">-1</span>]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">36</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">else</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">37</span></pre></td><td class="code"><pre><span class="line">                result = result + <span class="string">"error:parsing image error!"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">38</span></pre></td><td class="code"><pre><span class="line">                <span class="keyword">continue</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">39</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">else</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">40</span></pre></td><td class="code"><pre><span class="line">            result = result + <span class="string">"error:parsing image error!"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">41</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">continue</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">42</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">else</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">43</span></pre></td><td class="code"><pre><span class="line">        result = result + <span class="string">"error:parsing image error!"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">44</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">continue</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">45</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">try</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">46</span></pre></td><td class="code"><pre><span class="line">        minioClient.fput_object(bucket_name=<span class="string">'blog'</span>, object_name=date + <span class="string">"/"</span> + new_file_name, file_path=image)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">47</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">if</span> image.endswith(<span class="string">"temp"</span>):</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">48</span></pre></td><td class="code"><pre><span class="line">            os.remove(image)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">49</span></pre></td><td class="code"><pre><span class="line">        result = result +<span class="string">"你的Nginx地址，比如http://yourdomain:8081"</span> + <span class="string">"/blog/"</span> + date + <span class="string">"/"</span> + new_file_name + <span class="string">"\n"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">50</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">except</span> ResponseError <span class="keyword">as</span> err:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">51</span></pre></td><td class="code"><pre><span class="line">        result = result + <span class="string">"error:"</span> + err.message + <span class="string">"\n"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">52</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">53</span></pre></td><td class="code"><pre><span class="line">print(result)</span></pre></td></tr></table></figure>
+
+<p>我是把博客图片都放到了 blog 这个桶，然后按照月份创建文件夹，每个月的都放在同一个文件夹，文件名是用的 uuid。具体的逻辑想要修改的话自己改上面的脚本吧。</p>
+<p>搞定之后在 Typora 里面填上脚本，然后点击测试，就可以看看结果了，测试通过就万事大吉了，写个博客插入图片看看吧！</p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/705793b8gy1g5ruls77t2g208c08ct97.gif" alt="汤圆手势OK _斗图表情包"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Blog/" rel="tag"># Blog</a>
+              <a href="/tags/Typora/" rel="tag"># Typora</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/21/SpringBoot%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/" rel="prev" title="SpringBoot中的事务">
+      <i class="fa fa-chevron-left"></i> SpringBoot中的事务
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前因"><span class="nav-number">1.</span> <span class="nav-text">前因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Minio"><span class="nav-number">2.</span> <span class="nav-text">Minio</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nginx"><span class="nav-number">3.</span> <span class="nav-text">Nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Typora-和-Python-脚本"><span class="nav-number">4.</span> <span class="nav-text">Typora 和 Python 脚本</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">9:14</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="Java 高级特性有挺多，但是这几个一直没搞太通透，只会简单用用，为什么这么设计，有没有什么有意思的玩法都没探究过，今天就来整理一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java高级特性：泛型、反射、动态代理和注解">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;05&#x2F;10&#x2F;Java%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%EF%BC%9A%E6%B3%9B%E5%9E%8B%E3%80%81%E5%8F%8D%E5%B0%84%E3%80%81%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%92%8C%E6%B3%A8%E8%A7%A3&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="Java 高级特性有挺多，但是这几个一直没搞太通透，只会简单用用，为什么这么设计，有没有什么有意思的玩法都没探究过，今天就来整理一下。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;D17809940E1D4099BD319D343A262BDB?0.811335682794492.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;6828367BCC244C008F124B2A086B5B66?0.6631807899369526.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;22c9b11092b511ea971c00d861792df0.png">
+<meta property="article:published_time" content="2020-05-10T14:22:04.000Z">
+<meta property="article:modified_time" content="2020-05-10T14:23:37.664Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;D17809940E1D4099BD319D343A262BDB?0.811335682794492.png">
+
+<link rel="canonical" href="http://beritra.github.com/2020/05/10/Java%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%EF%BC%9A%E6%B3%9B%E5%9E%8B%E3%80%81%E5%8F%8D%E5%B0%84%E3%80%81%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%92%8C%E6%B3%A8%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Java高级特性：泛型、反射、动态代理和注解 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/05/10/Java%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%EF%BC%9A%E6%B3%9B%E5%9E%8B%E3%80%81%E5%8F%8D%E5%B0%84%E3%80%81%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%92%8C%E6%B3%A8%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java高级特性：泛型、反射、动态代理和注解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-10 22:22:04 / 修改时间：22:23:37" itemprop="dateCreated datePublished" datetime="2020-05-10T22:22:04+08:00">2020-05-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>19k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>32 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Java 高级特性有挺多，但是这几个一直没搞太通透，只会简单用用，为什么这么设计，有没有什么有意思的玩法都没探究过，今天就来整理一下。</p>
+<a id="more"></a>
+
+<h2 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h2><p>说到泛型，肯定很熟悉了，我们天天用的 List:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; list=<span class="keyword">new</span> ArrayList&lt;&gt;();</span></pre></td></tr></table></figure>
+
+<p><code>ArrayList</code>就是个泛型类，我们通过设定不同的类型，可以往集合里面存储不同的数据类型（而且只能存储设定的数据类型，这是泛型的优势之一）。“泛型”简单的意思就是泛指的类型（参数化类型）。</p>
+<p>有人灵机一动，就问这里为什么不用<code>Object</code>，到时候再转呐？</p>
+<p>问得好，在泛型出现之前，的确是这么做的。但是这样的有一个问题：如果集合里面数据很多，某一个数据转型出现错误，在编译期是无法发现的，但是在运行期会发生<code>java.lang.ClassCastException</code>。</p>
+<p>泛型一方面让我们只能往集合中添加一种类型的数据，同时可以让我们在编译期就发现这些错误，避免运行时异常的发生，提升代码的健壮性。</p>
+<p>我们可以从以下几个方面理解泛型：</p>
+<ul>
+<li>泛型通配符</li>
+<li>泛型类</li>
+<li>泛型接口</li>
+<li>泛型方法</li>
+<li>泛型擦除</li>
+<li>泛型数组</li>
+</ul>
+<h3 id="泛型符号"><a href="#泛型符号" class="headerlink" title="泛型符号"></a>泛型符号</h3><p>可能有人注意到有不同的泛型符号，其实泛型可以使用任何大写字母定义，把 T 换成 A 也一样，这里 T 只是名字上的意义而已。以下是一般约定俗成的符号意义：</p>
+<blockquote>
+<p> E - Element (在集合中使用，因为集合中存放的是元素)<br> T - Type（Java 类）<br> K - Key（键）<br> V - Value（值）<br> N - Number（数值类型）<br> ？-  表示不确定的 Java 类型</p>
+</blockquote>
+<p>对于<code>？</code>类型的泛型，我们称之为通配符，又有以下三种情况：</p>
+<h4 id="无限通配符-lt-gt"><a href="#无限通配符-lt-gt" class="headerlink" title="无限通配符&lt;?&gt;"></a>无限通配符&lt;?&gt;</h4><p>无限通配符可以表示所有的类型。可能一般会有疑惑，泛型本来就具备泛化的功能，可以表示所有类型，那么<code>&lt;T&gt;</code>和<code>&lt;?&gt;</code>区别是什么？无限通配符的主要作用就是让泛型能够接受未知类型的数据。</p>
+<p>？和 T 都表示不确定的类型，区别在于我们可以对 T 进行操作，但是对 ？不行，比如如下这种 ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">// 可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">T t = operate();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">？ car = operate();</span></pre></td></tr></table></figure>
+
+<p>T 是用于定义的时候，而 ? 用于使用的时候，我们可以这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    T t;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>但是不可以：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;?&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    ? t;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>在调用的时候想法，我们可以用 ? 表示一个未知的泛型：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Test&lt;?&gt; test = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr></table></figure>
+
+<p>这时候就不能用 T 了。但是注意，这里<code>Test&lt;?&gt;</code>类型的<code>test</code>独享是不能对其属性进行赋值的，也就是说下面的操作是不允许的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Test&lt;?&gt; test = <span class="keyword">new</span> Test&lt;String&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">test.t=<span class="string">"123"</span>;<span class="comment">//Incompatible types. Found: 'java.lang.String', required: 'capture&lt;?&gt;'</span></span></pre></td></tr></table></figure>
+
+<p>虽然我们创建了一个泛型类型为 String 的对象，但是不能对其赋值。可以看出<code>Test&lt;?&gt;</code>只是用于声明变量的时候用，你不能用它来实例化，尤其是用于当你不知道声明的泛型类型的时候。</p>
+<h4 id="上界通配符-lt-extends-T-gt"><a href="#上界通配符-lt-extends-T-gt" class="headerlink" title="上界通配符&lt;? extends T&gt;"></a>上界通配符&lt;? extends T&gt;</h4><p>使用固定上边界的通配符的泛型，就能够接受指定类及其子类类型的数据。要声明使用该类通配符，采用<code>&lt;? extends E&gt;</code>的形式，这里的 T 就是该泛型的上边界。注意：这里虽然用的是<code>extends</code>关键字，却不仅限于继承了父类 T 的子类，也可以代指显现了接口 T 的类。</p>
+<p>举个栗子，我们定义两个类，水果和苹果，水果是苹果的父类。然后定义一个泛型类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Fruit</span></span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Apple</span> <span class="keyword">extends</span> <span class="title">Fruit</span></span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>测试一下上界通配符可以发现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Test&lt;Fruit&gt; fruit = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Test&lt;Apple&gt; apple = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Test&lt;Object&gt; object = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">Test&lt;? extends Fruit&gt;  newTest;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">newTest=fruit;<span class="comment">//可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">newTest=apple;<span class="comment">//可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">newTest=object;<span class="comment">//ide报错</span></span></pre></td></tr></table></figure>
+
+
+
+<h4 id="下界通配符-lt-extends-T-gt"><a href="#下界通配符-lt-extends-T-gt" class="headerlink" title="下界通配符&lt;? extends T&gt;"></a>下界通配符&lt;? extends T&gt;</h4><p>跟上界通配符是相对应的，只接受指定类及其父类，很好理解。直接看栗子，还是用苹果和水果举例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Test&lt;Fruit&gt; fruit = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Test&lt;Apple&gt; apple = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Test&lt;Object&gt; object = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">Test&lt;String&gt; string = <span class="keyword">new</span> Test&lt;&gt;();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">Test&lt;? extends Fruit&gt;  newTest;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">newTest=fruit;<span class="comment">//可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">newTest=apple;<span class="comment">//可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">newTest=object;<span class="comment">//可以</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">newTest=string;<span class="comment">//ide报错</span></span></pre></td></tr></table></figure>
+
+<p>跟上面有一点点不同的是，由于<code>Object</code>是所有类的父类，所以也可以。</p>
+<p>另外跟上界通配符不同的是，下界通配符<code>&lt;? super T&gt;</code>不影响往里面存储，但是读取出来的数据只能是 Object 类型。</p>
+<p>原因是，下界通配符规定了元素最小的粒度，必须是 T 及其基类，那么我往里面存储 T 及其派生类都是可以的，因为它都可以隐式的转化为 T 类型。但是往外读就不好控制了，里面存储的都是 T 及其基类，无法转型为任何一种类型，只有 Object 基类才能装下。</p>
+<p>最后简单介绍下 Effective Java 这本书里面介绍的 PECS 原则。</p>
+<ul>
+<li>上界<code>&lt;? extends T&gt;</code>不能往里存，只能往外取，适合频繁往外面读取内容的场景。</li>
+<li>下界<code>&lt;? super T&gt;</code>不影响往里存，但往外取只能放在<code>Object</code>对象里，适合经常往里面插入数据的场景。</li>
+</ul>
+<h3 id="泛型类"><a href="#泛型类" class="headerlink" title="泛型类"></a>泛型类</h3><p>类结构是面向对象中最基本的元素，如果我们的类需要有很好的扩展性，那么我们可以将其设置成泛型的。</p>
+<p>泛型类定义时只需要在类名后面加上类型参数即可，当然你也可以添加多个参数，类似于<code>&lt;K,V&gt;</code>,<code>&lt;T,E,K&gt;</code>等。这样我们就可以在类里面使用定义的类型参数。当然需要注意，泛型的类型参数只能是 Object 类（包括自定义类），不能是基本类型。</p>
+<h3 id="泛型接口"><a href="#泛型接口" class="headerlink" title="泛型接口"></a>泛型接口</h3><p>泛型接口与泛型类的定义及使用基本相同。泛型接口常被用在各种类的生产器中，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">//定义一个泛型接口</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Generator</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">next</span><span class="params">()</span></span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>当实现泛型接口的类，未传入泛型实参时，需将泛型的声明也一起加到类中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 未传入泛型实参时，与泛型类的定义相同，在声明类的时候，需将泛型的声明也一起加到类中</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 即：class FruitGenerator&lt;T&gt; implements Generator&lt;T&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 如果不声明泛型，如：class FruitGenerator implements Generator&lt;T&gt;，编译器会报错："Unknown class"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FruitGenerator</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Generator</span>&lt;<span class="title">T</span>&gt;</span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">next</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>在实现类实现泛型接口时，如已将泛型类型传入实参类型，则所有使用泛型的地方都要替换成传入的实参类型：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 传入泛型实参时：</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 在实现类实现泛型接口时，如已将泛型类型传入实参类型，则所有使用泛型的地方都要替换成传入的实参类型</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 即：Generator&lt;T&gt;，public T next();中的的T都要替换成传入的String类型。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FruitGenerator</span> <span class="keyword">implements</span> <span class="title">Generator</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">next</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> <span class="string">"Fruit"</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+
+
+<h3 id="泛型方法"><a href="#泛型方法" class="headerlink" title="泛型方法"></a>泛型方法</h3><p>在java中,泛型类的定义非常简单，但是泛型方法就比较复杂了。</p>
+<p>泛型类，是在实例化类的时候指明泛型的具体类型；泛型方法，是在调用方法的时候指明泛型的具体类型。</p>
+<p>需要注意的是：</p>
+<ul>
+<li><code>public</code>与返回值中间<code>&lt;T&gt;</code>非常重要，可以理解为声明此方法为泛型方法。</li>
+<li>只有声明了<code>&lt;T&gt;</code>的方法才是泛型方法，泛型类中的使用了泛型的成员方法并不是泛型方法。</li>
+<li><code>&lt;T&gt;</code>表明该方法将使用泛型类型 T，此时才可以在方法中使用泛型类型 T。</li>
+<li>与泛型类的定义一样，此处 T 可以随便写为任意标识，常见的如 T、E、K、V 等形式的参数常用于表示泛型。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * 泛型方法的基本介绍</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * <span class="doctag">@param</span> tClass 传入的泛型实参</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> * <span class="doctag">@return</span> T 返回值为T类型</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="comment"> */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">genericMethod</span><span class="params">(Class&lt;T&gt; tClass)</span><span class="keyword">throws</span> InstantiationException ,</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="function">  IllegalAccessException</span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        T instance = tClass.newInstance();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> instance;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+
+
+<h4 id="泛型类中的泛型方法"><a href="#泛型类中的泛型方法" class="headerlink" title="泛型类中的泛型方法"></a>泛型类中的泛型方法</h4><p>如果在泛型类中声明了一个泛型方法，使用泛型 E，这种泛型 E 可以为任意类型。可以类型与 T 相同，也可以不同，比如一个最刁钻的情况：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    &lt;E&gt; <span class="function"><span class="keyword">void</span> <span class="title">func1</span><span class="params">(T t)</span> </span>&#123;<span class="comment">//这里传入的参数 t 跟类的泛型保持一致。所以这里的 E 是没有意义的，idea 会提示可以直接删掉。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">func2</span><span class="params">(T t)</span> </span>&#123;<span class="comment">//这里的两个泛型 T 都是新的泛型，和类的泛型 T 没有关系。这么写的话很容易引起误会，所以 idea 也会提示建议重命名。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &lt;E&gt; <span class="function"><span class="keyword">void</span> <span class="title">func3</span><span class="params">(E t)</span> </span>&#123;<span class="comment">//这个很清晰，E 和 T 是无关的泛型。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+
+
+<h4 id="静态方法与泛型"><a href="#静态方法与泛型" class="headerlink" title="静态方法与泛型"></a>静态方法与泛型</h4><p>静态方法有一种情况需要注意一下，那就是在类中的静态方法使用泛型：静态方法无法访问类上定义的泛型，如果静态方法操作的引用数据类型不确定的时候，必须要将泛型定义在方法上。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * 如果在类中定义使用泛型的静态方法，需要添加额外的泛型声明（将这个方法定义成泛型方法）</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * 即使静态方法要使用泛型类中已经声明过的泛型也不可以。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * 如：public static void show(T t)&#123;..&#125;,此时编译器会提示错误信息：</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="comment">          "StaticGenerator cannot be refrenced from static context"</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">show</span><span class="params">(T t)</span></span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+
+
+<h3 id="泛型擦除"><a href="#泛型擦除" class="headerlink" title="泛型擦除"></a>泛型擦除</h3><p>泛型擦除，或者叫泛型的类型擦除，出现的根本原因是为了保证兼容性。</p>
+<p>泛型是 Java 1.5 版本才引进的概念，在这之前是没有泛型的概念的，但显然，泛型代码能够很好地和之前版本的代码很好地兼容。这是因为，泛型信息只存在于代码编译阶段，在进入 JVM 之前，与泛型相关的信息会被擦除掉，专业术语叫做类型擦除。</p>
+<p>在泛型类被类型擦除的时候，之前泛型类中的类型参数部分如果没有指定上限，如<code>&lt;T&gt;</code>则会被转译成普通的 Object 类型，如果指定了上限如<code>&lt;T extends String&gt;</code>则类型参数就被替换成类型上限。</p>
+<p>如在代码中定义的<code>List&lt;object&gt;</code>和<code>List&lt;String&gt;</code>等类型，在编译后都会编程<code>List</code>。JVM 看到的只是<code>List</code>，而由泛型附加的类型信息对 JVM 来说是不可见的。Java 编译器会在编译时尽可能的发现可能出错的地方，但是仍然无法避免在运行时刻出现类型转换异常的情况。类型擦除也是 Java 的泛型实现方法与 C++ 模版机制实现方式之间的重要区别。</p>
+<h3 id="泛型数组"><a href="#泛型数组" class="headerlink" title="泛型数组"></a>泛型数组</h3><p>关于泛型数组，还要提醒一下，在java中是“不能创建一个确切的泛型类型的数组”的。</p>
+<p>也就是说下面的这个例子是不可以的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">List&lt;String&gt;[] ls = <span class="keyword">new</span> ArrayList&lt;String&gt;[<span class="number">10</span>];</span></pre></td></tr></table></figure>
+
+<p>而使用通配符创建泛型数组是可以的，如下面这个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">List&lt;?&gt;[] ls = <span class="keyword">new</span> ArrayList&lt;?&gt;[<span class="number">10</span>];</span></pre></td></tr></table></figure>
+
+<p>这样也是可以的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">List&lt;String&gt;[] ls = <span class="keyword">new</span> ArrayList[<span class="number">10</span>];</span></pre></td></tr></table></figure>
+
+
+
+<h2 id="反射"><a href="#反射" class="headerlink" title="反射"></a>反射</h2><p>关于反射，基本的用法应该都熟悉了，可以通过全类名找到对应的类，然后实例化一个对象，还可以访问其变量，调用他的方法。甚至可以绕过<code>private</code>关键字的限制等等。</p>
+<p>虽然有一点基础了解，但是一直不知道反射什么原理，为什么要设计这样一个功能。</p>
+<p>首先我们先明确反射提供的功能：</p>
+<ul>
+<li>在运行时判断任意一个对象所属的类；</li>
+<li>在运行时构造任意一个类的对象；</li>
+<li>在运行时判断任意一个类所具有的成员变量和方法（通过反射甚至可以调用private方法）；</li>
+<li>在运行时调用任意一个对象的方法。</li>
+</ul>
+<p>首先为什么需要有反射？我们看下动态编译与静态编译的概念：</p>
+<ul>
+<li>静态编译：在编译时确定类型，绑定对象。即通过<code>new</code>关键字实例化一个对象。</li>
+<li>动态编译：运行时确定类型，绑定对象。动态编译最大限度发挥了java的灵活性，体现了多态的应用，有以降低类之间的藕合性。</li>
+</ul>
+<p>另外不妨用大家接触最早的一个反射用例作为例子。刚接触 JDBC 的时候可能就有疑问，为什么连接数据库一定要先注册驱动，也就是用<code>Class.forName(驱动类)</code>来加载驱动类？</p>
+<p>这里的原因就是包括：</p>
+<ul>
+<li>解耦：所有不同数据库的驱动类都是 JDK 提供的通用接口<code>NonRegisteringDriver</code>的实现，使用反射可以方便解耦，后需更换数据库驱动不需要修改代码，改个配置文件就行了。另外这里也是桥接模式的一个体现。</li>
+<li>节省资源：我们加载驱动其实只是需要执行其静态代码块里的初始化代码，其他的都不会马上用到，所以更节省资源。</li>
+</ul>
+<p>另外，其实用<code>new com.mysql.jdbc.Driver();</code>的方式加载驱动，也不是不可以，只不过不是最优选择。</p>
+<p>另外，使用代理的优缺点也很明显：</p>
+<ul>
+<li>优点<br>可以实现动态创建对象和编译，体现出很大的灵活性。采用静态的话，需要把整个程序重新编译一次才可以实现功能的更新，而采用反射机制的话，它就可以不用卸载，只需要在运行时才动态的创建和编译，就可以实现该功能。</li>
+<li>缺点<br>对性能有影响。使用反射基本上是一种解释操作，我们可以告诉 JVM，我们希望做什么并且它满足我们的要求。这类操作总是慢于只直接执行相同的操作。</li>
+</ul>
+<h3 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h3><p>关于反射主要的用途，有一个知乎回答说得很好：</p>
+<blockquote>
+<p>比如你在开发一个 xxfreamwork，后续要初始化并管理其他开发者创建的类 Y y 的对象。你肯定不会在 freamwork 开发阶段就知道将来大家定义的类名，这时候可以把类名做参数初始化对象。</p>
+</blockquote>
+<p>像 Spring Framework 就是大量用到了反射，之前用 xml 配置 bean，Spring 框架就是通过反射来创建一个 bean 的实例，然后放到池子里进行管理。这时候就不能用 new 关键字来创建了，以为你根本不知道对方会有哪些类。</p>
+<p>除此之外，下面我们要说的动态代理也是另外一大重要用途，这个在下面详细说。</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>对于最简单的一次反射使用样例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Class actionClass=Class.forName(<span class="string">"MyClass"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Object action=actionClass.newInstance();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Method method = actionClass.getMethod(<span class="string">"myMethod"</span>,<span class="keyword">null</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">method.invoke(action,<span class="keyword">null</span>);</span></pre></td></tr></table></figure>
+
+<p>前两行实现了类的加载、链接和初始化（<code>newInstance</code>方法实际上也是使用反射调用了<code>&lt;init&gt;</code>方法），后两行实现了从 class 对象中获取到 method 对象然后执行反射调用。</p>
+<p>从上面的代码可以看出，如果我们自己想要实现<code>invoke</code>方法，其实只要实现这样一个 Method 类即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Class Method&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">     <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object obj,Object[] param)</span></span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">        MyClass myClass=(MyClass)obj;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> myClass.myMethod();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>看起来很简单吧，那么实际上 JVM 是怎么做的呐？</p>
+<p>首先来看一下Method对象是如何生成的：</p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/D17809940E1D4099BD319D343A262BDB?0.811335682794492.png" alt=""></p>
+<p>上面的 Class 对象是在加载类时由 JVM 构造的，JVM 为每个类管理一个独一无二的 Class 对象，这份 Class 对象里维护着该类的所有 Method，Field，Constructor 的 cache，这份 cache 也可以被称作根对象。每次<code>getMethod</code>获取到的 Method 对象都持有对根对象的引用，因为一些重量级的 Method 的成员变量（主要是 MethodAccessor ），我们不希望每次创建 Method 对象都要重新初始化，于是所有代表同一个方法的 Method 对象都共享着根对象的 MethodAccessor，每一次创建都会调用根对象的 copy 方法复制一份。</p>
+<p>获取到Method对象之后，调用invoke方法的流程如下：</p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/6828367BCC244C008F124B2A086B5B66?0.6631807899369526.png" alt="img"></p>
+<p>可以看到，调用<code>Method.invoke</code>之后，会直接去调<code>MethodAccessor.invoke</code>。MethodAccessor 就是上面提到的所有同名 method 共享的一个实例，由<code>ReflectionFactory</code>创建。创建机制采用了一种名为 inflation 的方式（JDK 1.4 之后）：如果该方法的累计调用次数&lt;=15，会创建出<code>NativeMethodAccessorImpl</code>，它的实现就是直接调用 native 方法实现反射；如果该方法的累计调用次数&gt;15，会由 Java 代码创建出字节码组装而成的<code>MethodAccessorImpl</code>。（是否采用 inflation 和 15 这个数字都可以在 JVM 参数中调整）。</p>
+<p>更加细致的过程R大有一篇博文：<a href="https://www.iteye.com/blog/rednaxelafx-548536" target="_blank" rel="noopener">关于反射调用方法的一个log</a></p>
+<h2 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h2><p>说道动态代理，就必须得回顾下代理模式这种设计模式了：</p>
+<blockquote>
+<p>代理模式：给某一个对象提供一个代理，并由代理对象来控制对真实对象的访问。代理模式是一种结构型设计模式。</p>
+<p>代理模式角色分为 3 种：</p>
+<p>Subject（抽象主题角色）：定义代理类和真实主题的公共对外方法，也是代理类代理真实主题的方法；</p>
+<p>RealSubject（真实主题角色）：真正实现业务逻辑的类；</p>
+<p>Proxy（代理主题角色）：用来代理和封装真实主题；</p>
+<p>代理模式的结构比较简单，其核心是代理类，为了让客户端能够一致性地对待真实对象和代理对象，在代理模式中引入了抽象层。</p>
+</blockquote>
+<p>简单来说，代理模式就在真实的角色外面包装一层代理，可以在代理方法中执行真实的方法，还可以额外做一些逻辑判断和处理。</p>
+<p>而动态代理，就是区别于静态代理的一种代理模式实现方式。二者根据字节码的创建时机来分类：</p>
+<ul>
+<li>所谓静态也就是在程序运行前就已经存在代理类的字节码文件，代理类和真实主题角色的关系在运行前就确定了。</li>
+<li>而动态代理的源码是在程序运行期间由<strong>JVM</strong>根据反射等机制动态的生成，所以在运行前并不存在代理类的字节码文件。</li>
+</ul>
+<h3 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h3><p>我们先用更好理解的静态代理来了解一下代理的过程，然后理解静态代理的缺点，再来学习动态代理。</p>
+<p>编写一个接口 UserService ，以及该接口的一个实现类 UserServiceImpl。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserService</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">select</span><span class="params">()</span></span>;   </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span></span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserServiceImpl</span> <span class="keyword">implements</span> <span class="title">UserService</span> </span>&#123;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">select</span><span class="params">()</span> </span>&#123;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        System.out.println(<span class="string">"查询 select 方法"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        System.out.println(<span class="string">"更新 update 方法"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>我们将通过静态代理对 UserServiceImpl 进行功能增强，在调用 <code>select</code> 和 <code>update</code> 之前记录一些日志。写一个代理类 UserServiceProxy，代理类需要实现 UserService：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserServiceProxy</span> <span class="keyword">implements</span> <span class="title">UserService</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">private</span> UserService target; <span class="comment">// 被代理的对象</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">UserServiceProxy</span><span class="params">(UserService target)</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">this</span>.target = target;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">select</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">        before();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        target.select();    <span class="comment">// 这里才实际调用真实主题角色的方法</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        after();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        before();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        target.update();    <span class="comment">// 这里才实际调用真实主题角色的方法</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        after();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">before</span><span class="params">()</span> </span>&#123;     <span class="comment">// 在执行方法之前执行</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">        System.out.println(String.format(<span class="string">"log start time [%s] "</span>, <span class="keyword">new</span> Date()));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">after</span><span class="params">()</span> </span>&#123;      <span class="comment">// 在执行方法之后执行</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">        System.out.println(String.format(<span class="string">"log end time [%s] "</span>, <span class="keyword">new</span> Date()));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>通过静态代理，我们达到了功能增强的目的，而且没有侵入原代码，这是静态代理的一个优点。</p>
+<p>虽然静态代理实现简单，且不侵入原代码，但是，当场景稍微复杂一些的时候，静态代理的缺点也会暴露出来。</p>
+<p>1、当需要代理多个类的时候，由于代理对象要实现与目标对象一致的接口，有两种方式：</p>
+<ul>
+<li>只维护一个代理类，由这个代理类实现多个接口，但是这样就导致代理类过于庞大；</li>
+<li>新建多个代理类，每个目标对象对应一个代理类，但是这样会产生过多的代理类。</li>
+</ul>
+<p>2、 当接口需要增加、删除、修改方法的时候，目标对象与代理类都要同时修改，不易维护。</p>
+<p>如何改进？就是使用动态代理。动态代理就是想办法，根据接口或目标对象，计算出代理类的字节码，然后再加载到 JVM 中使用。</p>
+<h3 id="动态代理-1"><a href="#动态代理-1" class="headerlink" title="动态代理"></a>动态代理</h3><p>常见的字节码操作类库有如下几种：</p>
+<blockquote>
+<p>这里有一些介绍：<a href="https://java-source.net/open-source/bytecode-libraries" target="_blank" rel="noopener">java-source.net/open-source…</a></p>
+</blockquote>
+<ul>
+<li>Apache BCEL (Byte Code Engineering Library)：是 Java classworking 广泛使用的一种框架，它可以深入到 JVM 汇编语言进行类操作的细节。</li>
+<li>ObjectWeb ASM：是一个Java字节码操作框架。它可以用于直接以二进制形式动态生成 stub 根类或其他代理类，或者在加载时动态修改类。</li>
+<li>CGLib(Code Generation Library)：是一个功能强大，高性能和高质量的代码生成库，用于扩展 JAVA 类并在运行时实现接口。</li>
+<li>Javassist：是 Java 的加载时反射系统，它是一个用于在 Java 中编辑字节码的类库；它使 Java 程序能够在运行时定义新类，并在 JVM 加载之前修改类文件。</li>
+<li>…</li>
+</ul>
+<p>为了让生成的代理类与目标对象（真实主题角色）保持一致性，实际使用中我们最常见的两种实现方式是：</p>
+<ol>
+<li>通过实现接口的方式 -&gt; JDK动态代理</li>
+<li>通过继承类的方式 -&gt; CGLib动态代理</li>
+</ol>
+<h4 id="JDK-动态代理"><a href="#JDK-动态代理" class="headerlink" title="JDK 动态代理"></a>JDK 动态代理</h4><p>JDK 动态代理主要涉及两个类：<code>java.lang.reflect.Proxy</code> 和 <code>java.lang.reflect.InvocationHandler</code>。还是以上面的例子，我们用动态代理的方式实现对 UserService 的日志记录。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogProxy</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    Object target;<span class="comment">//被代理的对象，实际的方法执行者。</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LogProxy</span><span class="params">(Object target)</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">this</span>.target = target;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    <span class="comment">// 调用invoke方法之前执行</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">before</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        System.out.println(String.format(<span class="string">"log start time [%s] "</span>, <span class="keyword">new</span> Date()));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">    <span class="comment">// 调用invoke方法之后执行</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">after</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        System.out.println(String.format(<span class="string">"log end time [%s] "</span>, <span class="keyword">new</span> Date()));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">        before();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">        Object result = method.invoke(target, args);  <span class="comment">// 调用 target 的 method 方法</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">        after();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> result;  <span class="comment">// 返回方法的执行结果</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这个就是日志记录代理类了，他的内部变量 target 是实际执行方法的对象，我们在执行对象的前后添加了日志记录方法。不同于静态代理中直接调用对象的方法，基于 JDK 的动态代理是利用反射来执行相应的方法。</p>
+<p>执行代理的步骤如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">      <span class="comment">// 1. 创建被代理的对象，UserService接口的实现类</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">     UserServiceImpl userServiceImpl = <span class="keyword">new</span> UserServiceImpl();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">     <span class="comment">// 2. 获取对应的 ClassLoader</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">     ClassLoader classLoader = userServiceImpl.getClass().getClassLoader();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">     <span class="comment">// 3. 获取所有接口的Class，这里的UserServiceImpl只实现了一个接口UserService，</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">     Class&lt;?&gt;[] interfaces = userServiceImpl.getClass().getInterfaces();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">     <span class="comment">// 4. 创建一个将传给代理类的调用请求处理器，处理所有的代理对象上的方法调用。这里创建的是一个自定义的日志处理器，须传入实际的执行对象 userServiceImpl</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">     InvocationHandler logHandler = <span class="keyword">new</span> LogProxy(userServiceImpl);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">     <span class="comment">/*</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="comment">  5.根据上面提供的信息，创建代理对象。在这个过程中：</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"><span class="comment">            a.JDK会通过根据传入的参数信息动态地在内存中创建和.class 文件等同的字节码</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"><span class="comment">            b.然后根据相应的字节码转换成对应的class，</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line"><span class="comment">            c.然后调用newInstance()创建代理实例</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"><span class="comment">*/</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">     UserService proxy = (UserService) Proxy.newProxyInstance(classLoader, interfaces, logHandler);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">     <span class="comment">// 调用代理的方法</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">     proxy.select();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">     proxy.update();</span></pre></td></tr></table></figure>
+
+<p>JDK 动态代理最主要的几个方法如下：</p>
+<blockquote>
+<p><strong>java.lang.reflect.InvocationHandler</strong></p>
+<p><code>Object invoke(Object proxy, Method method, Object[] args)</code> 定义了代理对象调用方法时希望执行的动作，用于集中处理在动态代理类对象上的方法调用</p>
+<p><strong>java.lang.reflect.Proxy</strong></p>
+<p><code>static InvocationHandler getInvocationHandler(Object proxy)</code>  用于获取指定代理对象所关联的调用处理器</p>
+<p><code>static Class getProxyClass(ClassLoader loader, Class... interfaces)</code> 返回指定接口的代理类</p>
+<p><code>static Object newProxyInstance(ClassLoader loader, Class[] interfaces, InvocationHandler h)</code> 构造实现指定接口的代理类的一个新实例，所有方法会调用给定处理器对象的 invoke 方法</p>
+<p><code>static boolean isProxyClass(Class cl)</code> 返回 cl 是否为一个代理类</p>
+</blockquote>
+<p>在<code>newProxyInstance</code>中顺着代码可以看到整个动态代理的流程，简单来说就是对参数进行校验，然后生成一个代理类的字节码文件，如果你修改 jvm 参数<code>jdk.proxy.ProxyGenerator.saveGeneratedFiles</code>为 true 的话，还可以保存生成的字节码文件。</p>
+<p>打印字节码文件我们可以看到生成的文件结构：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> $<span class="title">Proxy0</span> <span class="keyword">extends</span> <span class="title">Proxy</span> <span class="keyword">implements</span> <span class="title">UserService</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">static</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">            m1 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"equals"</span>, Class.forName(<span class="string">"java.lang.Object"</span>));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">            m2 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"toString"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">            m4 = Class.forName(<span class="string">"com.beritra.jdk.proxy.UserService"</span>).getMethod(<span class="string">"select"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">            m0 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"hashCode"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">            m3 = Class.forName(<span class="string">"com.beritra.jdk.proxy.UserService"</span>).getMethod(<span class="string">"update"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException var2) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchMethodError(var2.getMessage());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException var3) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoClassDefFoundError(var3.getMessage());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m3, (Object[])<span class="keyword">null</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">throw</span> var2;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">select</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m4, (Object[])<span class="keyword">null</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">throw</span> var2;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">    <span class="comment">//其他部分没贴</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">34</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>从这个生成的代理的代码中我们可以发现：</p>
+<ul>
+<li>继承了 Proxy 类，并且实现了被代理的所有接口，以及 equals、hashCode、toString 等方法</li>
+<li>由于继承了 Proxy 类，所以每个代理类都会关联一个 InvocationHandler 方法调用处理器</li>
+<li>类和所有方法都被 <code>public final</code> 修饰，所以代理类只可被使用，不可以再被继承</li>
+<li>每个方法都有一个 Method 对象来描述，Method 对象在static静态代码块中创建，以 <code>m + 数字</code> 的格式命名</li>
+<li>调用方法的时候通过 <code>super.h.invoke(this, m4, (Object[])null);</code> 调用，其中的 <code>super.h.invoke</code> 实际上是在创建代理的时候传递给 <code>Proxy.newProxyInstance</code> 的 LogHandler 对象，它继承 InvocationHandler 类，负责实际的调用处理逻辑。</li>
+<li>而 LogHandler 的 invoke 方法接收到 method、args 等参数后，进行一些处理，然后通过反射让被代理的对象 target 执行方法</li>
+</ul>
+<p>流程如下：</p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/22c9b11092b511ea971c00d861792df0.png" alt="img"></p>
+<h4 id="CGLib-动态代理"><a href="#CGLib-动态代理" class="headerlink" title="CGLib 动态代理"></a>CGLib 动态代理</h4><p>在 maven 依赖中加入 CGLib 的库：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/CGLib/CGLib --&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>CGLib<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>CGLib<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.3.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span></pre></td></tr></table></figure>
+
+<p>如果我们用 CGLib 的方式实现动态代理，代码更简单一点。还是跟上面 JDK 动态代理类似的例子，我们复用上面的 UserService 和 UserServiceImpl 两个类，但是重新写代理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogInterceptor</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="comment">/**</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * <span class="doctag">@param</span> object      表示要进行增强的对象</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * <span class="doctag">@param</span> method      表示拦截的方法</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * <span class="doctag">@param</span> objects     数组表示参数列表，基本数据类型需要传入其包装类型，如int--&gt;Integer、long-Long、double--&gt;Double</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * <span class="doctag">@param</span> methodProxy 表示对方法的代理，invokeSuper方法表示对被代理对象方法的调用</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * <span class="doctag">@return</span> 执行结果</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Throwable</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"><span class="comment">     */</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Object object, Method method, Object[] objects, MethodProxy methodProxy)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">        before();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        Object result = methodProxy.invokeSuper(object, objects);   <span class="comment">// 注意这里是调用 invokeSuper 而不是 invoke，否则死循环，methodProxy.invokesuper执行的是原始类的方法，method.invoke执行的是子类的方法</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        after();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> result;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">before</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">        System.out.println(String.format(<span class="string">"log start time [%s] "</span>, <span class="keyword">new</span> Date()));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">after</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">        System.out.println(String.format(<span class="string">"log end time [%s] "</span>, <span class="keyword">new</span> Date()));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后调用的时候：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">LogInterceptor logInterceptor= <span class="keyword">new</span> LogInterceptor();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Enhancer enhancer = <span class="keyword">new</span> Enhancer();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">enhancer.setSuperclass(UserServiceImpl<span class="class">.<span class="keyword">class</span>)</span>;  <span class="comment">// 设置超类，CGLib是通过继承来实现的</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">enhancer.setCallback(logInterceptor);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">UserService service = (UserService) enhancer.create();   <span class="comment">// 创建代理类</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">service.update();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">service.select();</span></pre></td></tr></table></figure>
+
+<p>执行代码实现了类似的效果。CGLib 还提供了更多的功能，比如我们实现 CallbackFilter 接口的话，可以执行回调。</p>
+<p>CGLib 创建动态代理类的模式是：</p>
+<ol>
+<li>查找目标类上的所有非 final 的 public 类型的方法定义；</li>
+<li>将这些方法的定义转换成字节码；</li>
+<li>将组成的字节码转换成相应的代理的 class 对象；</li>
+<li>实现 MethodInterceptor 接口，用来处理对代理类上所有方法的请求。</li>
+</ol>
+<h4 id="JDK-动态代理与-CGLib-动态代理对比"><a href="#JDK-动态代理与-CGLib-动态代理对比" class="headerlink" title="JDK 动态代理与 CGLib 动态代理对比"></a>JDK 动态代理与 CGLib 动态代理对比</h4><p>JDK 动态代理：基于 Java 反射机制实现，必须要实现了接口的业务类才能用这种办法生成代理对象。</p>
+<p>CGLib 动态代理：基于 ASM 机制实现，通过生成业务类的子类作为代理类，所以代理的类不能是 final 修饰的。</p>
+<p>JDK Proxy 的优势：</p>
+<ul>
+<li>最小化依赖关系，减少依赖意味着简化开发和维护，JDK 本身的支持，可能比 CGLib 更加可靠。</li>
+<li>平滑进行 JDK 版本升级，而字节码类库通常需要进行更新以保证在新版 Java 上能够使用。</li>
+<li>代码实现简单。</li>
+</ul>
+<p>基于类似 CGLib 框架的优势：</p>
+<ul>
+<li>无需实现接口，达到代理类无侵入。</li>
+<li>只操作我们关心的类，而不必为其他相关类增加工作量。</li>
+<li>高性能。</li>
+</ul>
+<p>Java 动态代理适合于那些有接口抽象的类代理，而 CGLib 则适合那些没有接口抽象的类代理。</p>
+<p>关于二者的效率区别，有一条博客这么说：</p>
+<blockquote>
+<p>1、CGLib 底层采用 ASM 字节码生成框架，使用字节码技术生成代理类，在 jdk6 之前比使用 Java 反射效率要高。唯一需要注意的是，CGLib 不能对声明为 final 的方法进行代理，因为 CGLib 原理是动态生成被代理类的子类。</p>
+<p>2、在 jdk6、jdk7、jdk8 逐步对 JDK 动态代理优化之后，在调用次数较少的情况下，JDK 代理效率高于 CGLib 代理效率，只有当进行大量调用的时候，jdk6 和 jdk7 比 CGLib 代理效率低一点，但是到 jdk8 的时候，jdk 代理效率高于 CGLib 代理。</p>
+</blockquote>
+<p><strong>Spring 框架怎么对二者进行选择的？</strong></p>
+<ol>
+<li><p>当 Bean 实现接口时，Spring 就会用 JDK 的动态代理。</p>
+</li>
+<li><p>当 Bean 没有实现接口时，Spring 使用 CGlib 实现。</p>
+</li>
+<li><p>可以强制使用 CGlib（在 spring 配置中加入<code>&lt;aop:aspectj-autoproxy proxy-target-class=&quot;true&quot;/&gt;</code>）。</p>
+</li>
+</ol>
+<h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h2><p>注解（Annotation）在 JDK 1.5 之后增加的一个新特性，注解的引入意义很大，有很多非常有名的框架，比如 Hibernate、Spring 等框架中都大量使用注解。注解对于开发人员来讲既熟悉又陌生，熟悉是因为只要你是做开发，都会用到注解（常见的@Override）。陌生是因为即使不使用注解也照常能够进行开发，注解不是必须的。</p>
+<h3 id="本质"><a href="#本质" class="headerlink" title="本质"></a>本质</h3><p><code>Java.lang.annotation.Annotation</code>接口中有这么一句话，用来描述注解。</p>
+<blockquote>
+<p>The common interface extended by all annotation types</p>
+<p>所有的注解类型都继承自这个普通的接口（Annotation）</p>
+</blockquote>
+<p>这句话有点抽象，但却说出了注解的本质。我们看一个 JDK 内置注解的定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(ElementType.METHOD)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.SOURCE)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Override &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>其实这个注解的本质就是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Override</span> <span class="keyword">extends</span> <span class="title">Annotation</span></span>&#123;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>只不过是继承了<code>Annotation</code>接口的接口。如果想验证，你可以去反编译任意一个注解类，就会得到相同的结论。</p>
+<p>所以注解说白了就是一个标签，甚至是一种特殊的注释，他本身不起作用，没有功能，需要额外的工具进行解析，实现它的功能。</p>
+<p>解析一个类或者方法的注解往往有两种形式，一种是编译期直接的扫描，一种是运行期反射。反射的方式后面详细叙述，而编译器的扫描指的是编译器在对 Java 代码编译字节码的过程中，会检测到某个类或者方法被一些注解修饰，这时它就会对于这些注解进行某些处理。</p>
+<p>典型的就是注解 @Override，一旦编译器检测到某个方法被修饰了 @Override 注解，编译器就会检查当前方法的方法签名是否真正重写了父类的某个方法，也就是比较父类中是否具有一个同样的方法签名。</p>
+<p>这一种情况只适用于那些编译器已经熟知的注解类，比如 JDK 内置的几个注解，而你自定义的注解，编译器是不知道你这个注解的作用的，当然也不知道该如何处理，往往只是会根据该注解的作用范围来选择是否编译进字节码文件，仅此而已。</p>
+<h3 id="元注解"><a href="#元注解" class="headerlink" title="元注解"></a>元注解</h3><p>什么东西只要一带上“元”就瞬间高大上了起来，类似“元数据”的意思是用来描述数据的数据。“元注解”就是用来修饰注解的注解，通常用在注解的定义上。</p>
+<p>还是看 @Override 的定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(ElementType.METHOD)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.SOURCE)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Override &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>其中的 @Target，@Retention 两个注解就是元注解。</p>
+<p>JAVA 中有以下几个元注解：</p>
+<ul>
+<li>@Target：注解的作用目标</li>
+<li>@Retention：注解的生命周期</li>
+<li>@Documented：注解是否应当被包含在 JavaDoc 文档中</li>
+<li>@Inherited：是否允许子类继承该注解</li>
+</ul>
+<p>@Target 用于指明被修饰的注解最终可以作用的目标是谁，也就是指明，你的注解到底是用来修饰方法的？修饰类的？还是用来修饰字段属性的。一共有以下几个属性：</p>
+<p>被这个 @Target 注解修饰的注解将只能作用在成员字段上，不能用于修饰方法或者类。他的值 ElementType 是一个枚举类型，有以下一些值：</p>
+<ul>
+<li>ElementType.TYPE：允许被修饰的注解作用在类、接口和枚举上</li>
+<li>ElementType.FIELD：允许作用在属性字段上</li>
+<li>ElementType.METHOD：允许作用在方法上</li>
+<li>ElementType.PARAMETER：允许作用在方法参数上</li>
+<li>ElementType.CONSTRUCTOR：允许作用在构造器上</li>
+<li>ElementType.LOCAL_VARIABLE：允许作用在本地局部变量上</li>
+<li>ElementType.ANNOTATION_TYPE：允许作用在注解上</li>
+<li>ElementType.PACKAGE：允许作用在包上</li>
+</ul>
+<p>@Retention 用于指明当前注解的生命周期，他的值 RetentionPolicy 也是枚举类型，包括以下几种：</p>
+<ul>
+<li>RetentionPolicy.SOURCE：当前注解编译期可见，不会写入 class 文件</li>
+<li>RetentionPolicy.CLASS：类加载阶段丢弃，会写入 class 文件</li>
+<li>RetentionPolicy.RUNTIME：永久保存，可以反射获取</li>
+</ul>
+<p>剩下两种类型的注解我们很少用，也比较简单。</p>
+<p>@Documented 注解修饰的注解，当我们执行 JavaDoc 文档打包时会被保存进 doc 文档，反之将在打包时丢弃。</p>
+<p>@Inherited 注解修饰的注解是具有可继承性的，也就说我们的注解修饰了一个类，而该类的子类将自动继承父类的该注解。</p>
+<h3 id="写一个注解"><a href="#写一个注解" class="headerlink" title="写一个注解"></a>写一个注解</h3><p>现在我们尝试自己写一个注解，以一个最简单的为例，假设我们写的注解叫<code>PrintMethods</code>，作用在类上，作用就是打印这个类所有的方法。然后仿照官方的注解定义该注解如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Documented</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(ElementType.TYPE)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> PrintMethods &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后找一个测试类加上注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">@PrintMethods</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AnnotationTest</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        AnnotationTest main = <span class="keyword">new</span> AnnotationTest();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        main.print();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">        System.out.println(<span class="string">"print"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>执行一下，看看发生了什么。</p>
+<p>答案是什么都没发生。之前说过了，注解就像一个标签，本身没什么功能。我们需要手动扫描注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Class&lt;?&gt; clazz = AnnotationTest<span class="class">.<span class="keyword">class</span></span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Annotation annotation = clazz.getAnnotation(PrintMethods<span class="class">.<span class="keyword">class</span>)</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (annotation != <span class="keyword">null</span>) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">for</span> (Method method : clazz.getDeclaredMethods()) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        System.out.println(method.getName());</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#125; <span class="keyword">else</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    System.out.println(<span class="string">"No Annotation"</span>);</span></pre></td></tr></table></figure>
+
+<p>执行这段代码，就会发现<code>AnnotationTest</code>这个类中的注解被顺利的打印了出来，包括<code>main</code>和<code>print</code>两个方法。</p>
+<p>其实在框架中也是这样的，比如 SpringBoot 的<code>@Componen</code>注解，把一个类标注为 bean，让 Spring 去管理，原理就是我们先通过<code>@ComponentScan</code>注解指定了包，然后 Spring 去吧所有包下面的类都扫描一遍，然后找到带有<code>@Componen</code>注解的，然后进行后续处理。</p>
+<p>参考文章：</p>
+<p><a href="https://blog.csdn.net/s10461/article/details/53941091" target="_blank" rel="noopener">Java 泛型详解-绝对是对泛型方法讲解最详细的，没有之一</a></p>
+<p><a href="https://blog.csdn.net/LonelyRoamer/article/details/7868820" target="_blank" rel="noopener">java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题</a></p>
+<p><a href="http://tengj.top/2016/04/28/javareflect/" target="_blank" rel="noopener">Java基础与提高干货系列——Java反射机制</a></p>
+<p><a href="[http://www.fanyilun.me/2015/10/29/Java%E5%8F%8D%E5%B0%84%E5%8E%9F%E7%90%86/](http://www.fanyilun.me/2015/10/29/Java反射原理/)">Java反射原理简析</a></p>
+<p><a href="https://juejin.im/post/5c1ca8df6fb9a049b347f55c" target="_blank" rel="noopener">Java 动态代理详解</a></p>
+<p><a href="https://juejin.im/post/5b45bd715188251b3a1db54f" target="_blank" rel="noopener">JAVA 注解的基本原理</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/10/Minio-Nginx%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A%E4%B8%80%E9%94%AE%E4%B8%8A%E4%BC%A0%E5%8D%9A%E5%AE%A2%E5%9B%BE%E7%89%87/" rel="prev" title="Minio+Nginx搭建图床一键上传博客图片">
+      <i class="fa fa-chevron-left"></i> Minio+Nginx搭建图床一键上传博客图片
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#泛型"><span class="nav-number">1.</span> <span class="nav-text">泛型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#泛型符号"><span class="nav-number">1.1.</span> <span class="nav-text">泛型符号</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#无限通配符-lt-gt"><span class="nav-number">1.1.1.</span> <span class="nav-text">无限通配符&lt;?&gt;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#上界通配符-lt-extends-T-gt"><span class="nav-number">1.1.2.</span> <span class="nav-text">上界通配符&lt;? extends T&gt;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#下界通配符-lt-extends-T-gt"><span class="nav-number">1.1.3.</span> <span class="nav-text">下界通配符&lt;? extends T&gt;</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#泛型类"><span class="nav-number">1.2.</span> <span class="nav-text">泛型类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#泛型接口"><span class="nav-number">1.3.</span> <span class="nav-text">泛型接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#泛型方法"><span class="nav-number">1.4.</span> <span class="nav-text">泛型方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#泛型类中的泛型方法"><span class="nav-number">1.4.1.</span> <span class="nav-text">泛型类中的泛型方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#静态方法与泛型"><span class="nav-number">1.4.2.</span> <span class="nav-text">静态方法与泛型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#泛型擦除"><span class="nav-number">1.5.</span> <span class="nav-text">泛型擦除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#泛型数组"><span class="nav-number">1.6.</span> <span class="nav-text">泛型数组</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反射"><span class="nav-number">2.</span> <span class="nav-text">反射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#用途"><span class="nav-number">2.1.</span> <span class="nav-text">用途</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#原理"><span class="nav-number">2.2.</span> <span class="nav-text">原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态代理"><span class="nav-number">3.</span> <span class="nav-text">动态代理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态代理"><span class="nav-number">3.1.</span> <span class="nav-text">静态代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态代理-1"><span class="nav-number">3.2.</span> <span class="nav-text">动态代理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JDK-动态代理"><span class="nav-number">3.2.1.</span> <span class="nav-text">JDK 动态代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CGLib-动态代理"><span class="nav-number">3.2.2.</span> <span class="nav-text">CGLib 动态代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JDK-动态代理与-CGLib-动态代理对比"><span class="nav-number">3.2.3.</span> <span class="nav-text">JDK 动态代理与 CGLib 动态代理对比</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注解"><span class="nav-number">4.</span> <span class="nav-text">注解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#本质"><span class="nav-number">4.1.</span> <span class="nav-text">本质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#元注解"><span class="nav-number">4.2.</span> <span class="nav-text">元注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写一个注解"><span class="nav-number">4.3.</span> <span class="nav-text">写一个注解</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">352k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">9:46</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

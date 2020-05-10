@@ -157,10 +157,10 @@
 
 <p>看起来很简单吧，那么实际上 JVM 是怎么做的呐？</p>
 <p>首先来看一下Method对象是如何生成的：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/D17809940E1D4099BD319D343A262BDB?0.811335682794492.png" alt=""></p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/D17809940E1D4099BD319D343A262BDB.png" alt=""></p>
 <p>上面的 Class 对象是在加载类时由 JVM 构造的，JVM 为每个类管理一个独一无二的 Class 对象，这份 Class 对象里维护着该类的所有 Method，Field，Constructor 的 cache，这份 cache 也可以被称作根对象。每次<code>getMethod</code>获取到的 Method 对象都持有对根对象的引用，因为一些重量级的 Method 的成员变量（主要是 MethodAccessor ），我们不希望每次创建 Method 对象都要重新初始化，于是所有代表同一个方法的 Method 对象都共享着根对象的 MethodAccessor，每一次创建都会调用根对象的 copy 方法复制一份。</p>
 <p>获取到Method对象之后，调用invoke方法的流程如下：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/6828367BCC244C008F124B2A086B5B66?0.6631807899369526.png" alt="img"></p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/6828367BCC244C008F124B2A086B5B66.png" alt="img"></p>
 <p>可以看到，调用<code>Method.invoke</code>之后，会直接去调<code>MethodAccessor.invoke</code>。MethodAccessor 就是上面提到的所有同名 method 共享的一个实例，由<code>ReflectionFactory</code>创建。创建机制采用了一种名为 inflation 的方式（JDK 1.4 之后）：如果该方法的累计调用次数&lt;=15，会创建出<code>NativeMethodAccessorImpl</code>，它的实现就是直接调用 native 方法实现反射；如果该方法的累计调用次数&gt;15，会由 Java 代码创建出字节码组装而成的<code>MethodAccessorImpl</code>。（是否采用 inflation 和 15 这个数字都可以在 JVM 参数中调整）。</p>
 <p>更加细致的过程R大有一篇博文：<a href="https://www.iteye.com/blog/rednaxelafx-548536" target="_blank" rel="noopener">关于反射调用方法的一个log</a></p>
 <h2 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h2><p>说道动态代理，就必须得回顾下代理模式这种设计模式了：</p>
@@ -3367,6 +3367,49 @@
       </tags>
   </entry>
   <entry>
+    <title>InnoDB和MyISAM区别和联系</title>
+    <url>/2019/12/01/InnoDB%E5%92%8CMyISAM%E5%8C%BA%E5%88%AB%E5%92%8C%E8%81%94%E7%B3%BB/</url>
+    <content><![CDATA[<p>s从别人博客抄来的 MySQL 中 InnoDB 引擎与 MyISAM 引擎的区别与联系。</p>
+<a id="more"></a>
+
+<p><strong>InnoDB：</strong>MySQL默认的事务型引擎，也是最重要和使用最广泛的存储引擎。它被设计成为大量的短期事务，短期事务大部分情况下是正常提交的，很少被回滚。InnoDB的性能与自动崩溃恢复的特性，使得它在非事务存储需求中也很流行。除非有非常特别的原因需要使用其他的存储引擎，否则应该优先考虑InnoDB引擎。</p>
+<p><strong>MyISAM：</strong>在MySQL 5.1 及之前的版本，MyISAM是默认引擎。MyISAM提供的大量的特性，包括全文索引、压缩、空间函数（GIS）等，但MyISAM并不支持事务以及行级锁，而且一个毫无疑问的缺陷是崩溃后无法安全恢复。正是由于MyISAM引擎的缘故，即使MySQL支持事务已经很长时间了，在很多人的概念中MySQL还是非事务型数据库。尽管这样，它并不是一无是处的。对于只读的数据，或者表比较小，可以忍受修复操作，则依然可以使用MyISAM（但请不要默认使用MyISAM，而是应该默认使用InnoDB）</p>
+<h3 id="1、-存储结构"><a href="#1、-存储结构" class="headerlink" title="1、 存储结构"></a>1、 存储结构</h3><p><strong>MyISAM：</strong>每个MyISAM在磁盘上存储成三个文件。分别为：<strong>表定义文件、数据文件、索引文件。</strong>第一个文件的名字以表的名字开始，扩展名指出文件类型。.frm文件存储表定义。数据文件的扩展名为.MYD (MYData)。索引文件的扩展名是.MYI (MYIndex)。</p>
+<p><strong>InnoDB：</strong>所有的表都保存在同一个数据文件中（也可能是多个文件，或者是独立的表空间文件），InnoDB表的大小只受限于操作系统文件的大小，一般为2GB。</p>
+<h3 id="2、-存储空间"><a href="#2、-存储空间" class="headerlink" title="2、 存储空间"></a>2、 存储空间</h3><p><strong>MyISAM：</strong> MyISAM支持支持三种不同的存储格式：静态表(默认，但是注意数据末尾不能有空格，会被去掉)、动态表、压缩表。当表在创建之后并导入数据之后，不会再进行修改操作，可以使用压缩表，极大的减少磁盘的空间占用。</p>
+<p><strong>InnoDB：</strong> 需要更多的内存和存储，它会在主内存中建立其专用的缓冲池用于高速缓冲数据和索引。</p>
+<h3 id="3、-可移植性、备份及恢复"><a href="#3、-可移植性、备份及恢复" class="headerlink" title="3、 可移植性、备份及恢复"></a>3、 可移植性、备份及恢复</h3><p><strong>MyISAM：</strong>数据是以文件的形式存储，所以在跨平台的数据转移中会很方便。在备份和恢复时可单独针对某个表进行操作。</p>
+<p><strong>InnoDB：</strong>免费的方案可以是拷贝数据文件、备份 binlog，或者用 mysqldump，在数据量达到几十G的时候就相对痛苦了。</p>
+<h3 id="4、-事务支持"><a href="#4、-事务支持" class="headerlink" title="4、 事务支持"></a>4、 事务支持</h3><p><strong>MyISAM：</strong>强调的是性能，每次查询具有原子性,其执行数度比InnoDB类型更快，但是不提供事务支持。</p>
+<p><strong>InnoDB：</strong>提供事务支持事务，外部键等高级数据库功能。 具有事务(commit)、回滚(rollback)和崩溃修复能力(crash recovery capabilities)的事务安全(transaction-safe (ACID compliant))型表。</p>
+<h3 id="5、-AUTO-INCREMENT"><a href="#5、-AUTO-INCREMENT" class="headerlink" title="5、 AUTO_INCREMENT"></a>5、 AUTO_INCREMENT</h3><p><strong>MyISAM：</strong>可以和其他字段一起建立联合索引。引擎的自动增长列必须是索引，如果是组合索引，自动增长可以不是第一列，他可以根据前面几列进行排序后递增。</p>
+<p><strong>InnoDB：</strong>InnoDB中必须包含只有该字段的索引。引擎的自动增长列必须是索引，如果是组合索引也必须是组合索引的第一列。</p>
+<h3 id="6、-表锁差异"><a href="#6、-表锁差异" class="headerlink" title="6、 表锁差异"></a>6、 表锁差异</h3><p><strong>MyISAM：</strong> 只支持表级锁，用户在操作myisam表时，select，update，delete，insert语句都会给表自动加锁，如果加锁以后的表满足insert并发的情况下，可以在表的尾部插入新的数据。</p>
+<p><strong>InnoDB：</strong> 支持事务和行级锁，是innodb的最大特色。行锁大幅度提高了多用户并发操作的新能。但是InnoDB的行锁，只是在WHERE的主键是有效的，非主键的WHERE都会锁全表的。</p>
+<h3 id="7、-全文索引"><a href="#7、-全文索引" class="headerlink" title="7、 全文索引"></a>7、 全文索引</h3><p><a href="https://link.zhihu.com/?target=https%3A//blog.csdn.net/u013276277/article/details/78139159">MySql全文索引</a></p>
+<p><strong>MyISAM：</strong>支持 FULLTEXT类型的全文索引</p>
+<p><strong>InnoDB：</strong>不支持FULLTEXT类型的全文索引，但是innodb可以使用sphinx插件支持全文索引，并且效果更好。</p>
+<h3 id="8、表主键"><a href="#8、表主键" class="headerlink" title="8、表主键"></a>8、表主键</h3><p><strong>MyISAM：</strong>允许没有任何索引和主键的表存在，索引都是保存行的地址。</p>
+<p><strong>InnoDB：</strong>如果没有设定主键或者非空唯一索引，就会自动生成一个6字节的主键(用户不可见)，数据是主索引的一部分，附加索引保存的是主索引的值。</p>
+<h3 id="9、表的具体行数"><a href="#9、表的具体行数" class="headerlink" title="9、表的具体行数"></a>9、表的具体行数</h3><p><strong>MyISAM：</strong> 保存有表的总行数，如果select count(<em>) from table;会直接取出出该值。</em></p>
+<p><strong>InnoDB：</strong> 没有保存表的总行数，如果使用select count(*) from table；就会遍历整个表，消耗相当大，但是在加了wehre条件后，myisam和innodb处理的方式都一样。</p>
+<h3 id="10、CRUD操作"><a href="#10、CRUD操作" class="headerlink" title="10、CRUD操作"></a>10、CRUD操作</h3><p><strong>MyISAM：</strong>如果执行大量的SELECT，MyISAM是更好的选择。</p>
+<p><strong>InnoDB：</strong>如果你的数据执行大量的INSERT或UPDATE，出于性能方面的考虑，应该使用InnoDB表。</p>
+<h3 id="11、-外键"><a href="#11、-外键" class="headerlink" title="11、 外键"></a>11、 外键</h3><p><strong>MyISAM：</strong>不支持</p>
+<p><strong>InnoDB：</strong>支持</p>
+<p>参考文章：</p>
+<p><a href="https://www.zhihu.com/question/20596402/answer/529312016" target="_blank" rel="noopener">Mysql 中 MyISAM 和 InnoDB 的区别有哪些？</a></p>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>InnoDB</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>InnoDB 表结构</title>
     <url>/2019/12/01/InnoDB%E8%A1%A8%E7%BB%93%E6%9E%84/</url>
     <content><![CDATA[<p>本文大部分内容摘抄至《MySQL技术内幕（InnoDB存储引擎）第二版》，小部分来源于自己理解和网络博客。</p>
@@ -3551,49 +3594,6 @@
 <li>使用该语句的时候，不会触发交换表和被交换表上的触发器</li>
 <li>AUTO_INCREMENT 列将被重置</li>
 </ul>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>InnoDB</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>InnoDB和MyISAM区别和联系</title>
-    <url>/2019/12/01/InnoDB%E5%92%8CMyISAM%E5%8C%BA%E5%88%AB%E5%92%8C%E8%81%94%E7%B3%BB/</url>
-    <content><![CDATA[<p>s从别人博客抄来的 MySQL 中 InnoDB 引擎与 MyISAM 引擎的区别与联系。</p>
-<a id="more"></a>
-
-<p><strong>InnoDB：</strong>MySQL默认的事务型引擎，也是最重要和使用最广泛的存储引擎。它被设计成为大量的短期事务，短期事务大部分情况下是正常提交的，很少被回滚。InnoDB的性能与自动崩溃恢复的特性，使得它在非事务存储需求中也很流行。除非有非常特别的原因需要使用其他的存储引擎，否则应该优先考虑InnoDB引擎。</p>
-<p><strong>MyISAM：</strong>在MySQL 5.1 及之前的版本，MyISAM是默认引擎。MyISAM提供的大量的特性，包括全文索引、压缩、空间函数（GIS）等，但MyISAM并不支持事务以及行级锁，而且一个毫无疑问的缺陷是崩溃后无法安全恢复。正是由于MyISAM引擎的缘故，即使MySQL支持事务已经很长时间了，在很多人的概念中MySQL还是非事务型数据库。尽管这样，它并不是一无是处的。对于只读的数据，或者表比较小，可以忍受修复操作，则依然可以使用MyISAM（但请不要默认使用MyISAM，而是应该默认使用InnoDB）</p>
-<h3 id="1、-存储结构"><a href="#1、-存储结构" class="headerlink" title="1、 存储结构"></a>1、 存储结构</h3><p><strong>MyISAM：</strong>每个MyISAM在磁盘上存储成三个文件。分别为：<strong>表定义文件、数据文件、索引文件。</strong>第一个文件的名字以表的名字开始，扩展名指出文件类型。.frm文件存储表定义。数据文件的扩展名为.MYD (MYData)。索引文件的扩展名是.MYI (MYIndex)。</p>
-<p><strong>InnoDB：</strong>所有的表都保存在同一个数据文件中（也可能是多个文件，或者是独立的表空间文件），InnoDB表的大小只受限于操作系统文件的大小，一般为2GB。</p>
-<h3 id="2、-存储空间"><a href="#2、-存储空间" class="headerlink" title="2、 存储空间"></a>2、 存储空间</h3><p><strong>MyISAM：</strong> MyISAM支持支持三种不同的存储格式：静态表(默认，但是注意数据末尾不能有空格，会被去掉)、动态表、压缩表。当表在创建之后并导入数据之后，不会再进行修改操作，可以使用压缩表，极大的减少磁盘的空间占用。</p>
-<p><strong>InnoDB：</strong> 需要更多的内存和存储，它会在主内存中建立其专用的缓冲池用于高速缓冲数据和索引。</p>
-<h3 id="3、-可移植性、备份及恢复"><a href="#3、-可移植性、备份及恢复" class="headerlink" title="3、 可移植性、备份及恢复"></a>3、 可移植性、备份及恢复</h3><p><strong>MyISAM：</strong>数据是以文件的形式存储，所以在跨平台的数据转移中会很方便。在备份和恢复时可单独针对某个表进行操作。</p>
-<p><strong>InnoDB：</strong>免费的方案可以是拷贝数据文件、备份 binlog，或者用 mysqldump，在数据量达到几十G的时候就相对痛苦了。</p>
-<h3 id="4、-事务支持"><a href="#4、-事务支持" class="headerlink" title="4、 事务支持"></a>4、 事务支持</h3><p><strong>MyISAM：</strong>强调的是性能，每次查询具有原子性,其执行数度比InnoDB类型更快，但是不提供事务支持。</p>
-<p><strong>InnoDB：</strong>提供事务支持事务，外部键等高级数据库功能。 具有事务(commit)、回滚(rollback)和崩溃修复能力(crash recovery capabilities)的事务安全(transaction-safe (ACID compliant))型表。</p>
-<h3 id="5、-AUTO-INCREMENT"><a href="#5、-AUTO-INCREMENT" class="headerlink" title="5、 AUTO_INCREMENT"></a>5、 AUTO_INCREMENT</h3><p><strong>MyISAM：</strong>可以和其他字段一起建立联合索引。引擎的自动增长列必须是索引，如果是组合索引，自动增长可以不是第一列，他可以根据前面几列进行排序后递增。</p>
-<p><strong>InnoDB：</strong>InnoDB中必须包含只有该字段的索引。引擎的自动增长列必须是索引，如果是组合索引也必须是组合索引的第一列。</p>
-<h3 id="6、-表锁差异"><a href="#6、-表锁差异" class="headerlink" title="6、 表锁差异"></a>6、 表锁差异</h3><p><strong>MyISAM：</strong> 只支持表级锁，用户在操作myisam表时，select，update，delete，insert语句都会给表自动加锁，如果加锁以后的表满足insert并发的情况下，可以在表的尾部插入新的数据。</p>
-<p><strong>InnoDB：</strong> 支持事务和行级锁，是innodb的最大特色。行锁大幅度提高了多用户并发操作的新能。但是InnoDB的行锁，只是在WHERE的主键是有效的，非主键的WHERE都会锁全表的。</p>
-<h3 id="7、-全文索引"><a href="#7、-全文索引" class="headerlink" title="7、 全文索引"></a>7、 全文索引</h3><p><a href="https://link.zhihu.com/?target=https%3A//blog.csdn.net/u013276277/article/details/78139159">MySql全文索引</a></p>
-<p><strong>MyISAM：</strong>支持 FULLTEXT类型的全文索引</p>
-<p><strong>InnoDB：</strong>不支持FULLTEXT类型的全文索引，但是innodb可以使用sphinx插件支持全文索引，并且效果更好。</p>
-<h3 id="8、表主键"><a href="#8、表主键" class="headerlink" title="8、表主键"></a>8、表主键</h3><p><strong>MyISAM：</strong>允许没有任何索引和主键的表存在，索引都是保存行的地址。</p>
-<p><strong>InnoDB：</strong>如果没有设定主键或者非空唯一索引，就会自动生成一个6字节的主键(用户不可见)，数据是主索引的一部分，附加索引保存的是主索引的值。</p>
-<h3 id="9、表的具体行数"><a href="#9、表的具体行数" class="headerlink" title="9、表的具体行数"></a>9、表的具体行数</h3><p><strong>MyISAM：</strong> 保存有表的总行数，如果select count(<em>) from table;会直接取出出该值。</em></p>
-<p><strong>InnoDB：</strong> 没有保存表的总行数，如果使用select count(*) from table；就会遍历整个表，消耗相当大，但是在加了wehre条件后，myisam和innodb处理的方式都一样。</p>
-<h3 id="10、CRUD操作"><a href="#10、CRUD操作" class="headerlink" title="10、CRUD操作"></a>10、CRUD操作</h3><p><strong>MyISAM：</strong>如果执行大量的SELECT，MyISAM是更好的选择。</p>
-<p><strong>InnoDB：</strong>如果你的数据执行大量的INSERT或UPDATE，出于性能方面的考虑，应该使用InnoDB表。</p>
-<h3 id="11、-外键"><a href="#11、-外键" class="headerlink" title="11、 外键"></a>11、 外键</h3><p><strong>MyISAM：</strong>不支持</p>
-<p><strong>InnoDB：</strong>支持</p>
-<p>参考文章：</p>
-<p><a href="https://www.zhihu.com/question/20596402/answer/529312016" target="_blank" rel="noopener">Mysql 中 MyISAM 和 InnoDB 的区别有哪些？</a></p>
 ]]></content>
       <categories>
         <category>MySQL</category>
@@ -5752,8 +5752,8 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
       </categories>
       <tags>
         <tag>Java</tag>
-        <tag>JVM</tag>
         <tag>面试</tag>
+        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>
@@ -5792,8 +5792,8 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
       </categories>
       <tags>
         <tag>Java</tag>
-        <tag>面试</tag>
         <tag>API</tag>
+        <tag>面试</tag>
       </tags>
   </entry>
   <entry>

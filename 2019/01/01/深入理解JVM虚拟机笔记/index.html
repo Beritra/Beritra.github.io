@@ -60,7 +60,7 @@
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;a694fc404774cb03d0a60f51afd316d1.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;17e4a5d77426df4bb5549bc5316112bb.jpg">
 <meta property="article:published_time" content="2019-01-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2020-03-12T16:53:49.087Z">
+<meta property="article:modified_time" content="2020-05-19T16:23:05.647Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JVM">
@@ -250,7 +250,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-13 00:53:49" itemprop="dateModified" datetime="2020-03-13T00:53:49+08:00">2020-03-13</time>
+                <time title="修改时间：2020-05-20 00:23:05" itemprop="dateModified" datetime="2020-05-20T00:23:05+08:00">2020-05-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -507,9 +507,9 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <p>虚拟机提供了<code>-XX:+PrintGCDetail</code>这个参数，告诉虚拟机在发生垃圾内存收集行为的时候打印内存回首日志，并且在进程退出的时候输出当前内存各个区域的分配情况。</p>
 <h4 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h4><p>所谓大的对象是指需要大量连续空间的Java对象，最典型的是很长的字符串和数组。</p>
 <p>虚拟机提供了<code>-XX:PretenureSizeThreshold</code>参数，另大于这个设置值的对象直接在老年代分配。目的是避免Eden区及两个Survivor区之间大量的内存复制。</p>
-<h4 id="长期存活的对象进入老年代"><a href="#长期存活的对象进入老年代" class="headerlink" title="长期存活的对象进入老年代"></a>长期存活的对象进入老年代</h4><p> 为了分配哪些对象放在新生代，哪些放在老年代，虚拟机给每个对象定义了一个对象年龄（Age）计数器，如果对象在Eden出生并经过第一次Minor GC后仍然存活，并且能被Survivor容纳的话，将被移动到Survivor空间中，并且对象年龄设为1。对象在Survivor中每经过一次Minor GC，年龄就增加一岁，当年龄增加到一定成都（默认是15岁），就会被晋升到老年代，这个阈值可以通过参数<code>-XX:MaxTenuringThreshold</code>设置。</p>
-<h4 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h4><p>为了适应不同程序的内存状况，不是只有对象年龄大于MaxTenuringThreshold才能晋升老年代。如果Survivor空间中相同年龄所有对象大小总和大于Survivor空间的一般，年龄大于或等于该年龄的对象就可以直接进入老年代。</p>
-<h4 id="空间分配担保"><a href="#空间分配担保" class="headerlink" title="空间分配担保"></a>空间分配担保</h4><p>在发生Minor GC之前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有的对象总空间，如果这个条件成立，那么Minor GC可以确保是安全的。如果不成立，则虚拟机会查看<code>HandlePromotionFailure</code>设置值是否允许担保失败。如果允许，那么会继续检查老年代最大可用的连续空间是否大于晋升到老年代对象的平均大小。如果大于就尝试进行一次Minor GC，尽管这次GC是有风险的。如果小于，或者不允许冒险，就改为进行一次Full GC。</p>
+<h4 id="长期存活的对象进入老年代"><a href="#长期存活的对象进入老年代" class="headerlink" title="长期存活的对象进入老年代"></a>长期存活的对象进入老年代</h4><p> 为了分配哪些对象放在新生代，哪些放在老年代，虚拟机给每个对象定义了一个对象年龄（Age）计数器，如果对象在Eden出生并经过第一次 Minor GC 后仍然存活，并且能被Survivor容纳的话，将被移动到 Survivor 空间中，并且对象年龄设为1。对象在 Survivor 中每经过一次 Minor GC，年龄就增加一岁，当年龄增加到一定程度（默认是 15 岁），就会被晋升到老年代，这个阈值可以通过参数<code>-XX:MaxTenuringThreshold</code>设置。</p>
+<h4 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h4><p>为了适应不同程序的内存状况，不是只有对象年龄大于 MaxTenuringThreshold 才能晋升老年代。如果 Survivor 空间中相同年龄所有对象大小总和大于 Survivor 空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代。</p>
+<h4 id="空间分配担保"><a href="#空间分配担保" class="headerlink" title="空间分配担保"></a>空间分配担保</h4><p>在发生 Minor GC 之前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有的对象总空间，如果这个条件成立，那么 Minor GC 可以确保是安全的。如果不成立，则虚拟机会查看<code>HandlePromotionFailure</code>设置值是否允许担保失败。如果允许，那么会继续检查老年代最大可用的连续空间是否大于晋升到老年代对象的平均大小。如果大于就尝试进行一次 Minor GC，尽管这次 GC 是有风险的。如果小于，或者不允许冒险，就改为进行一次 Full GC。</p>
 <h2 id="虚拟机性能监控和故障处理"><a href="#虚拟机性能监控和故障处理" class="headerlink" title="虚拟机性能监控和故障处理"></a>虚拟机性能监控和故障处理</h2><h3 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h3><table>
 <thead>
 <tr>
@@ -761,7 +761,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <h3 id="类加载的过程"><a href="#类加载的过程" class="headerlink" title="类加载的过程"></a>类加载的过程</h3><p>加载、验证、准备、解析和初始化这 5 个阶段的具体动作。</p>
 <h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><p>加载是“类加载”（Class Loading）的一个阶段，在加载阶段，虚拟机需要完成以下 3 件事：</p>
 <ul>
-<li>通过一个类的权限定名来获取定义此类的二进制字节流。</li>
+<li>通过一个类的全限定名来获取定义此类的二进制字节流。</li>
 <li>将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构。</li>
 <li>在内存中生成一个代表这个类的<code>java.lang.Class</code>对象，作为方法区这个类的各种数据的访问入口。</li>
 </ul>
@@ -780,7 +780,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <li>如果数组的组件类型不是引用类型（如<code>int[]数组</code>），Java 虚拟机将会把数组标记为与引导类加载器关联。</li>
 <li>数组的可见性与他的组件类型的可见性一致，如果组件类型不是引用类型，那数组类的可见性将默认为<code>public</code>。</li>
 </ul>
-<p>加载阶段完成后，虚拟机外部的二进制字节流文件就按照虚拟机所需的格式存储在方法去之中，方法区中的数据存储格式由虚拟机实现自行定义，虚拟机规范未规定此区域的具体结构。然后在内存中实例化一个<code>java.lang.Class</code>类的对象（并没有明确在 Java 堆中，对于 HotSpot 虚拟机而言，Class 对象比较特殊，它虽然是对象，但是存放在方法去里面），这个对象将作为程序访问方法去中的这些类型数据的外部接口。</p>
+<p>加载阶段完成后，虚拟机外部的二进制字节流文件就按照虚拟机所需的格式存储在方法去之中，方法区中的数据存储格式由虚拟机实现自行定义，虚拟机规范未规定此区域的具体结构。然后在内存中实例化一个<code>java.lang.Class</code>类的对象（并没有明确在 Java 堆中，对于 HotSpot 虚拟机而言，Class 对象比较特殊，它虽然是对象，但是存放在方法区里面），这个对象将作为程序访问方法区中的这些类型数据的外部接口。</p>
 <p>加载阶段与连接阶段的部分内容（如一部分字节码文件格式验证动作）是交叉进行的，加载阶段尚未完成，连接阶段可能已经开始，但这些夹在加载阶段之中进行的动作，仍然属于连接阶段的内容，这两个阶段的开始时间仍然保持着固定的先后顺序。</p>
 <h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>验证是连接阶段的第一步，这一阶段的目的是确保 Class 文件中的字节流中包含的信息符合虚拟机要求，并且不会危害虚拟机自身的安全。</p>
 <p>Java 语言本身是相对安全的语言，使用纯粹的 Java 代码无法做到诸如访问数组边界以外的数据、将对象转型为它未实现的类型、跳转到不存在的代码行之类的事情，如果这样做了，编译器会拒绝编译。验证阶段大致上会完成以下 4 个阶段的检验动作：</p>
@@ -940,7 +940,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -990,12 +990,12 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">352k</span>
+    <span title="站点总字数">354k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">9:46</span>
+    <span title="站点阅读时长">9:51</span>
 </div>
 
         

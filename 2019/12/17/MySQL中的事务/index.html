@@ -64,7 +64,7 @@
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;60caac0b4782048229a8c172ec18b2d7.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;adac784b49794e6d6b386295158a4c02.png">
 <meta property="article:published_time" content="2019-12-17T10:11:12.000Z">
-<meta property="article:modified_time" content="2020-04-21T15:01:34.600Z">
+<meta property="article:modified_time" content="2020-05-20T16:09:59.036Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
@@ -254,7 +254,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-21 23:01:34" itemprop="dateModified" datetime="2020-04-21T23:01:34+08:00">2020-04-21</time>
+                <time title="修改时间：2020-05-21 00:09:59" itemprop="dateModified" datetime="2020-05-21T00:09:59+08:00">2020-05-21</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -274,14 +274,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>15k</span>
+              <span>16k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>25 分钟</span>
+              <span>27 分钟</span>
             </span>
 
         </div>
@@ -481,6 +481,23 @@
 <p>在存储过程中使用自动回滚很容易丢失错误信息，所以应该在程序中控制而不是数据库中。在程序中控制事务的好处是用户可以得知发生错误的原因，然后根据发生的原因进一步调试程序。</p>
 <h2 id="长事务"><a href="#长事务" class="headerlink" title="长事务"></a>长事务</h2><p>长事务（Loing-Lived Transaction），顾名思义，就是执行时间较长的事务，比如，对于银行系统中的数据库，每过一个阶段可能需要更新对应账户的利息。如果对应账户的数量非常大，例如对有 1 亿用户的表进行更新操作，可能需要非常长的时间来完成，可能需要一个小时，也可能需要 4、5 个小时，这取决于数据库的硬件配置。然而，由于事务的 ACID 特性，这个操作被封装在一个事务中完成。这就产生了一个问题，在执行过程中，当数据库、操作系统或者硬件发生问题的时候，重新开始事务的代价变得不可接受。数据库需要回滚所有已经发生的变化，而这个过程可能比产生这些变化的时间还要长。因此，对于长事务的问题，有时候可以通过转化为小批量（mini batch）的事务来进行处理。当事务发生错误时，只需要回滚一部分数据，然后接着上次已完成的事务继续进行。</p>
 <p>由一个小地方还需要注意，要保证事务在处理工程中，没有其他的事务来更新表中的数据，需要人工加一个共享锁。</p>
+<h2 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h2><p>关于 MVCC，感觉博客中好多解释是冲突的，干脆去看官网，以下内容直接粘贴的官网文档：</p>
+<h3 id="InnoDB多版本"><a href="#InnoDB多版本" class="headerlink" title="InnoDB多版本"></a>InnoDB多版本</h3><p><code>InnoDB</code>是一个 <a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_mvcc" target="_blank" rel="noopener">多版本的存储引擎</a>：它保留有关已更改行的旧版本的信息，以支持诸如并发和<a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_rollback" target="_blank" rel="noopener">回滚</a>之类的事务功能 。此信息存储在表空间中的数据结构中，该数据结构称为 <a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_rollback_segment" target="_blank" rel="noopener">回滚段</a>（出现在 Oracle 中类似的数据结构之后）。<code>InnoDB</code> 使用回滚段中的信息来执行事务回滚中所需的撤消操作。它还使用该信息来构建行的早期版本，以实现<a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read" target="_blank" rel="noopener">一致的读取</a>。</p>
+<p>在内部的实现中，<code>InnoDB</code>向数据库中存储的每一行添加了三个字段。包括：</p>
+<ul>
+<li>一个 6 个字节的<code>DB_TRX_ID</code>字段，表示插入或更新该行的最后一个事务的事务标识符。同样，在内部用更新来实现删除，在更新操作的时候，行中的软删除标记位被标记为删除。</li>
+<li>还包含一个 7 字节的 <code>DB_ROLL_PTR</code>字段，称为滚动指针。回滚指针指向写入回滚段的撤消日志（undo log）记录。如果行已更新，则撤消日志记录将保存了更新之前的全部信息，方便进行重建。</li>
+<li>一个 6 字节的<code>DB_ROW_ID</code>字段包含一个行 ID，该行 ID 随着插入新行而单调增加。如果 <code>InnoDB</code>自动生成聚集索引，该索引包含行 ID 值。否则，该 <code>DB_ROW_ID</code>列不会出现在任何索引中。</li>
+</ul>
+<p>回滚段中的撤消日志分为插入撤销和更新撤消日志。插入撤消日志仅在事务回滚时才需要，并且在事务提交后可以立即将其丢弃。更新撤消日志也用于一致的读取中，但是只有在其没有了分配了快照的事务后，才可以被删除。（因为一致性读取可能需要使用更新撤消日志中的信息来构建数据库行的早期版本。）</p>
+<p>定期提交您的事务，包括仅用于一致读取的事务。否则， <code>InnoDB</code>将无法丢弃更新撤消日志中的数据，并且回滚段可能会变得太大而填满表空间。</p>
+<p>回滚段中的撤消日志记录的物理大小通常小于相应的插入或更新的行。您可以使用此信息来计算回滚段所需的空间。</p>
+<p>在<code>InnoDB</code>多版本方案中，当您使用 SQL 语句删除行时，并不会立即将其从数据库中物理删除。<code>InnoDB</code>仅在丢弃那些删除操作的撤销记录时，才物理删除相应的行及其索引记录。此删除操作称为<a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_purge" target="_blank" rel="noopener">purge</a>，它非常快，通常花费与执行删除操作的SQL语句相同的时间顺序。</p>
+<p>如果您以大致相同的速率在表中以较小的批次插入和删除行，则由于所有“ 死 ”行，清除线程可能开始滞后并且表可能会变得越来越大 ，从而使所有内容都受磁盘约束而且非常慢。在这种情况下，请限制新行的操作，并通过调整<a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_max_purge_lag" target="_blank" rel="noopener"><code>innodb_max_purge_lag</code></a>系统变量来向清除线程分配更多资源 。有关更多信息，请参见<a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html" target="_blank" rel="noopener">第15.14节“ InnoDB启动选项和系统变量”</a>。</p>
+<h3 id="多版本索引和二级索引"><a href="#多版本索引和二级索引" class="headerlink" title="多版本索引和二级索引"></a>多版本索引和二级索引</h3><p><code>InnoDB</code>多版本并发控制（MVCC）对二级索引的处理方式不同于聚簇索引。聚簇索引中的记录将就地更新，其隐藏的系统列指向撤消日志条目，可以从中重建记录的早期版本。与聚簇索引记录不同，辅助索引记录不包含隐藏的系统列，也不会就地更新。</p>
+<p>更新二级索引列时，将对旧的二级索引记录进行删除标记，将新记录插入，并最终清除带有删除标记的记录。当二级索引记录被删除标记或二级索引页被较新的事务更新时，<code>InnoDB</code>在聚集索引中查找数据库记录。在聚集索引中，<code>DB_TRX_ID</code>检查记录的记录，如果在启动读取事务后修改了记录，则从撤消日志中检索记录的正确版本。</p>
+<p>如果二级索引记录被标记为删除，或二级索引页被更新的事务更新， 则不使用<a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_covering_index" target="_blank" rel="noopener">覆盖索引</a>技术。<code>InnoDB</code>在聚集索引中查找记录，而不是从索引结构中返回值。</p>
+<p>但是，如果启用了 <a href="https://dev.mysql.com/doc/refman/8.0/en/index-condition-pushdown-optimization.html" target="_blank" rel="noopener">索引条件下推（ICP）</a>优化，并且<code>WHERE</code>只能使用索引中的字段来评估部分条件，则 MySQL 服务器仍会将<code>WHERE</code>条件的这一部分下推到存储引擎，并使用索引。如果找不到匹配的记录，则避免聚集索引查找。如果找到了匹配的记录，即使在删除标记的记录中，也要在 <code>InnoDB</code>聚簇索引中查找记录。</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>我们了解了 InnoDB 存储引擎管理事务的许多方面。了解了事务如何工作以及如何使用。</p>
 <p>事务必须遵循 ACID 特性，即 Atomicity（原子性）、Consistency（一致性）、Isolation（隔离性）和 Durability（持久性）</p>
 <p>。隔离性通过锁来完成；原子性、一致性、隔离性通过 redo 和 undo 来完成。</p>
@@ -570,7 +587,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#认识事务"><span class="nav-number">1.</span> <span class="nav-text">认识事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分类"><span class="nav-number">1.2.</span> <span class="nav-text">分类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的实现"><span class="nav-number">2.</span> <span class="nav-text">事务的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redo"><span class="nav-number">2.1.</span> <span class="nav-text">redo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo"><span class="nav-number">2.2.</span> <span class="nav-text">undo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pruge"><span class="nav-number">2.3.</span> <span class="nav-text">pruge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#group-commit"><span class="nav-number">2.4.</span> <span class="nav-text">group commit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务控制语句"><span class="nav-number">3.</span> <span class="nav-text">事务控制语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#隐式提交的-SQL-语句"><span class="nav-number">4.</span> <span class="nav-text">隐式提交的 SQL 语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对于事务操作的统计"><span class="nav-number">5.</span> <span class="nav-text">对于事务操作的统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的隔离级别"><span class="nav-number">6.</span> <span class="nav-text">事务的隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式事务"><span class="nav-number">7.</span> <span class="nav-text">分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-数据库分布式事务"><span class="nav-number">7.1.</span> <span class="nav-text">MySQL 数据库分布式事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部-XA-事务"><span class="nav-number">7.2.</span> <span class="nav-text">内部 XA 事务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不好的事务习惯"><span class="nav-number">8.</span> <span class="nav-text">不好的事务习惯</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在循环中提交"><span class="nav-number">8.1.</span> <span class="nav-text">在循环中提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用自动提交"><span class="nav-number">8.2.</span> <span class="nav-text">使用自动提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用自动回滚"><span class="nav-number">8.3.</span> <span class="nav-text">使用自动回滚</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#长事务"><span class="nav-number">9.</span> <span class="nav-text">长事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">10.</span> <span class="nav-text">小结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#认识事务"><span class="nav-number">1.</span> <span class="nav-text">认识事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分类"><span class="nav-number">1.2.</span> <span class="nav-text">分类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的实现"><span class="nav-number">2.</span> <span class="nav-text">事务的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redo"><span class="nav-number">2.1.</span> <span class="nav-text">redo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo"><span class="nav-number">2.2.</span> <span class="nav-text">undo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pruge"><span class="nav-number">2.3.</span> <span class="nav-text">pruge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#group-commit"><span class="nav-number">2.4.</span> <span class="nav-text">group commit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务控制语句"><span class="nav-number">3.</span> <span class="nav-text">事务控制语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#隐式提交的-SQL-语句"><span class="nav-number">4.</span> <span class="nav-text">隐式提交的 SQL 语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对于事务操作的统计"><span class="nav-number">5.</span> <span class="nav-text">对于事务操作的统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的隔离级别"><span class="nav-number">6.</span> <span class="nav-text">事务的隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式事务"><span class="nav-number">7.</span> <span class="nav-text">分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-数据库分布式事务"><span class="nav-number">7.1.</span> <span class="nav-text">MySQL 数据库分布式事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部-XA-事务"><span class="nav-number">7.2.</span> <span class="nav-text">内部 XA 事务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不好的事务习惯"><span class="nav-number">8.</span> <span class="nav-text">不好的事务习惯</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在循环中提交"><span class="nav-number">8.1.</span> <span class="nav-text">在循环中提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用自动提交"><span class="nav-number">8.2.</span> <span class="nav-text">使用自动提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用自动回滚"><span class="nav-number">8.3.</span> <span class="nav-text">使用自动回滚</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#长事务"><span class="nav-number">9.</span> <span class="nav-text">长事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC"><span class="nav-number">10.</span> <span class="nav-text">MVCC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#InnoDB多版本"><span class="nav-number">10.1.</span> <span class="nav-text">InnoDB多版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多版本索引和二级索引"><span class="nav-number">10.2.</span> <span class="nav-text">多版本索引和二级索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">11.</span> <span class="nav-text">小结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -593,7 +610,7 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -643,12 +660,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">352k</span>
+    <span title="站点总字数">354k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">9:46</span>
+    <span title="站点阅读时长">9:51</span>
 </div>
 
         

@@ -53,7 +53,7 @@
 <meta property="og:site_name" content="Beritra">
 <meta property="og:description" content="NoSQL 几乎是必备的知识，其中 Redis 大概是适用范围最广的非关系型数据库，应该也是我个人接触比较早，了解比较多的，因此整理下 Redis 的相关知识点。先从比较基础的内容整理开始，后续更多复杂和深入的内容考虑慢慢补充或者再开专门的文章来整理。">
 <meta property="article:published_time" content="2020-02-25T17:23:14.000Z">
-<meta property="article:modified_time" content="2020-02-25T17:25:21.998Z">
+<meta property="article:modified_time" content="2020-05-25T14:33:34.270Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="redis">
@@ -234,10 +234,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-02-26 01:23:14 / 修改时间：01:25:21" itemprop="dateCreated datePublished" datetime="2020-02-26T01:23:14+08:00">2020-02-26</time>
+              <time title="创建时间：2020-02-26 01:23:14" itemprop="dateCreated datePublished" datetime="2020-02-26T01:23:14+08:00">2020-02-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-25 22:33:34" itemprop="dateModified" datetime="2020-05-25T22:33:34+08:00">2020-05-25</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -256,14 +262,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>14k</span>
+              <span>17k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>24 分钟</span>
+              <span>28 分钟</span>
             </span>
 
         </div>
@@ -278,28 +284,29 @@
         <p>NoSQL 几乎是必备的知识，其中 Redis 大概是适用范围最广的非关系型数据库，应该也是我个人接触比较早，了解比较多的，因此整理下 Redis 的相关知识点。先从比较基础的内容整理开始，后续更多复杂和深入的内容考虑慢慢补充或者再开专门的文章来整理。</p>
 <a id="more"></a>
 
-<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>直接抄来的一些关于Redisd的简介：</p>
-<p>Redis 是一个高性能的key-value数据库。 </p>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>直接抄来的一些关于 Redis 的简介：</p>
+<p>Redis 是一个高性能的 key-value 数据库。 </p>
 <p>Redis 有以下优势：</p>
 <ul>
-<li>性能极高 – Redis能读的速度是110000次/s,写的速度是81000次/s 。</li>
-<li>丰富的数据类型 – Redis支持二进制案例的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作。</li>
-<li>原子 – Redis的所有操作都是原子性的，意思就是要么成功执行要么失败完全不执行。单个操作是原子性的。多个操作也支持事务，即原子性，通过MULTI和EXEC指令包起来。</li>
-<li>丰富的特性 – Redis还支持 publish/subscribe, 通知, key 过期等等特性。</li>
+<li>性能极高 – 我在本机上用自带的 redis-benchmark 测试，读写能超过 15 万次每秒 。</li>
+<li>丰富的数据类型 – Redis 支持二进制的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作。</li>
+<li>原子 – Redis 的所有操作都是原子性的，意思就是要么成功执行要么失败完全不执行。单个操作是原子性的。多个操作也支持事务，即原子性，通过 MULTI 和 EXEC 指令包起来。</li>
+<li>丰富的特性 – Redis 还支持 publish/subscribe, 通知, key 过期等等特性。</li>
 </ul>
 <h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><p>Redis 能用来做什么？互联网公司一般怎么使用它？</p>
 <p>除了常见的缓存（cache），Redis 能做的还有很多，比如：</p>
 <ul>
-<li>分布式锁:<a href="https://segmentfault.com/a/1190000012919740" target="_blank" rel="noopener">基于 Redis 的分布式锁实现</a></li>
-<li>排序:<a href="http://doc.redisfans.com/key/sort.html" target="_blank" rel="noopener">sort 命令</a></li>
-<li>去重:小数据量可以直接用 Redis 的 Set 来去重，数据量非常大而且不要是百分百的精准可以考虑用布隆过滤器。 </li>
-<li>计数器:简单方式用<code>incr()</code> </li>
+<li>分布式锁：<a href="https://segmentfault.com/a/1190000012919740" target="_blank" rel="noopener">基于 Redis 的分布式锁实现</a></li>
+<li>排序：<a href="http://doc.redisfans.com/key/sort.html" target="_blank" rel="noopener">sort 命令</a></li>
+<li>去重：小数据量可以直接用 Redis 的 Set 来去重，数据量非常大而且不要是百分百的精准可以考虑用布隆过滤器。 </li>
+<li>计数器、限速器：基于lua 脚本和<code>incr()</code> </li>
+<li><a href="http://doc.redisfans.com/string/bitcount.html#bitmap" target="_blank" rel="noopener">使用 bitmap 实现用户上线次数统计</a></li>
 </ul>
-<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>Redis 有 5 种常用的基础数据结构，分别为:string (字符串)、list (列表)、set (集合)、hash (哈 希) 和 zset (有序集合)。熟练掌握这 5 种基本数据结构的使用是 Redis 知识最基础也最重要的部分，它也是在 Redis 面试题中问到最多的内容。除此之外，Redis 官网上还提到了三种数据类型：Bit arrays 、HyperLogLogs和Streams。</p>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>Redis 有 5 种常用的基础数据结构，分别为:string (字符串)、list (列表)、set (集合)、hash (哈 希) 和 zset (有序集合)。熟练掌握这 5 种基本数据结构的使用是 Redis 知识最基础也最重要的部分，它也是在 Redis 面试题中问到最多的内容。除此之外，Redis 官网上还提到了三种数据类型：Bit arrays 、HyperLogLogs 和 Streams。</p>
 <h3 id="key"><a href="#key" class="headerlink" title="key"></a>key</h3><p>官网上这么介绍 Redis 的 key：</p>
-<p>Redis密钥是二进制安全的，这意味着您可以使用任何二进制序列作为密钥，从“ foo”之类的字符串到JPEG文件的内容。空字符串也是有效的键。有关密钥的其他一些规则：</p>
+<p>Redis 密钥是二进制安全的，这意味着您可以使用任何二进制序列作为密钥，从“ foo”之类的字符串到 JPEG 文件的内容。空字符串也是有效的键。有关密钥的其他一些规则：</p>
 <ul>
-<li>太长的密钥不是一个好主意。例如，一个1024字节的密钥是一个坏主意，不仅是内存方面的问题，而且因为在数据集中查找密钥可能需要进行一些代价高昂的密钥比较。即使当手头的任务是匹配一个大值的存在时，对它进行散列（例如使用SHA1）也是一个更好的主意，尤其是从内存和带宽的角度来看。</li>
+<li>太长的密钥不是一个好主意。例如，一个 1024 字节的密钥是一个坏主意，不仅是内存方面的问题，而且因为在数据集中查找密钥可能需要进行一些代价高昂的密钥比较。即使当手头的任务是匹配一个大值的存在时，对它进行散列（例如使用SHA1）也是一个更好的主意，尤其是从内存和带宽的角度来看。</li>
 <li>非常短的键通常不是一个好主意。如果您可以改写“ user:1000:followers”，那么将“ u1000flw”作为密钥写的毫无意义。与键对象本身和值对象使用的空间相比，后者更具可读性，并且添加的空间较小。虽然短键显然会消耗更少的内存，但您的工作是找到合适的平衡。</li>
 <li>尝试坚持使用架构。例如，“ object-type:id”是一个好主意，例如“ user:1000”。点或破折号通常用于多字字段，例如“ comment:123:reply.to”或“ comment:123:reply-to”中。</li>
 <li>允许的最大密钥大小为512 MB。</li>
@@ -364,7 +371,7 @@
 <p>Redis 中集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是 O(1)。</p>
 <h3 id="Sorted-Set（有序集合）"><a href="#Sorted-Set（有序集合）" class="headerlink" title="Sorted Set（有序集合）"></a>Sorted Set（有序集合）</h3><p>Redis 有序集合和集合一样也是string类型元素的集合,且不允许重复的成员。不同的是每个元素都会关联一个 double 类型的分数。Redis 正是通过分数来为集合中的成员进行从小到大的排序。有序集合的成员是唯一的,但分数(score)却可以重复。</p>
 <p>集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是O(1)。 集合中最大的成员数为 2^32 - 1 (4294967295, 每个集合可存储40多亿个成员)。</p>
-<h3 id="Bitmaps（位图）-and-HyperLogLogs（？这个怎么翻译）"><a href="#Bitmaps（位图）-and-HyperLogLogs（？这个怎么翻译）" class="headerlink" title="Bitmaps（位图） and HyperLogLogs（？这个怎么翻译）"></a>Bitmaps（位图） and HyperLogLogs（？这个怎么翻译）</h3><p>Redis还支持位图和 HyperLogLogs，它们实际上是基于String基本类型的数据类型，但是具有自己的语义。 可以参考官网中<a href="https://redis.io/topics/data-types-intro" target="_blank" rel="noopener">introduction to Redis data types</a>以获取有关这些类型的信息。</p>
+<h3 id="Bitmaps（位图）-and-HyperLogLogs（？这个怎么翻译）"><a href="#Bitmaps（位图）-and-HyperLogLogs（？这个怎么翻译）" class="headerlink" title="Bitmaps（位图） and HyperLogLogs（？这个怎么翻译）"></a>Bitmaps（位图） and HyperLogLogs（？这个怎么翻译）</h3><p>Redis 还支持位图和 HyperLogLogs，它们实际上是基于 String 基本类型的数据类型，但是具有自己的语义。 可以参考官网中<a href="https://redis.io/topics/data-types-intro" target="_blank" rel="noopener">introduction to Redis data types</a>以获取有关这些类型的信息。</p>
 <h2 id="其他功能"><a href="#其他功能" class="headerlink" title="其他功能"></a>其他功能</h2><h3 id="Transaction（事务）"><a href="#Transaction（事务）" class="headerlink" title="Transaction（事务）"></a>Transaction（事务）</h3><p><a href="http://redisdoc.com/transaction/multi.html#multi" target="_blank" rel="noopener">MULTI</a> 、 <a href="http://redisdoc.com/transaction/exec.html#exec" target="_blank" rel="noopener">EXEC</a> 、 <a href="http://redisdoc.com/transaction/discard.html#discard" target="_blank" rel="noopener">DISCARD</a> 和 <a href="http://redisdoc.com/transaction/watch.html#watch" target="_blank" rel="noopener">WATCH</a> 是 Redis 事务的基础。</p>
 <p>事务可以一次执行多个命令， 并且带有以下两个重要的保证：</p>
 <ul>
@@ -514,20 +521,20 @@
 <h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="1、为什么-Redis-这么快？"><a href="#1、为什么-Redis-这么快？" class="headerlink" title="1、为什么 Redis 这么快？"></a>1、为什么 Redis 这么快？</h3><ul>
 <li>数据存于内存</li>
 <li>用了多路复用I/O</li>
-<li>单线程</li>
+<li>核心存取过程使用单线程</li>
 </ul>
 <h3 id="2、key-过期清除（超时剔除）策略"><a href="#2、key-过期清除（超时剔除）策略" class="headerlink" title="2、key 过期清除（超时剔除）策略"></a>2、key 过期清除（超时剔除）策略</h3><ol>
 <li>惰性过期（类比懒加载，这是懒过期）：只有当访问一个key时，才会判断该key是否已过期，过期则清除。该策略可以最大化地节省CPU资源，却对内存非常不友好。极端情况可能出现大量的过期key没有再次被访问，从而不会被清除，占用大量内存。</li>
 <li>定期过期：每隔一定的时间，会扫描一定数量的数据库的expires字典中一定数量的key，并清除其中已过期的key。该策略是前两者的一个折中方案。通过调整定时扫描的时间间隔和每次扫描的限定耗时，可以在不同情况下使得CPU和内存资源达到最优的平衡效果</li>
 </ol>
-<h3 id="3、-Redis的内存淘汰策略"><a href="#3、-Redis的内存淘汰策略" class="headerlink" title="3、 Redis的内存淘汰策略"></a>3、 Redis的内存淘汰策略</h3><p>Redis的内存淘汰策略是指在Redis的用于缓存的内存不足时，怎么处理需要新写入且需要申请额外空间的数据。</p>
+<h3 id="3、-Redis的内存淘汰策略"><a href="#3、-Redis的内存淘汰策略" class="headerlink" title="3、 Redis的内存淘汰策略"></a>3、 Redis的内存淘汰策略</h3><p>Redis 的内存淘汰策略是指在 Redis 的用于缓存的内存不足时，怎么处理需要新写入且需要申请额外空间的数据。</p>
 <ul>
 <li>noeviction：当内存不足以容纳新写入数据时，新写入操作会报错。</li>
-<li>allkeys-lru：当内存不足以容纳新写入数据时，在键空间中，移除最近最少使用的key。</li>
-<li>allkeys-random：当内存不足以容纳新写入数据时，在键空间中，随机移除某个key。</li>
-<li>volatile-lru：当内存不足以容纳新写入数据时，在设置了过期时间的键空间中，移除最近最少使用的key。</li>
-<li>volatile-random：当内存不足以容纳新写入数据时，在设置了过期时间的键空间中，随机移除某个key。</li>
-<li>volatile-ttl：当内存不足以容纳新写入数据时，在设置了过期时间的键空间中，有更早过期时间的key优先移除。</li>
+<li>allkeys-lru：当内存不足以容纳新写入数据时，在键空间中，移除最近最少使用的 key。</li>
+<li>allkeys-random：当内存不足以容纳新写入数据时，在键空间中，随机移除某个 key。</li>
+<li>volatile-lru：当内存不足以容纳新写入数据时，在设置了过期时间的键空间中，移除最近最少使用的 key。</li>
+<li>volatile-random：当内存不足以容纳新写入数据时，在设置了过期时间的键空间中，随机移除某个 key。</li>
+<li>volatile-ttl：当内存不足以容纳新写入数据时，在设置了过期时间的键空间中，有更早过期时间的 key 优先移除。</li>
 </ul>
 <h3 id="4、如何防止缓存穿透？"><a href="#4、如何防止缓存穿透？" class="headerlink" title="4、如何防止缓存穿透？"></a>4、如何防止缓存穿透？</h3><ol>
 <li>数据命中不高，变化实时性比较高的情况下，可以缓存空对象。</li>
@@ -541,12 +548,80 @@
 </ul>
 <p>有种观点认为 Redis 处理事务的做法会产生 bug ， 然而需要注意的是， 在通常情况下， 回滚并不能解决编程错误带来的问题。 举个例子， 如果你本来想通过 <a href="http://redisdoc.com/string/incr.html#incr" target="_blank" rel="noopener">INCR key</a> 命令将键的值加上 <code>1</code> ， 却不小心加上了 <code>2</code> ， 又或者对错误类型的键执行了 <a href="http://redisdoc.com/string/incr.html#incr" target="_blank" rel="noopener">INCR key</a> ， 回滚是没有办法处理这些情况的。</p>
 <p>鉴于没有任何机制能避免程序员自己造成的错误， 并且这类错误通常不会在生产环境中出现， 所以 Redis 选择了更简单、更快速的无回滚方式来处理事务。</p>
-<h2 id="结合Java"><a href="#结合Java" class="headerlink" title="结合Java"></a>结合Java</h2><p>参考文章</p>
+<h2 id="RedLock"><a href="#RedLock" class="headerlink" title="RedLock"></a>RedLock</h2><p>Redis 官方站这篇文章 <a href="https://link.zhihu.com/?target=https%3A//redis.io/topics/distlock">Distributed locks with Redis</a>提出了一种权威的基于 Redis 实现分布式锁的方式名叫 <strong>Redlock</strong>，此种方式比原先的单节点的方法更安全。它可以保证以下特性：</p>
+<ol>
+<li>安全特性：互斥访问，即永远只有一个客户端能拿到锁。</li>
+<li>避免死锁：最终客户端都可能拿到锁，不会出现死锁的情况，即使原本锁住某资源的客户端挂掉了或者出现了网络分区。</li>
+<li>容错性：只要大部分 Redis 节点存活就可以正常提供服务。</li>
+</ol>
+<h3 id="故障切换-failover-实现方式的局限性"><a href="#故障切换-failover-实现方式的局限性" class="headerlink" title="故障切换(failover)实现方式的局限性"></a>故障切换(failover)实现方式的局限性</h3><p>通过 Redis 为某个资源加锁的最简单方式就是在一个 Redis 实例中使用过期特性(expire)创建一个 key,  如果获得锁的客户端没有释放锁，那么在一定时间内这个 Key 将会自动删除，避免死锁。</p>
+<p>这种做法在表面上看起来可行，但分布式锁作为架构中的一个组件,为了避免Redis宕机引起锁服务不可用,  我们需要为 Redis 实例(master)增加热备(slave)，如果 master 不可用则将 slave 提升为 master。</p>
+<p>这种主从的配置方式存在一定的安全风险，由于 Redis 的<strong>主从复制是异步</strong>进行的，可能会发生多个客户端同时持有一个锁的现象。比如以下情况：</p>
+<ul>
+<li>Client A 获得在 master 节点获得了锁</li>
+<li>在 master 将 key 备份到 slave 节点之前，master宕机</li>
+<li>slave 被提升为 master</li>
+<li>Client B 在新的 master 节点处获得了锁，Client A 也持有这个锁</li>
+</ul>
+<h3 id="RedLock-算法介绍"><a href="#RedLock-算法介绍" class="headerlink" title="RedLock 算法介绍"></a>RedLock 算法介绍</h3><p>下面例子中的分布式环境包含 N 个 Redis Master 节点，这些节点相互独立，无需备份。这些节点尽可能相互隔离的部署在不同的物理机或虚拟机上（故障隔离）。</p>
+<p>节点数量暂定为 5 个（在需要投票的集群中，5 个节点的配置是比较合理的最小配置方式）。获得锁和释放锁的方式仍然采用之前介绍的方法。</p>
+<p>一个 Client 想要获得一个锁需要以下几个操作：</p>
+<ol>
+<li><p>得到本地时间</p>
+</li>
+<li><p>client 使用相同的 key 和随机数,按照顺序在每个 master 实例中尝试获得锁。在获得锁的过程中，为每一个锁操作设置一个快速失败时间（如果想要获得一个 10 秒的锁，  那么每一个锁操作的失败时间设为 5 - 50ms）。</p>
+<p>这样可以避免客户端与一个已经故障的 master 通信占用太长时间，通过快速失败的方式尽快的与集群中的其他节点完成锁操作。</p>
+</li>
+<li><p>客户端计算出与 master 获得锁操作过程中消耗的时间，当且仅当 client 获得锁消耗的时间小于锁的存活时间，并且在一半以上的 master 节点中获得锁。才认为 client 成功的获得了锁。</p>
+</li>
+<li><p>如果已经获得了锁，client 执行任务的时间窗口是锁的存活时间减去获得锁消耗的时间。</p>
+</li>
+<li><p>如果 client 获得锁的数量不足一半以上，或获得锁的时间超时，那么认为获得锁失败。客户端需要尝试在所有的 master 节点中释放锁，即使在第二步中没有成功获得该 master 节点中的锁，仍要进行释放操作。</p>
+</li>
+</ol>
+<h4 id="RedLock-性能及崩溃恢复的相关解决方法"><a href="#RedLock-性能及崩溃恢复的相关解决方法" class="headerlink" title="RedLock 性能及崩溃恢复的相关解决方法"></a>RedLock 性能及崩溃恢复的相关解决方法</h4><ol>
+<li><p>如果 redis 没有持久化功能，在 client A 获取锁成功后，所有 redis 重启，client B 能够再次获取到锁，这样违法了锁的排他互斥性;</p>
+</li>
+<li><p>如果启动 AOF 永久化存储，事情会好些， 举例：当我们重启 redis 后，由于 redis 过期机制是按照 unix 时间戳走的，所以在重启后，然后会按照规定的时间过期，不影响业务。但是由于 AOF 同步到磁盘的方式默认是每秒一次，如果在一秒内断电，会导致数据丢失，立即重启会造成锁互斥性失效。但如果同步磁盘方式使用 Always(每一个写命令都同步到硬盘)造成性能急剧下降。所以在锁完全有效性和性能方面要有所取舍。</p>
+</li>
+<li><p>有效解决既保证锁完全有效性及性能高效及即使断电情况的方法是 redis 同步到磁盘方式保持默认的每秒，在 redis 无论因为什么原因停掉后要等待 TTL 时间后再重启（学名:<strong>延迟重启</strong>），缺点是 在TTL时间内服务相当于暂停状态。</p>
+</li>
+</ol>
+<p>总结：</p>
+<ol>
+<li><p>TTL 时长 要大于正常业务执行的时间+获取所有 redis 服务消耗时间+时钟漂移</p>
+</li>
+<li><p>获取 redis 所有服务消耗时间要远小于 TTL 时间，并且获取成功的锁个数要在总数的一半以上：N/2+1</p>
+</li>
+<li><p>尝试获取每个 redis 实例锁时的时间要远小于 TTL 时间</p>
+</li>
+<li><p>尝试获取所有锁失败后重新尝试一定要有一定次数限制</p>
+</li>
+<li><p>在 redis 崩溃后（无论一个还是所有），要延迟 TTL 时间重启 redis</p>
+</li>
+<li><p>在实现多 redis 节点时要结合单节点分布式锁算法共同实现</p>
+</li>
+</ol>
+<h2 id="结合Java"><a href="#结合Java" class="headerlink" title="结合Java"></a>结合Java</h2><p>Jedis：是老牌的 Redis 的 Java 实现客户端，提供了比较全面的 Redis 命令的支持，</p>
+<p>Redisson：实现了分布式和可扩展的 Java 数据结构。</p>
+<p>Lettuce：高级 Redis 客户端，用于线程安全同步，异步和响应使用，支持集群，Sentinel，管道和编码器。</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>Jedis：比较全面的提供了Redis的操作特性</li>
+<li>Redisson：促使使用者对 Redis 的关注分离，提供很多分布式相关操作服务，例如，分布式锁，分布式集合，可通过 Redis 支持延迟队列</li>
+<li>Lettuce：基于 Netty 框架的事件驱动的通信层，其方法调用是异步的。Lettuce 的 API 是线程安全的，所以可以操作单个Lettuce 连接来完成各种操作</li>
+</ul>
+<p>Jedis 直接连接 redis server，如果在多线程环境下是非线程安全的，这个时候只有使用连接池，为每个 Jedis 实例增加物理连接 。</p>
+<p>lettuce 的连接是基于 Netty 的，连接实例（StatefulRedisConnection）可以在多个线程间并发访问，StatefulRedisConnection是线程安全的，所以一个连接实例可以满足多线程环境下的并发访问，当然这也是可伸缩的设计，一个连接实例不够的情况也可以按需增加连接实例。</p>
+<p>Redisson 实现了分布式和可扩展的 Java 数据结构，和 Jedis 相比，功能较为简单，不支持字符串操作，不支持排序、事务、管道、分区等 Redis 特性。Redisson 的宗旨是促进使用者对 Redis 的关注分离，从而让使用者能够将精力更集中地放在处理业务逻辑上。</p>
+<p>总结：<br>优先使用 Lettuce，如果需要分布式锁，分布式集合等分布式的高级特性，添加 Redisson 结合使用，因为 Redisson 本身对字符串的操作支持很差。</p>
+<p>参考文章</p>
 <p><a href="https://youyou-tech.com/2019/11/05/redis相关原理及面试官由浅到深必问的/" target="_blank" rel="noopener">redis相关原理及面试官由浅到深必问的</a></p>
 <p><a href="https://juejin.im/post/5d0da0ef6fb9a07ebd48dee0" target="_blank" rel="noopener">Redis 选择hash还是string 存储数据？</a></p>
 <p><a href="https://segmentfault.com/a/1190000002906345" target="_blank" rel="noopener">Redis 持久化</a></p>
 <p><a href="http://redisdoc.com/topic/persistence.html" target="_blank" rel="noopener">持久化（persistence）</a></p>
 <p><a href="https://www.cnblogs.com/rjzheng/p/10360619.html" target="_blank" rel="noopener">【原创】那些年用过的Redis集群架构（含面试解析）</a></p>
+<p><a href="https://blog.brickgao.com/2018/05/06/distributed-lock-with-redlock/" target="_blank" rel="noopener">通过 Redlock 实现分布式锁</a></p>
 
     </div>
 
@@ -633,7 +708,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简述"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用"><span class="nav-number">2.</span> <span class="nav-text">应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据结构"><span class="nav-number">3.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#key"><span class="nav-number">3.1.</span> <span class="nav-text">key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#string-字符串"><span class="nav-number">3.2.</span> <span class="nav-text">string (字符串)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hash（哈希）"><span class="nav-number">3.3.</span> <span class="nav-text">Hash（哈希）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#List（列表）"><span class="nav-number">3.4.</span> <span class="nav-text">List（列表）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#这两种存储方式的优缺点"><span class="nav-number">3.4.1.</span> <span class="nav-text">这两种存储方式的优缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Set（集合）"><span class="nav-number">3.5.</span> <span class="nav-text">Set（集合）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sorted-Set（有序集合）"><span class="nav-number">3.6.</span> <span class="nav-text">Sorted Set（有序集合）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bitmaps（位图）-and-HyperLogLogs（？这个怎么翻译）"><span class="nav-number">3.7.</span> <span class="nav-text">Bitmaps（位图） and HyperLogLogs（？这个怎么翻译）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他功能"><span class="nav-number">4.</span> <span class="nav-text">其他功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction（事务）"><span class="nav-number">4.1.</span> <span class="nav-text">Transaction（事务）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Replication（复制）"><span class="nav-number">4.2.</span> <span class="nav-text">Replication（复制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pub-sub（发布与订阅）"><span class="nav-number">4.3.</span> <span class="nav-text">pub&#x2F;sub（发布与订阅）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#编程示例"><span class="nav-number">4.3.1.</span> <span class="nav-text">编程示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sentinel（哨兵）"><span class="nav-number">4.4.</span> <span class="nav-text">Sentinel（哨兵）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#持久化"><span class="nav-number">5.</span> <span class="nav-text">持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-的优点"><span class="nav-number">5.1.</span> <span class="nav-text">RDB 的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-的缺点"><span class="nav-number">5.2.</span> <span class="nav-text">RDB 的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-的优点"><span class="nav-number">5.3.</span> <span class="nav-text">AOF 的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-的缺点"><span class="nav-number">5.4.</span> <span class="nav-text">AOF 的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-和-AOF-，应该用哪一个？"><span class="nav-number">5.5.</span> <span class="nav-text">RDB 和 AOF ，应该用哪一个？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群"><span class="nav-number">6.</span> <span class="nav-text">集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是-Redis-集群？"><span class="nav-number">6.1.</span> <span class="nav-text">什么是 Redis 集群？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-集群数据共享"><span class="nav-number">6.2.</span> <span class="nav-text">Redis 集群数据共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-集群中的主从复制"><span class="nav-number">6.3.</span> <span class="nav-text">Redis 集群中的主从复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-集群的一致性保证（guarantee）"><span class="nav-number">6.4.</span> <span class="nav-text">Redis 集群的一致性保证（guarantee）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见问题"><span class="nav-number">7.</span> <span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、为什么-Redis-这么快？"><span class="nav-number">7.1.</span> <span class="nav-text">1、为什么 Redis 这么快？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、key-过期清除（超时剔除）策略"><span class="nav-number">7.2.</span> <span class="nav-text">2、key 过期清除（超时剔除）策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、-Redis的内存淘汰策略"><span class="nav-number">7.3.</span> <span class="nav-text">3、 Redis的内存淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、如何防止缓存穿透？"><span class="nav-number">7.4.</span> <span class="nav-text">4、如何防止缓存穿透？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、为什么-Redis-不支持回滚（roll-back）"><span class="nav-number">7.5.</span> <span class="nav-text">5、为什么 Redis 不支持回滚（roll back）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结合Java"><span class="nav-number">8.</span> <span class="nav-text">结合Java</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简述"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用"><span class="nav-number">2.</span> <span class="nav-text">应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据结构"><span class="nav-number">3.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#key"><span class="nav-number">3.1.</span> <span class="nav-text">key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#string-字符串"><span class="nav-number">3.2.</span> <span class="nav-text">string (字符串)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hash（哈希）"><span class="nav-number">3.3.</span> <span class="nav-text">Hash（哈希）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#List（列表）"><span class="nav-number">3.4.</span> <span class="nav-text">List（列表）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#这两种存储方式的优缺点"><span class="nav-number">3.4.1.</span> <span class="nav-text">这两种存储方式的优缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Set（集合）"><span class="nav-number">3.5.</span> <span class="nav-text">Set（集合）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sorted-Set（有序集合）"><span class="nav-number">3.6.</span> <span class="nav-text">Sorted Set（有序集合）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bitmaps（位图）-and-HyperLogLogs（？这个怎么翻译）"><span class="nav-number">3.7.</span> <span class="nav-text">Bitmaps（位图） and HyperLogLogs（？这个怎么翻译）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他功能"><span class="nav-number">4.</span> <span class="nav-text">其他功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction（事务）"><span class="nav-number">4.1.</span> <span class="nav-text">Transaction（事务）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Replication（复制）"><span class="nav-number">4.2.</span> <span class="nav-text">Replication（复制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pub-sub（发布与订阅）"><span class="nav-number">4.3.</span> <span class="nav-text">pub&#x2F;sub（发布与订阅）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#编程示例"><span class="nav-number">4.3.1.</span> <span class="nav-text">编程示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sentinel（哨兵）"><span class="nav-number">4.4.</span> <span class="nav-text">Sentinel（哨兵）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#持久化"><span class="nav-number">5.</span> <span class="nav-text">持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-的优点"><span class="nav-number">5.1.</span> <span class="nav-text">RDB 的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-的缺点"><span class="nav-number">5.2.</span> <span class="nav-text">RDB 的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-的优点"><span class="nav-number">5.3.</span> <span class="nav-text">AOF 的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-的缺点"><span class="nav-number">5.4.</span> <span class="nav-text">AOF 的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-和-AOF-，应该用哪一个？"><span class="nav-number">5.5.</span> <span class="nav-text">RDB 和 AOF ，应该用哪一个？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群"><span class="nav-number">6.</span> <span class="nav-text">集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是-Redis-集群？"><span class="nav-number">6.1.</span> <span class="nav-text">什么是 Redis 集群？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-集群数据共享"><span class="nav-number">6.2.</span> <span class="nav-text">Redis 集群数据共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-集群中的主从复制"><span class="nav-number">6.3.</span> <span class="nav-text">Redis 集群中的主从复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-集群的一致性保证（guarantee）"><span class="nav-number">6.4.</span> <span class="nav-text">Redis 集群的一致性保证（guarantee）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见问题"><span class="nav-number">7.</span> <span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、为什么-Redis-这么快？"><span class="nav-number">7.1.</span> <span class="nav-text">1、为什么 Redis 这么快？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、key-过期清除（超时剔除）策略"><span class="nav-number">7.2.</span> <span class="nav-text">2、key 过期清除（超时剔除）策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、-Redis的内存淘汰策略"><span class="nav-number">7.3.</span> <span class="nav-text">3、 Redis的内存淘汰策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、如何防止缓存穿透？"><span class="nav-number">7.4.</span> <span class="nav-text">4、如何防止缓存穿透？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、为什么-Redis-不支持回滚（roll-back）"><span class="nav-number">7.5.</span> <span class="nav-text">5、为什么 Redis 不支持回滚（roll back）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RedLock"><span class="nav-number">8.</span> <span class="nav-text">RedLock</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#故障切换-failover-实现方式的局限性"><span class="nav-number">8.1.</span> <span class="nav-text">故障切换(failover)实现方式的局限性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RedLock-算法介绍"><span class="nav-number">8.2.</span> <span class="nav-text">RedLock 算法介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RedLock-性能及崩溃恢复的相关解决方法"><span class="nav-number">8.2.1.</span> <span class="nav-text">RedLock 性能及崩溃恢复的相关解决方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结合Java"><span class="nav-number">9.</span> <span class="nav-text">结合Java</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -706,12 +781,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">354k</span>
+    <span title="站点总字数">357k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">9:51</span>
+    <span title="站点阅读时长">9:55</span>
 </div>
 
         

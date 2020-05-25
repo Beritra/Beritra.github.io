@@ -618,8 +618,8 @@
       </categories>
       <tags>
         <tag>Spring</tag>
-        <tag>framework</tag>
         <tag>SpringBoot</tag>
+        <tag>framework</tag>
       </tags>
   </entry>
   <entry>
@@ -5104,9 +5104,9 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
       </categories>
       <tags>
         <tag>容器云</tag>
+        <tag>CI/CD</tag>
         <tag>Rancher</tag>
         <tag>Docker</tag>
-        <tag>CI/CD</tag>
       </tags>
   </entry>
   <entry>
@@ -5193,10 +5193,10 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
         <category>运维</category>
       </categories>
       <tags>
-        <tag>运维</tag>
         <tag>容器云</tag>
-        <tag>ELK</tag>
         <tag>日志</tag>
+        <tag>运维</tag>
+        <tag>ELK</tag>
       </tags>
   </entry>
   <entry>
@@ -5859,8 +5859,8 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
       </categories>
       <tags>
         <tag>Java</tag>
-        <tag>JVM</tag>
         <tag>面试</tag>
+        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>

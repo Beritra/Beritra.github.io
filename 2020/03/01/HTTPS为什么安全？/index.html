@@ -46,18 +46,18 @@
   };
 </script>
 
-  <meta name="description" content="知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。">
+  <meta name="description" content="知道 HTTPS，也用过 HTTPS，但是一直不知道原理，这次探究一下。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HTTPS为什么安全？">
 <meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;03&#x2F;01&#x2F;HTTPS%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%89%E5%85%A8%EF%BC%9F&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
-<meta property="og:description" content="知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。">
+<meta property="og:description" content="知道 HTTPS，也用过 HTTPS，但是一直不知道原理，这次探究一下。">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;2b9b90ea9f8dfdff2274335d198f04e5.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;47374473deecb326870d3b993bc37707.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;843931a17deddf3b0e03f276578dab56.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;af5bb15f4644cff034f6c4627b0542b3.png">
 <meta property="article:published_time" content="2020-03-01T15:52:45.000Z">
-<meta property="article:modified_time" content="2020-03-01T15:54:03.878Z">
+<meta property="article:modified_time" content="2020-05-27T16:11:05.485Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="https">
 <meta property="article:tag" content="计算机网络">
@@ -238,10 +238,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-03-01 23:52:45 / 修改时间：23:54:03" itemprop="dateCreated datePublished" datetime="2020-03-01T23:52:45+08:00">2020-03-01</time>
+              <time title="创建时间：2020-03-01 23:52:45" itemprop="dateCreated datePublished" datetime="2020-03-01T23:52:45+08:00">2020-03-01</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-28 00:11:05" itemprop="dateModified" datetime="2020-05-28T00:11:05+08:00">2020-05-28</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -279,7 +285,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。</p>
+        <p>知道 HTTPS，也用过 HTTPS，但是一直不知道原理，这次探究一下。</p>
 <a id="more"></a>
 
 <p>惯例，上 Wiki，什么是 HTTPS?</p>
@@ -287,12 +293,12 @@
 <p><strong>超文本传输安全协议</strong>（英语：<strong>H</strong>yper<strong>T</strong>ext <strong>T</strong>ransfer <strong>P</strong>rotocol <strong>S</strong>ecure，缩写：<strong>HTTPS</strong>；常称为HTTP over TLS、HTTP over SSL或HTTP Secure）是一种通过<a href="https://zh.wikipedia.org/wiki/計算機網絡" target="_blank" rel="noopener">计算机网络</a>进行安全通信的<a href="https://zh.wikipedia.org/wiki/網路傳輸協定" target="_blank" rel="noopener">传输协议</a>。HTTPS经由<a href="https://zh.wikipedia.org/wiki/HTTP" target="_blank" rel="noopener">HTTP</a>进行通信，但利用<a href="https://zh.wikipedia.org/wiki/传输层安全" target="_blank" rel="noopener">SSL/TLS</a>来<a href="https://zh.wikipedia.org/wiki/加密" target="_blank" rel="noopener">加密</a>数据包。HTTPS开发的主要目的，是提供对<a href="https://zh.wikipedia.org/wiki/網站" target="_blank" rel="noopener">网站</a>服务器的<a href="https://zh.wikipedia.org/wiki/身份验证" target="_blank" rel="noopener">身份认证</a>，保护交换数据的隐私与<a href="https://zh.wikipedia.org/wiki/完整性" target="_blank" rel="noopener">完整性</a>。这个协议由<a href="https://zh.wikipedia.org/wiki/網景" target="_blank" rel="noopener">网景</a>公司（Netscape）在1994年首次提出，随后扩展到<a href="https://zh.wikipedia.org/wiki/網際網路" target="_blank" rel="noopener">互联网</a>上。</p>
 </blockquote>
 <p>可以看出，Https 之所以安全，是经过了加密，那么新的问题又来了，SSL 和 TLS 分别是什么？是怎么加密的？</p>
-<h2 id="SSL-和-TLS"><a href="#SSL-和-TLS" class="headerlink" title="SSL 和 TLS"></a>SSL 和 TLS</h2><p>SSL：（Secure Socket Layer，安全套接字层），位于可靠的面向连接的<strong>网络层协议</strong>和<strong>应用层协议</strong>之间的一种协议层。SSL通过互相认证、使用数字签名确保完整性、使用加密确保私密性，以实现客户端和服务器之间的安全通讯。该协议由两层组成：SSL记录协议和SSL握手协议。</p>
+<h2 id="SSL-和-TLS"><a href="#SSL-和-TLS" class="headerlink" title="SSL 和 TLS"></a>SSL 和 TLS</h2><p>SSL：（Secure Socket Layer，安全套接字层），位于可靠的面向连接的<strong>网络层协议</strong>和<strong>应用层协议</strong>之间的一种协议层。SSL 通过互相认证、使用数字签名确保完整性、使用加密确保私密性，以实现客户端和服务器之间的安全通讯。该协议由两层组成：SSL 记录协议和 SSL 握手协议。</p>
 <p>TLS：(Transport Layer Security，传输层安全协议)，用于两个应用程序之间提供保密性和数据完整性。该协议由两层组成：TLS 记录协议和 TLS 握手协议。</p>
-<p>SSL 和 TLS 是一种能够在服务器，machines 和通过网络运行的应用程序（列如，客户端连接到 web 服务器）之间提供身份认证和数据加密的加密协议。SSL是TLS的前世。多年来，新版本的发布用来解决漏洞，提供更强大支持，更安全的密码套件和算法。</p>
-<p>SSL最初是由 Netscape 开发的，早在1995年以SSL 2.0的方式发布（1.0从未对公众发布）。在一些漏洞被发现之后，版本2.0在1996年很快被3.0所取代。注意：版本2.0和3.0有时会写成 SSLv2 和 SSLv3。</p>
+<p>SSL 和 TLS 是一种能够在服务器，machines 和通过网络运行的应用程序（列如，客户端连接到 web 服务器）之间提供身份认证和数据加密的加密协议。SSL 是 TLS 的前世。多年来，新版本的发布用来解决漏洞，提供更强大支持，更安全的密码套件和算法。</p>
+<p>SSL 最初是由 Netscape 开发的，早在 1995 年以 SSL 2.0 的方式发布（1.0从未对公众发布）。在一些漏洞被发现之后，版本 2.0 在 1996 年很快被 3.0 所取代。注意：版本 2.0 和 3.0 有时会写成 SSLv2 和 SSLv3。</p>
 <p><a href="https://tools.ietf.org/html/rfc2246" target="_blank" rel="noopener">TLS</a>以SSL 3.0为基础于1999年作为SSL的新版本推出。</p>
-<h3 id="应该选-SSL-还是-TLS？"><a href="#应该选-SSL-还是-TLS？" class="headerlink" title="应该选 SSL 还是 TLS？"></a>应该选 SSL 还是 TLS？</h3><p>SSL2.0和SSL3.0已经被IEFT组织废弃（分别在2011年，2015年）多年来，在被废弃的SSL协议中一直存在漏洞并被发现 (e.g. <a href="https://www.globalsign.com/en/blog/poodle-vulnerability-in-ssl-30/" target="_blank" rel="noopener">POODLE</a>, <a href="https://www.globalsign.com/en/blog/drown-attack-sslv2/" target="_blank" rel="noopener">DROWN</a>)。大多数现代浏览器遇到使用废弃协议的 web 服务时，会降低用户体验（红线穿过挂锁标志或者https表示警告）来表现。因为这些原因，你应该在服务端禁止使用 SSL 协议，仅仅保留 TLS 协议开启。</p>
+<h3 id="应该选-SSL-还是-TLS？"><a href="#应该选-SSL-还是-TLS？" class="headerlink" title="应该选 SSL 还是 TLS？"></a>应该选 SSL 还是 TLS？</h3><p>SSL 2.0 和 SSL 3.0 已经被 IEFT 组织废弃（分别在2011年，2015年）多年来，在被废弃的 SSL 协议中一直存在漏洞并被发现 (e.g. <a href="https://www.globalsign.com/en/blog/poodle-vulnerability-in-ssl-30/" target="_blank" rel="noopener">POODLE</a>, <a href="https://www.globalsign.com/en/blog/drown-attack-sslv2/" target="_blank" rel="noopener">DROWN</a>)。大多数现代浏览器遇到使用废弃协议的 web 服务时，会降低用户体验（红线穿过挂锁标志或者https表示警告）来表现。因为这些原因，你应该在服务端禁止使用 SSL 协议，仅仅保留 TLS 协议开启。</p>
 <h2 id="为什么要用-TLS-SSL？"><a href="#为什么要用-TLS-SSL？" class="headerlink" title="为什么要用 TLS/SSL？"></a>为什么要用 TLS/SSL？</h2><p>要想规避风险，要先知道风险点在哪。我们要知道 HTTPS 想要解决哪些问题，具体通过什么手段解决的。 </p>
 <p>常规的 HTTP 通信，有以下的问题。</p>
 <ol>
@@ -324,7 +330,7 @@
 <li>证书签名用到的Hash算法</li>
 <li>有效期等等其他信息</li>
 </ul>
-<p>这些内容都是明文，然后将明文通过摘要算法获取 hash，通过<strong>证书颁发机构</strong>的私钥进行非对称加密，得到签名信息，这个步骤叫做数字签名。明文+hash+数字签名共同组成了这个数字证书。</p>
+<p>这些内容都是明文，然后将明文通过摘要算法获取 hash，通过<strong>证书颁发机构</strong>的私钥进行非对称加密，得到签名信息，这个步骤叫做数字签名。明文 + hash + 数字签名共同组成了这个数字证书。</p>
 <p>现在客户端拿到了这个数字证书，使用证书里说明的 hash 算法对明文进行摘要运算，得到的 hash 值应该和证书里是一样的。然后客户端会查询这个证书的颁发机构名称，从自己内置的信任列表里找该机构的证书，这里有两种情况：</p>
 <ol>
 <li>找到了，说明是自己信任的 CA 颁发的，从该机构的数字证书中可以找到证书的公钥，用这个公钥解密之前拿到的数字证书，如果能成功解密，证明证书可信。会添加到信任列表。</li>
@@ -517,12 +523,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">357k</span>
+    <span title="站点总字数">358k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">9:55</span>
+    <span title="站点阅读时长">9:56</span>
 </div>
 
         

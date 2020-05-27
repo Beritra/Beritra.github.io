@@ -61,7 +61,7 @@
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;8fd5bf86f968ababd2e78669517c5c08.png">
 <meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;9151c7a0b015e54bdc06bebfaec18be7.jpg">
 <meta property="article:published_time" content="2020-03-12T17:00:00.000Z">
-<meta property="article:modified_time" content="2020-03-12T16:54:33.396Z">
+<meta property="article:modified_time" content="2020-05-27T15:57:31.489Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="集合">
@@ -242,10 +242,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-03-13 01:00:00 / 修改时间：00:54:33" itemprop="dateCreated datePublished" datetime="2020-03-13T01:00:00+08:00">2020-03-13</time>
+              <time title="创建时间：2020-03-13 01:00:00" itemprop="dateCreated datePublished" datetime="2020-03-13T01:00:00+08:00">2020-03-13</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-27 23:57:31" itemprop="dateModified" datetime="2020-05-27T23:57:31+08:00">2020-05-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -289,7 +295,7 @@
 <h2 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h2><p><code>java.util</code>包中提供的常见Map类包括以下几种。这里乱入了个<code>ConcurrentHashMap</code>，放到下面和其他<code>concurrent</code>包的集合一起讲。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/745d97b3e18d919ffbb9ad3a7f61c61b.png" alt=""></p>
 <h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><p> HashMap 是老生常谈的集合了，学习 HashMap 主要关注点是哈希算法、rehash、数据存储、扩容方式、性能区别和结合ConcurrentHashMap 了解为什么线程不安全，后者怎么解决线程安全问题。</p>
-<h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>先看一下JDK中 hashCode 的生成方式，JDK8 以后都是如下方式：</p>
+<h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>先看一下JDK中 hashCode 的生成方式，JDK 1.8 以后都是如下方式：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">int</span> h;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <p>这里可以看到，key 不是 null 的情况下，都是取<code>key.hashCode()</code>之后无符号右移16位，然后取异或。这里的<code>key.hashCode()</code>是 native 方法，直接在 JVM 中返回 int 型散列值。</p>
@@ -301,13 +307,13 @@
 <p>理论上散列值是一个 int 型，如果直接拿散列值作为下标访问 HashMap 主数组的话，考虑到 2 进制 32 位带符号的 int 表值范围从<code>-2147483648</code>到<code>2147483648</code>。前后加起来大概 40 亿的映射空间。只要哈希函数映射得比较均匀松散，一般应用是很难出现碰撞的。</p>
 <p>但问题是一个 40 亿长度的数组，内存是放不下的。你想，HashMap 扩容之前的数组初始大小才 16。所以这个散列值是不能直接拿来用的。用之前还要先做对数组的长度取模运算，得到的余数才能用来访问数组下标。</p>
 <p>顺便说一下，这也正好解释了为什么 HashMap 的数组长度要取 2 的整次幂。因为这样（数组长度 -1）正好相当于一个“低位掩码”。“与”操作的结果就是散列值的高位全部归零，只保留低位值，用来做数组下标访问。以初始长度 16 为例，16-1=15。2 进制表示是<code>00000000 00000000 00001111</code>。和某散列值做“与”操作如下，结果就是截取了最低的四位值。即</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">		10100101 11000100 00100101</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&amp;	  00000000 00000000 00001111</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">-------------------------------------------------</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">		00000000 00000000 00000101    &#x2F;&#x2F;高位全部归零，只保留末四位</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">   10100101 11000100 00100101</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&amp;  00000000 00000000 00001111</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">-------------------------------------------------</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">   00000000 00000000 00000101    &#x2F;&#x2F;高位全部归零，只保留末四位</span></pre></td></tr></table></figure>
 
 <p>但这时候问题就来了，这样就算我的散列值分布再松散，要是只取最后几位的话，碰撞也会很严重。更要命的是如果散列本身做得不好，分布上成等差数列的漏洞，恰好使最后几个低位呈现规律性重复，就无比蛋疼。</p>
 <p>这时候“扰动函数”的价值就体现出来了，说到这里大家应该猜出来了。看下面这个图:</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/e2865f788f40d13b29e204649820a9bf.jpg" alt=""></p>
 <p>右位移 16 位，正好是 32bit 的一半，自己的高半区和低半区做异或，就是为了混合原始哈希码的高位和低位，以此来加大低位的随机性。而且混合后的低位掺杂了高位的部分特征，这样高位的信息也被变相保留下来。</p>
-<h4 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h4><p>HashMap两个关键的初始化参数：</p>
+<h4 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h4><p>HashMap 两个关键的初始化参数：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">4</span>; <span class="comment">// aka 16</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> DEFAULT_LOAD_FACTOR = <span class="number">0.75f</span>;</span></pre></td></tr></table></figure>
 
 <p>前者是初始化容量 16，即新建一个 HashMap 的时候，如果不指定长度，则容量为 16。</p>
@@ -331,8 +337,8 @@
 <p>按照我们理想的状况，hashMap 的存取就是 O(1)，也就是直接根据 hashcode 就可以找到它，每个 bucket 只存储一个节点，链表指向都是<code>null</code>，这样就比较开心了，不要出现一个链表很长的情况。</p>
 <p>所以我们希望它能分布的均匀一点，如果让我们设计的话，我们肯定是直接对长度取模：<code>hashcode % length</code>，但 HashMap 的设计者却不是这样写的，它写成了 2 进制运算，因为当容量一定是<code>2^n</code>时，<code>h &amp; (length - 1) == h % length</code>，并且位运算的速度要高于取模。</p>
 <p>另外，元素在重新计算 hash 之后，因为 n 变为 2 倍，新的 index 的二进制就是在前面多了一位，比如原来的容量为 8 的时候，元素下标为 5，扩容到 16 之后，根据多的那一位是 0 还是 1，元素下标只需要 +8 或者在原位置就可以了，也就是说 resize 操作也会更快。</p>
-<h4 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h4><p>HashMap 实际是一种“数组+链表”数据结构。在 put 操作中，通过内部定义算法寻止找到数组下标，将数据直接放入此数组元素中，若通过算法得到的该数组元素已经有了元素（俗称 hash 冲突，链表结构出现的实际意义也就是为了解决 hash 冲突的问题）。将会把这个数组元素上的链表进行遍历，将新的数据放到链表末尾。</p>
-<p>通过哈希算法从寻止上能够高效的找到对应的下标，但是随着数据的增长，哈希冲突碰撞过多。在寻找数据时，先找到链表，然后通过遍历在寻找对应数据，如此将会使得 get 数据效率越来越低。在 JDK1.8 中，链表元素数量大于等于 8 将会重组该链表结构形成为“红黑树结构”，这种结构使得在 hash 冲突碰撞过多情况下，<code>get</code>效率比链表的效率高很多。</p>
+<h4 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h4><p>HashMap 实际是一种“数组+链表”数据结构。在 put 操作中，通过内部定义算法寻址找到数组下标，将数据直接放入此数组元素中，若通过算法得到的该数组元素已经有了元素（俗称 hash 冲突，链表结构出现的实际意义也就是为了解决 hash 冲突的问题）。将会把这个数组元素上的链表进行遍历，将新的数据放到链表末尾。</p>
+<p>通过哈希算法从寻止上能够高效的找到对应的下标，但是随着数据的增长，哈希冲突碰撞过多。在寻找数据时，先找到链表，然后通过遍历在寻找对应数据，如此将会使得 get 数据效率越来越低。在 JDK 1.8 中，链表元素数量大于等于 8 将会重组该链表结构形成为“红黑树结构”，这种结构使得在 hash 冲突碰撞过多情况下，<code>get</code>效率比链表的效率高很多。</p>
 <h4 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h4><p>在没有哈希冲突的情况下，HashMap 存取元素的时间复杂度是 O(1)，但是这只是理想情况。当冲突不多的时候，重复元素以链表形式存储，时间复杂度是 O(N)，当数据量大的时候，链表转换为红黑树，时间复杂度变成 O(LogN)</p>
 <h4 id="线程安全和其他局限"><a href="#线程安全和其他局限" class="headerlink" title="线程安全和其他局限"></a>线程安全和其他局限</h4><p>HashMap 不是线程安全的，另外如果 HashMap 的 key 是自定义类，需要重写<code>hashCode()</code>方法，并且由于 HashMap 的效率高度依赖<code>hashCode()</code>，需要保证散列分布尽量均匀。</p>
 <p>都知道 HashMap 不是线程安全的，那么在哪些环节导致了他线程不安全？</p>
@@ -346,12 +352,12 @@
 <p>跟上面同样，多个线程同时修改数据，可能产生错误。</p>
 </li>
 <li><p>扩容的时候</p>
-<p>线程1执行<code>put</code>时，因为元素个数超出<code>threshold</code>而导致 rehash，线程2此时执行<code>get</code>，有可能导致这个问题。</p>
+<p>线程 1 执行<code>put</code>时，因为元素个数超出<code>threshold</code>而导致 rehash，线程 2 此时执行<code>get</code>，有可能导致这个问题。</p>
 <p>因为在 resize 的时候，是计算新的容量和<code>threshold</code>，在创建一个新 hash 表，最后将旧 hash 表中元素 rehash 到新的 hash 表中。如果在这个期间，另一个线程执行读取操作，有可能<code>get</code>到<code>null</code>。</p>
 </li>
 </ol>
 <p>那么 ConcurrentHashMap 如何保证线程安全？这个在另一篇文章中单独叙述。</p>
-<h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>LinkedHashMap是继承自HashMap的，跟HashMap最大的区别是，他是基于Hash表和链表的实现，并且依靠着双向链表保证了迭代顺序是插入的顺序。</p>
+<h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>LinkedHashMap 是继承自 HashMap 的，跟 HashMap 最大的区别是，他是基于 Hash 表和链表的实现，并且依靠着双向链表保证了迭代顺序是插入的顺序。</p>
 <p>来看看 HashMap 和 LinkedHashMap 的结构图，是不是秒懂了。LinkedHashMap 其实就是可以看成 HashMap 的基础上，多了一个双向链表来维持顺序。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/61bd32fe80e6c936034c93389cc99c0a.jpg" alt=""></p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/f7855185a5577918835416203aa831ae.jpg" alt=""></p>
@@ -365,23 +371,23 @@
 <li>可以对元素进行排序；</li>
 <li>无序集合（插入和遍历顺序不一致）；</li>
 </ul>
-<p>由于是基于红黑树，TreeMap 在插入、删除、搜索的时候，时间复杂度都是O(LogN)。红黑树的结构单独另外说明，这里就不赘述。</p>
-<h3 id="EnumMap"><a href="#EnumMap" class="headerlink" title="EnumMap"></a>EnumMap</h3><p>EnumMap 是专门为枚举类型量身定做的Map实现。虽然使用其它的 Map 实现（如HashMap）也能完成枚举类型实例到值得映射，但是使用 EnumMap 会更加高效：它只能接收同一枚举类型的实例作为键值，并且由于枚举类型实例的数量相对固定并且有限，所以 EnumMap 使用数组来存放与枚举类型对应的值。这使得 EnumMap 的效率非常高。EnumMap 在内部使用枚举类型的<code>ordinal()</code>得到当前实例的声明次序，并使用这个次序维护枚举类型实例对应值在数组的位置。</p>
+<p>由于是基于红黑树，TreeMap 在插入、删除、搜索的时候，时间复杂度都是 O(LogN)。红黑树的结构单独另外说明，这里就不赘述。</p>
+<h3 id="EnumMap"><a href="#EnumMap" class="headerlink" title="EnumMap"></a>EnumMap</h3><p>EnumMap 是专门为枚举类型量身定做的 Map 实现。虽然使用其它的 Map 实现（如 HashMap）也能完成枚举类型实例到值得映射，但是使用 EnumMap 会更加高效：它只能接收同一枚举类型的实例作为键值，并且由于枚举类型实例的数量相对固定并且有限，所以 EnumMap 使用数组来存放与枚举类型对应的值。这使得 EnumMap 的效率非常高。EnumMap 在内部使用枚举类型的<code>ordinal()</code>得到当前实例的声明次序，并使用这个次序维护枚举类型实例对应值在数组的位置。</p>
 <p>在 key 是枚举类的时候，EnumMap 可以用来代替 HashMap，并且由于是数组实现，性能更好。</p>
 <h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><h4 id="Hashtable-与-HashMap-的简单比较"><a href="#Hashtable-与-HashMap-的简单比较" class="headerlink" title="Hashtable 与 HashMap 的简单比较"></a>Hashtable 与 HashMap 的简单比较</h4><ol>
 <li><p>HashTable 基于 Dictionary 类，而 HashMap 是基于 AbstractMap。Dictionary 是任何可将键映射到相应值的类的抽象父类，而 AbstractMap 是基于 Map 接口的实现，它以最大限度地减少实现此接口所需的工作。</p>
 </li>
-<li><p>HashMap 的 key 和 value 都允许为<code>null</code>，而 Hashtable 的 key 和 value 都不允许为<code>null</code>。HashMap 遇到 key 为<code>null</code>的时候，调用<code>putForNullKey</code>方法进行处理，而对 value 没有处理；Hashtable遇到<code>null</code>，直接返回<code>NullPointerException</code>。</p>
+<li><p>HashMap 的 key 和 value 都允许为<code>null</code>，而 Hashtable 的 key 和 value 都不允许为<code>null</code>（出于并发上取不到值的考虑）。HashMap 遇到 key 为<code>null</code>的时候，调用<code>putForNullKey</code>方法进行处理，而对 value 没有处理；Hashtable遇到<code>null</code>，直接返回<code>NullPointerException</code>。</p>
 </li>
-<li><p>Hashtable 方法是同步，而HashMap则不是。我们可以看一下源码，Hashtable 中的几乎所有的 public 的方法都是<code>synchronized</code>的，而有些方法也是在内部通过<code>synchronized</code>代码块来实现。所以有人一般都建议如果是涉及到多线程同步时采用 HashTable，没有涉及就采用 HashMap，但是在 Collections 类中存在一个静态方法：<code>synchronizedMap()</code>，该方法创建了一个线程安全的 Map 对象，并把它作为一个封装的对象来返回。</p>
+<li><p>Hashtable 方法是同步，而 HashMap 则不是。我们可以看一下源码，Hashtable 中的几乎所有的 public 的方法都是<code>synchronized</code>的，而有些方法也是在内部通过<code>synchronized</code>代码块来实现。所以有人一般都建议如果是涉及到多线程同步时采用 HashTable，没有涉及就采用 HashMap，但是在 Collections 类中存在一个静态方法：<code>synchronizedMap()</code>，该方法创建了一个线程安全的 Map 对象，并把它作为一个封装的对象来返回。</p>
 </li>
-<li><p>HashMap的初始容量为 16，Hashtable初始容量为 11，两者的填充因子默认都是0.75。</p>
+<li><p>HashMap的初始容量为 16，Hashtable 初始容量为 11，两者的填充因子默认都是 0.75。</p>
 </li>
 <li><p>两者计算 hash 的方法不同</p>
 <p>Hashtable 计算 hash 是直接使用 key 的 hashcode 对 table 数组的长度直接进行取模</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> hash = key.hashCode();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> index = (hash &amp; <span class="number">0x7FFFFFFF</span>) % tab.length;</span></pre></td></tr></table></figure>
 
-<p>HashMap 计算 hash 对 key 的 hashcode 的前后16为进行了异或操作，以获得更好的散列值，然后对table数组长度取模(实际上是位操作，增加效率)</p>
+<p>HashMap 计算 hash 对 key 的 hashcode 的前后 16 位进行了异或操作，以获得更好的散列值，然后对 table 数组长度取模（实际上是位操作，增加效率）</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">       <span class="keyword">int</span> h;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">       <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">   </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">indexFor</span><span class="params">(<span class="keyword">int</span> h, <span class="keyword">int</span> length)</span> </span>&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">       <span class="keyword">return</span> h &amp; (length-<span class="number">1</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr></table></figure>
 
 
@@ -416,7 +422,7 @@
 <li>Vector 方法调用是线程安全的。</li>
 <li>成员变量有所不同</li>
 </ul>
-<h4 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h4><p>Stack栈是Vector的一个子类，它实现了一个标准的后进先出的栈。</p>
+<h4 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h4><p>Stack 栈是 Vector 的一个子类，它实现了一个标准的后进先出的栈。</p>
 <p>他的方法很简单，只有<code>empty()</code>、<code>peek()</code>、<code>pop()</code>、<code>push(Object element)</code>、<code>search(object element)</code>这几个。其中 peek 和 pop 的返回值都是堆栈顶部的对象，但是前者只是查看，后者是移除。</p>
 <h2 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h2><p><code>java.util</code>包中提供的常见Set类包括以下几种。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/06530f14f76b79769887d3f1e8eebc27.png" alt=""></p>
@@ -426,22 +432,22 @@
 <p>EnumSet 的默认子类 RegularEnumSet 和 JumboEnumSet 实现原理都是基于位运算向量，位运算向量的原理就是用一个位表示一个元素的状态（元素的状态只有两种），用一组位表示一个集合的状态，每个位对应一个元素，譬如一个枚举类 DemoEnum 有6个枚举值，则 EnumSet<DemoEnum> 集合就可以通过一个 byte 字节从右到左（二进制低到高位）来表示，不用的位上用 0 填充，用的位上每个 bit 位代表一个枚举值，1 表示包含该枚举值，0 表示不含该枚举值。因此位向量能表示的枚举值个数与向量长度有关，上面例子中一个 byte 类型最多能表示 8 个枚举值，所以 EnumSet 抽象类的两个实现类 RegularEnumSet 和 JumboEnumSet 分别定义了不同的向量长度。RegularEnumSet 使用 64 位的 long 类型变量作为位向量，而 JumboEnumSet 使用一个 long 类型数组作为向量（数组内存连续），故当我们通过 EnumSet 的工厂方法创建 EnumSet 集合时 EnumSet 会通过判断枚举类的枚举值数量决定使用两个子类的哪一个，如果枚举值个数小于等于 64 就用 RegularEnumSet，大于 64 就用 JumboEnumSet。</p>
 <p>简单来说 EnumSet 就是一个高效的枚举类集合。</p>
 <h2 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h2><p><img src="http://nas.beritra.com:18081/uploads/big/8fd5bf86f968ababd2e78669517c5c08.png" alt=""></p>
-<p>队列(Queue)可以当做一种特殊的线性表，遵循先进先出原则。而双向队列(Deque),是 Queue 的一个子接口，双向队列是指该队列两端的元素既能入队(offer)也能出队(poll),如果将 Deque 限制为只能从一端入队和出队，则可实现栈的数据结构。</p>
-<p>PriorityQueue 有一种特殊的队列，叫做优先队列。优先队列的作用是能保证每次取出的元素都是队列中权值最小的<strong>（Java的优先队列每次取最小元素，C++的优先队列每次取最大元素）。这里牵涉到了大小关系，</strong>元素大小的评判可以通过元素本身的自然顺序（natural ordering），也可以通过构造时传入的比较器（Comparator，类似于C++的仿函数）。</p>
-<p>Java 中 PriorityQueue 实现了 Queue 接口，不允许放入<code>null</code>元素；其通过堆实现，具体说是通过完全二叉树（complete binary tree）实现的<strong>小顶堆</strong>（任意一个非叶子节点的权值，都不大于其左右子节点的权值），也就意味着可以通过数组来作为 PriorityQueue 的底层实现。</p>
-<p>最小堆的完全二叉树有一个特性是根节点必定是最小节点，子女节点一定大于其父节点。还有一个特性是叶子节点数量=全部非叶子节点数量+1。</p>
+<p>队列(Queue)可以当做一种特殊的线性表，遵循先进先出原则。而双向队列(Deque)，是 Queue 的一个子接口，双向队列是指该队列两端的元素既能入队(offer)也能出队(poll),如果将 Deque 限制为只能从一端入队和出队，则可实现栈的数据结构。</p>
+<p>PriorityQueue 有一种特殊的队列，叫做优先队列。优先队列的作用是能保证每次取出的元素都是队列中权值最小的（Java的优先队列每次取最小元素，C++的优先队列每次取最大元素）。这里牵涉到了大小关系，元素大小的评判可以通过元素本身的自然顺序（natural ordering），也可以通过构造时传入的比较器（Comparator，类似于C++的仿函数）。</p>
+<p>Java 中 PriorityQueue 实现了 Queue 接口，不允许放入<code>null</code>元素；其通过堆实现，具体说是通过完全二叉树（complete binary tree）实现的小顶堆（任意一个非叶子节点的权值，都不大于其左右子节点的权值），也就意味着可以通过数组来作为 PriorityQueue 的底层实现。</p>
+<p>最小堆的完全二叉树有一个特性是根节点必定是最小节点，子女节点一定大于其父节点。还有一个特性是叶子节点数量 = 全部非叶子节点数量 +1。</p>
 <p>每次增删元素都有可能对树结构进行调整，所以 PriorityQueue 队列不适合进场出队入队的频繁操作，但是他的优先级特性非常适合一些对顺序有要求的数据处理场合。</p>
 <h2 id="concurrent包"><a href="#concurrent包" class="headerlink" title="concurrent包"></a>concurrent包</h2><h4 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h4><p>上面 HashMap 已经说到了 HashMap 在多个线程同时存取或者触发扩容的时候，都有可能出现错误，导致操作被覆盖或者丢失，那么怎么解决这个问题呐？</p>
 <p>第一反应当然是加锁，HashTable 就是这么做的，使用了<code>synchronized</code>关键字。虽然解决了并发访问的安全性问题，但是性能不怎么样。HashTable 中的增删改、甚至<code>equals</code>、<code>toString</code>方法等等都是方法级的锁，所以同时只能一个线程去操作，导致效率问题。</p>
-<p>在JDK1.7及之前版本，ConcurrentHashMap 采用的是 Segment 分段锁，即将数据分为一段一段的存储，然后给每一段数据加一把锁。当一个线程占用锁访问其中一个段数据时，其他段的数据也能被其他线程访问。</p>
-<p>在JDK1.8以后，ConcurrentHashMap 取消了 Segment 分段锁，采用 CAS 和<code>synchronized</code>来保证并发安全。 数据结构与 HashMap 1.8 的结构类似，数组+链表/红黑二叉树(链表长度&gt;8 时，转换为红黑树)。</p>
+<p>在 JDK 1.7 及之前版本，ConcurrentHashMap 采用的是 Segment 分段锁，即将数据分为一段一段的存储，然后给每一段数据加一把锁。当一个线程占用锁访问其中一个段数据时，其他段的数据也能被其他线程访问。</p>
+<p>在 JDK 1.8 以后，ConcurrentHashMap 取消了 Segment 分段锁，采用 CAS 和<code>synchronized</code>来保证并发安全。 数据结构与 HashMap 1.8 的结构类似，数组+链表/红黑二叉树(链表长度 &gt;8 时，转换为红黑树)。</p>
 <p>通过 JDK 的源码和官方文档看来， 他们认为的弃用分段锁的原因由以下几点：</p>
 <ol>
 <li>加入多个分段锁浪费内存空间。</li>
 <li>生产环境中， map 在放入时竞争同一个锁的概率非常小，分段锁反而会造成更新等操作的长时间等待。</li>
 <li>为了提高 GC 的效率。</li>
 </ol>
-<p>在 JDK11 下对 HashMap 和 ConcurrentHashMap 进行了简单测试，生成 5000 万条随机数然后插入，分别消耗 16348 毫秒和 19194 毫秒。其中包括随机数生成、插入和扩容的时间消耗，可见两者之间性能差距不大。</p>
+<p>在 JDK 11 下对 HashMap 和 ConcurrentHashMap 进行了简单测试，生成 5000 万条随机数然后插入，分别消耗 16348 毫秒和 19194 毫秒。其中包括随机数生成、插入和扩容的时间消耗，可见两者之间性能差距不大。</p>
 <p>然后使用 HashTable 在单线程下插入，同样的数据量时间在 17 秒所有，跟 HashMap 差别不大，可以当做是误差范围内。然后使用 20 个线程插入，消耗时间在 15 秒左右，提升并不明显。奇怪的是 ConcurrentHashMap 却使用了 45 秒。然后缩小数据量，在 1000 万以下的时候，ConcurrentHashMap 的插入速度又好于 HashTable 了。这个现象很有意思，有空了详细研究一下产生这个问题的原因。</p>
 <p>ConcurrentHashMap 的<strong>整体性能</strong>要优于 HashTable，但是某些场景不能替代 HashTable，例如<strong>强一致性</strong>的场景，ConcurrentHashMap 的<code>get</code>、<code>size</code>等方法都<strong>没有加锁</strong>，ConcurrentHashMap 是<strong>弱一致性</strong>的。更多关于 ConcurrentHashMap 的原理在另一个文章中单独分析。</p>
 <h4 id="ConcurrentSkipListMap"><a href="#ConcurrentSkipListMap" class="headerlink" title="ConcurrentSkipListMap"></a>ConcurrentSkipListMap</h4><p>ConcurrentSkipListMap 提供了一种线程安全的并发访问的排序映射表。内部是 SkipList（跳表）结构实现，在理论上能够在 O(logN) 时间内完成查找、插入、删除操作。</p>
@@ -620,12 +626,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-area-chart"></i>
     </span>
-    <span title="站点总字数">357k</span>
+    <span title="站点总字数">358k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">9:55</span>
+    <span title="站点阅读时长">9:56</span>
 </div>
 
         

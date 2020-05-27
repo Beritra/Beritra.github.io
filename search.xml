@@ -104,7 +104,7 @@
 <p>泛型是 Java 1.5 版本才引进的概念，在这之前是没有泛型的概念的，但显然，泛型代码能够很好地和之前版本的代码很好地兼容。这是因为，泛型信息只存在于代码编译阶段，在进入 JVM 之前，与泛型相关的信息会被擦除掉，专业术语叫做类型擦除。</p>
 <p>在泛型类被类型擦除的时候，之前泛型类中的类型参数部分如果没有指定上限，如<code>&lt;T&gt;</code>则会被转译成普通的 Object 类型，如果指定了上限如<code>&lt;T extends String&gt;</code>则类型参数就被替换成类型上限。</p>
 <p>如在代码中定义的<code>List&lt;object&gt;</code>和<code>List&lt;String&gt;</code>等类型，在编译后都会编程<code>List</code>。JVM 看到的只是<code>List</code>，而由泛型附加的类型信息对 JVM 来说是不可见的。Java 编译器会在编译时尽可能的发现可能出错的地方，但是仍然无法避免在运行时刻出现类型转换异常的情况。类型擦除也是 Java 的泛型实现方法与 C++ 模版机制实现方式之间的重要区别。</p>
-<h3 id="泛型数组"><a href="#泛型数组" class="headerlink" title="泛型数组"></a>泛型数组</h3><p>关于泛型数组，还要提醒一下，在java中是“不能创建一个确切的泛型类型的数组”的。</p>
+<h3 id="泛型数组"><a href="#泛型数组" class="headerlink" title="泛型数组"></a>泛型数组</h3><p>关于泛型数组，还要提醒一下，在 Java 中是“不能创建一个确切的泛型类型的数组”的。</p>
 <p>也就是说下面的这个例子是不可以的：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;String&gt;[] ls = <span class="keyword">new</span> ArrayList&lt;String&gt;[<span class="number">10</span>];</span></pre></td></tr></table></figure>
 
@@ -128,7 +128,7 @@
 <p>首先为什么需要有反射？我们看下动态编译与静态编译的概念：</p>
 <ul>
 <li>静态编译：在编译时确定类型，绑定对象。即通过<code>new</code>关键字实例化一个对象。</li>
-<li>动态编译：运行时确定类型，绑定对象。动态编译最大限度发挥了java的灵活性，体现了多态的应用，有以降低类之间的藕合性。</li>
+<li>动态编译：运行时确定类型，绑定对象。动态编译最大限度发挥了 Java 的灵活性，体现了多态的应用，有以降低类之间的藕合性。</li>
 </ul>
 <p>另外不妨用大家接触最早的一个反射用例作为例子。刚接触 JDBC 的时候可能就有疑问，为什么连接数据库一定要先注册驱动，也就是用<code>Class.forName(驱动类)</code>来加载驱动类？</p>
 <p>这里的原因就是包括：</p>
@@ -227,7 +227,7 @@
 <p><code>static Object newProxyInstance(ClassLoader loader, Class[] interfaces, InvocationHandler h)</code> 构造实现指定接口的代理类的一个新实例，所有方法会调用给定处理器对象的 invoke 方法</p>
 <p><code>static boolean isProxyClass(Class cl)</code> 返回 cl 是否为一个代理类</p>
 </blockquote>
-<p>在<code>newProxyInstance</code>中顺着代码可以看到整个动态代理的流程，简单来说就是对参数进行校验，然后生成一个代理类的字节码文件，如果你修改 jvm 参数<code>jdk.proxy.ProxyGenerator.saveGeneratedFiles</code>为 true 的话，还可以保存生成的字节码文件。</p>
+<p>在<code>newProxyInstance</code>中顺着代码可以看到整个动态代理的流程，简单来说就是对参数进行校验，然后生成一个代理类的字节码文件，如果你修改 JVM 参数<code>jdk.proxy.ProxyGenerator.saveGeneratedFiles</code>为 true 的话，还可以保存生成的字节码文件。</p>
 <p>打印字节码文件我们可以看到生成的文件结构：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> $<span class="title">Proxy0</span> <span class="keyword">extends</span> <span class="title">Proxy</span> <span class="keyword">implements</span> <span class="title">UserService</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">static</span> &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            m1 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"equals"</span>, Class.forName(<span class="string">"java.lang.Object"</span>));</span></pre></td></tr><tr><td class="code"><pre><span class="line">            m2 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"toString"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">            m4 = Class.forName(<span class="string">"com.beritra.jdk.proxy.UserService"</span>).getMethod(<span class="string">"select"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">            m0 = Class.forName(<span class="string">"java.lang.Object"</span>).getMethod(<span class="string">"hashCode"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">            m3 = Class.forName(<span class="string">"com.beritra.jdk.proxy.UserService"</span>).getMethod(<span class="string">"update"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException var2) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoSuchMethodError(var2.getMessage());</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException var3) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NoClassDefFoundError(var3.getMessage());</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m3, (Object[])<span class="keyword">null</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">throw</span> var2;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">select</span><span class="params">()</span> <span class="keyword">throws</span>  </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">try</span> &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">super</span>.h.invoke(<span class="keyword">this</span>, m4, (Object[])<span class="keyword">null</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | Error var2) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">throw</span> var2;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UndeclaredThrowableException(var3);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="comment">//其他部分没贴</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
@@ -349,7 +349,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Class&lt;?&gt; clazz = AnnotationTest<span class="class">.<span class="keyword">class</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">Annotation annotation = clazz.getAnnotation(PrintMethods<span class="class">.<span class="keyword">class</span>)</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (annotation != <span class="keyword">null</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">for</span> (Method method : clazz.getDeclaredMethods()) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        System.out.println(method.getName());</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125; <span class="keyword">else</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    System.out.println(<span class="string">"No Annotation"</span>);</span></pre></td></tr></table></figure>
 
 <p>执行这段代码，就会发现<code>AnnotationTest</code>这个类中的注解被顺利的打印了出来，包括<code>main</code>和<code>print</code>两个方法。</p>
-<p>其实在框架中也是这样的，比如 SpringBoot 的<code>@Componen</code>注解，把一个类标注为 bean，让 Spring 去管理，原理就是我们先通过<code>@ComponentScan</code>注解指定了包，然后 Spring 去吧所有包下面的类都扫描一遍，然后找到带有<code>@Componen</code>注解的，然后进行后续处理。</p>
+<p>其实在框架中也是这样的，比如 SpringBoot 的<code>@Componen</code>注解，把一个类标注为 bean，让 Spring 去管理，原理就是我们先通过<code>@ComponentScan</code>注解指定了包，然后 Spring 去把所有包下面的类都扫描一遍，然后找到带有<code>@Componen</code>注解的，然后进行后续处理。</p>
 <p>参考文章：</p>
 <p><a href="https://blog.csdn.net/s10461/article/details/53941091" target="_blank" rel="noopener">Java 泛型详解-绝对是对泛型方法讲解最详细的，没有之一</a></p>
 <p><a href="https://blog.csdn.net/LonelyRoamer/article/details/7868820" target="_blank" rel="noopener">java泛型（二）、泛型的内部原理：类型擦除以及类型擦除带来的问题</a></p>
@@ -1085,7 +1085,7 @@
 <h2 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h2><p><code>java.util</code>包中提供的常见Map类包括以下几种。这里乱入了个<code>ConcurrentHashMap</code>，放到下面和其他<code>concurrent</code>包的集合一起讲。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/745d97b3e18d919ffbb9ad3a7f61c61b.png" alt=""></p>
 <h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><p> HashMap 是老生常谈的集合了，学习 HashMap 主要关注点是哈希算法、rehash、数据存储、扩容方式、性能区别和结合ConcurrentHashMap 了解为什么线程不安全，后者怎么解决线程安全问题。</p>
-<h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>先看一下JDK中 hashCode 的生成方式，JDK8 以后都是如下方式：</p>
+<h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>先看一下JDK中 hashCode 的生成方式，JDK 1.8 以后都是如下方式：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> h;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <p>这里可以看到，key 不是 null 的情况下，都是取<code>key.hashCode()</code>之后无符号右移16位，然后取异或。这里的<code>key.hashCode()</code>是 native 方法，直接在 JVM 中返回 int 型散列值。</p>
@@ -1097,13 +1097,13 @@
 <p>理论上散列值是一个 int 型，如果直接拿散列值作为下标访问 HashMap 主数组的话，考虑到 2 进制 32 位带符号的 int 表值范围从<code>-2147483648</code>到<code>2147483648</code>。前后加起来大概 40 亿的映射空间。只要哈希函数映射得比较均匀松散，一般应用是很难出现碰撞的。</p>
 <p>但问题是一个 40 亿长度的数组，内存是放不下的。你想，HashMap 扩容之前的数组初始大小才 16。所以这个散列值是不能直接拿来用的。用之前还要先做对数组的长度取模运算，得到的余数才能用来访问数组下标。</p>
 <p>顺便说一下，这也正好解释了为什么 HashMap 的数组长度要取 2 的整次幂。因为这样（数组长度 -1）正好相当于一个“低位掩码”。“与”操作的结果就是散列值的高位全部归零，只保留低位值，用来做数组下标访问。以初始长度 16 为例，16-1=15。2 进制表示是<code>00000000 00000000 00001111</code>。和某散列值做“与”操作如下，结果就是截取了最低的四位值。即</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">		10100101 11000100 00100101</span></pre></td></tr><tr><td class="code"><pre><span class="line">&amp;	  00000000 00000000 00001111</span></pre></td></tr><tr><td class="code"><pre><span class="line">-------------------------------------------------</span></pre></td></tr><tr><td class="code"><pre><span class="line">		00000000 00000000 00000101    &#x2F;&#x2F;高位全部归零，只保留末四位</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">   10100101 11000100 00100101</span></pre></td></tr><tr><td class="code"><pre><span class="line">&amp;  00000000 00000000 00001111</span></pre></td></tr><tr><td class="code"><pre><span class="line">-------------------------------------------------</span></pre></td></tr><tr><td class="code"><pre><span class="line">   00000000 00000000 00000101    &#x2F;&#x2F;高位全部归零，只保留末四位</span></pre></td></tr></table></figure>
 
 <p>但这时候问题就来了，这样就算我的散列值分布再松散，要是只取最后几位的话，碰撞也会很严重。更要命的是如果散列本身做得不好，分布上成等差数列的漏洞，恰好使最后几个低位呈现规律性重复，就无比蛋疼。</p>
 <p>这时候“扰动函数”的价值就体现出来了，说到这里大家应该猜出来了。看下面这个图:</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/e2865f788f40d13b29e204649820a9bf.jpg" alt=""></p>
 <p>右位移 16 位，正好是 32bit 的一半，自己的高半区和低半区做异或，就是为了混合原始哈希码的高位和低位，以此来加大低位的随机性。而且混合后的低位掺杂了高位的部分特征，这样高位的信息也被变相保留下来。</p>
-<h4 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h4><p>HashMap两个关键的初始化参数：</p>
+<h4 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h4><p>HashMap 两个关键的初始化参数：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">4</span>; <span class="comment">// aka 16</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> DEFAULT_LOAD_FACTOR = <span class="number">0.75f</span>;</span></pre></td></tr></table></figure>
 
 <p>前者是初始化容量 16，即新建一个 HashMap 的时候，如果不指定长度，则容量为 16。</p>
@@ -1127,8 +1127,8 @@
 <p>按照我们理想的状况，hashMap 的存取就是 O(1)，也就是直接根据 hashcode 就可以找到它，每个 bucket 只存储一个节点，链表指向都是<code>null</code>，这样就比较开心了，不要出现一个链表很长的情况。</p>
 <p>所以我们希望它能分布的均匀一点，如果让我们设计的话，我们肯定是直接对长度取模：<code>hashcode % length</code>，但 HashMap 的设计者却不是这样写的，它写成了 2 进制运算，因为当容量一定是<code>2^n</code>时，<code>h &amp; (length - 1) == h % length</code>，并且位运算的速度要高于取模。</p>
 <p>另外，元素在重新计算 hash 之后，因为 n 变为 2 倍，新的 index 的二进制就是在前面多了一位，比如原来的容量为 8 的时候，元素下标为 5，扩容到 16 之后，根据多的那一位是 0 还是 1，元素下标只需要 +8 或者在原位置就可以了，也就是说 resize 操作也会更快。</p>
-<h4 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h4><p>HashMap 实际是一种“数组+链表”数据结构。在 put 操作中，通过内部定义算法寻止找到数组下标，将数据直接放入此数组元素中，若通过算法得到的该数组元素已经有了元素（俗称 hash 冲突，链表结构出现的实际意义也就是为了解决 hash 冲突的问题）。将会把这个数组元素上的链表进行遍历，将新的数据放到链表末尾。</p>
-<p>通过哈希算法从寻止上能够高效的找到对应的下标，但是随着数据的增长，哈希冲突碰撞过多。在寻找数据时，先找到链表，然后通过遍历在寻找对应数据，如此将会使得 get 数据效率越来越低。在 JDK1.8 中，链表元素数量大于等于 8 将会重组该链表结构形成为“红黑树结构”，这种结构使得在 hash 冲突碰撞过多情况下，<code>get</code>效率比链表的效率高很多。</p>
+<h4 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h4><p>HashMap 实际是一种“数组+链表”数据结构。在 put 操作中，通过内部定义算法寻址找到数组下标，将数据直接放入此数组元素中，若通过算法得到的该数组元素已经有了元素（俗称 hash 冲突，链表结构出现的实际意义也就是为了解决 hash 冲突的问题）。将会把这个数组元素上的链表进行遍历，将新的数据放到链表末尾。</p>
+<p>通过哈希算法从寻止上能够高效的找到对应的下标，但是随着数据的增长，哈希冲突碰撞过多。在寻找数据时，先找到链表，然后通过遍历在寻找对应数据，如此将会使得 get 数据效率越来越低。在 JDK 1.8 中，链表元素数量大于等于 8 将会重组该链表结构形成为“红黑树结构”，这种结构使得在 hash 冲突碰撞过多情况下，<code>get</code>效率比链表的效率高很多。</p>
 <h4 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h4><p>在没有哈希冲突的情况下，HashMap 存取元素的时间复杂度是 O(1)，但是这只是理想情况。当冲突不多的时候，重复元素以链表形式存储，时间复杂度是 O(N)，当数据量大的时候，链表转换为红黑树，时间复杂度变成 O(LogN)</p>
 <h4 id="线程安全和其他局限"><a href="#线程安全和其他局限" class="headerlink" title="线程安全和其他局限"></a>线程安全和其他局限</h4><p>HashMap 不是线程安全的，另外如果 HashMap 的 key 是自定义类，需要重写<code>hashCode()</code>方法，并且由于 HashMap 的效率高度依赖<code>hashCode()</code>，需要保证散列分布尽量均匀。</p>
 <p>都知道 HashMap 不是线程安全的，那么在哪些环节导致了他线程不安全？</p>
@@ -1142,12 +1142,12 @@
 <p>跟上面同样，多个线程同时修改数据，可能产生错误。</p>
 </li>
 <li><p>扩容的时候</p>
-<p>线程1执行<code>put</code>时，因为元素个数超出<code>threshold</code>而导致 rehash，线程2此时执行<code>get</code>，有可能导致这个问题。</p>
+<p>线程 1 执行<code>put</code>时，因为元素个数超出<code>threshold</code>而导致 rehash，线程 2 此时执行<code>get</code>，有可能导致这个问题。</p>
 <p>因为在 resize 的时候，是计算新的容量和<code>threshold</code>，在创建一个新 hash 表，最后将旧 hash 表中元素 rehash 到新的 hash 表中。如果在这个期间，另一个线程执行读取操作，有可能<code>get</code>到<code>null</code>。</p>
 </li>
 </ol>
 <p>那么 ConcurrentHashMap 如何保证线程安全？这个在另一篇文章中单独叙述。</p>
-<h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>LinkedHashMap是继承自HashMap的，跟HashMap最大的区别是，他是基于Hash表和链表的实现，并且依靠着双向链表保证了迭代顺序是插入的顺序。</p>
+<h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>LinkedHashMap 是继承自 HashMap 的，跟 HashMap 最大的区别是，他是基于 Hash 表和链表的实现，并且依靠着双向链表保证了迭代顺序是插入的顺序。</p>
 <p>来看看 HashMap 和 LinkedHashMap 的结构图，是不是秒懂了。LinkedHashMap 其实就是可以看成 HashMap 的基础上，多了一个双向链表来维持顺序。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/61bd32fe80e6c936034c93389cc99c0a.jpg" alt=""></p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/f7855185a5577918835416203aa831ae.jpg" alt=""></p>
@@ -1161,23 +1161,23 @@
 <li>可以对元素进行排序；</li>
 <li>无序集合（插入和遍历顺序不一致）；</li>
 </ul>
-<p>由于是基于红黑树，TreeMap 在插入、删除、搜索的时候，时间复杂度都是O(LogN)。红黑树的结构单独另外说明，这里就不赘述。</p>
-<h3 id="EnumMap"><a href="#EnumMap" class="headerlink" title="EnumMap"></a>EnumMap</h3><p>EnumMap 是专门为枚举类型量身定做的Map实现。虽然使用其它的 Map 实现（如HashMap）也能完成枚举类型实例到值得映射，但是使用 EnumMap 会更加高效：它只能接收同一枚举类型的实例作为键值，并且由于枚举类型实例的数量相对固定并且有限，所以 EnumMap 使用数组来存放与枚举类型对应的值。这使得 EnumMap 的效率非常高。EnumMap 在内部使用枚举类型的<code>ordinal()</code>得到当前实例的声明次序，并使用这个次序维护枚举类型实例对应值在数组的位置。</p>
+<p>由于是基于红黑树，TreeMap 在插入、删除、搜索的时候，时间复杂度都是 O(LogN)。红黑树的结构单独另外说明，这里就不赘述。</p>
+<h3 id="EnumMap"><a href="#EnumMap" class="headerlink" title="EnumMap"></a>EnumMap</h3><p>EnumMap 是专门为枚举类型量身定做的 Map 实现。虽然使用其它的 Map 实现（如 HashMap）也能完成枚举类型实例到值得映射，但是使用 EnumMap 会更加高效：它只能接收同一枚举类型的实例作为键值，并且由于枚举类型实例的数量相对固定并且有限，所以 EnumMap 使用数组来存放与枚举类型对应的值。这使得 EnumMap 的效率非常高。EnumMap 在内部使用枚举类型的<code>ordinal()</code>得到当前实例的声明次序，并使用这个次序维护枚举类型实例对应值在数组的位置。</p>
 <p>在 key 是枚举类的时候，EnumMap 可以用来代替 HashMap，并且由于是数组实现，性能更好。</p>
 <h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><h4 id="Hashtable-与-HashMap-的简单比较"><a href="#Hashtable-与-HashMap-的简单比较" class="headerlink" title="Hashtable 与 HashMap 的简单比较"></a>Hashtable 与 HashMap 的简单比较</h4><ol>
 <li><p>HashTable 基于 Dictionary 类，而 HashMap 是基于 AbstractMap。Dictionary 是任何可将键映射到相应值的类的抽象父类，而 AbstractMap 是基于 Map 接口的实现，它以最大限度地减少实现此接口所需的工作。</p>
 </li>
-<li><p>HashMap 的 key 和 value 都允许为<code>null</code>，而 Hashtable 的 key 和 value 都不允许为<code>null</code>。HashMap 遇到 key 为<code>null</code>的时候，调用<code>putForNullKey</code>方法进行处理，而对 value 没有处理；Hashtable遇到<code>null</code>，直接返回<code>NullPointerException</code>。</p>
+<li><p>HashMap 的 key 和 value 都允许为<code>null</code>，而 Hashtable 的 key 和 value 都不允许为<code>null</code>（出于并发上取不到值的考虑）。HashMap 遇到 key 为<code>null</code>的时候，调用<code>putForNullKey</code>方法进行处理，而对 value 没有处理；Hashtable遇到<code>null</code>，直接返回<code>NullPointerException</code>。</p>
 </li>
-<li><p>Hashtable 方法是同步，而HashMap则不是。我们可以看一下源码，Hashtable 中的几乎所有的 public 的方法都是<code>synchronized</code>的，而有些方法也是在内部通过<code>synchronized</code>代码块来实现。所以有人一般都建议如果是涉及到多线程同步时采用 HashTable，没有涉及就采用 HashMap，但是在 Collections 类中存在一个静态方法：<code>synchronizedMap()</code>，该方法创建了一个线程安全的 Map 对象，并把它作为一个封装的对象来返回。</p>
+<li><p>Hashtable 方法是同步，而 HashMap 则不是。我们可以看一下源码，Hashtable 中的几乎所有的 public 的方法都是<code>synchronized</code>的，而有些方法也是在内部通过<code>synchronized</code>代码块来实现。所以有人一般都建议如果是涉及到多线程同步时采用 HashTable，没有涉及就采用 HashMap，但是在 Collections 类中存在一个静态方法：<code>synchronizedMap()</code>，该方法创建了一个线程安全的 Map 对象，并把它作为一个封装的对象来返回。</p>
 </li>
-<li><p>HashMap的初始容量为 16，Hashtable初始容量为 11，两者的填充因子默认都是0.75。</p>
+<li><p>HashMap的初始容量为 16，Hashtable 初始容量为 11，两者的填充因子默认都是 0.75。</p>
 </li>
 <li><p>两者计算 hash 的方法不同</p>
 <p>Hashtable 计算 hash 是直接使用 key 的 hashcode 对 table 数组的长度直接进行取模</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> hash = key.hashCode();</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> index = (hash &amp; <span class="number">0x7FFFFFFF</span>) % tab.length;</span></pre></td></tr></table></figure>
 
-<p>HashMap 计算 hash 对 key 的 hashcode 的前后16为进行了异或操作，以获得更好的散列值，然后对table数组长度取模(实际上是位操作，增加效率)</p>
+<p>HashMap 计算 hash 对 key 的 hashcode 的前后 16 位进行了异或操作，以获得更好的散列值，然后对 table 数组长度取模（实际上是位操作，增加效率）</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">       <span class="keyword">int</span> h;</span></pre></td></tr><tr><td class="code"><pre><span class="line">       <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   </span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">indexFor</span><span class="params">(<span class="keyword">int</span> h, <span class="keyword">int</span> length)</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">       <span class="keyword">return</span> h &amp; (length-<span class="number">1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr></table></figure>
 
 
@@ -1212,7 +1212,7 @@
 <li>Vector 方法调用是线程安全的。</li>
 <li>成员变量有所不同</li>
 </ul>
-<h4 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h4><p>Stack栈是Vector的一个子类，它实现了一个标准的后进先出的栈。</p>
+<h4 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h4><p>Stack 栈是 Vector 的一个子类，它实现了一个标准的后进先出的栈。</p>
 <p>他的方法很简单，只有<code>empty()</code>、<code>peek()</code>、<code>pop()</code>、<code>push(Object element)</code>、<code>search(object element)</code>这几个。其中 peek 和 pop 的返回值都是堆栈顶部的对象，但是前者只是查看，后者是移除。</p>
 <h2 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h2><p><code>java.util</code>包中提供的常见Set类包括以下几种。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/06530f14f76b79769887d3f1e8eebc27.png" alt=""></p>
@@ -1222,22 +1222,22 @@
 <p>EnumSet 的默认子类 RegularEnumSet 和 JumboEnumSet 实现原理都是基于位运算向量，位运算向量的原理就是用一个位表示一个元素的状态（元素的状态只有两种），用一组位表示一个集合的状态，每个位对应一个元素，譬如一个枚举类 DemoEnum 有6个枚举值，则 EnumSet<DemoEnum> 集合就可以通过一个 byte 字节从右到左（二进制低到高位）来表示，不用的位上用 0 填充，用的位上每个 bit 位代表一个枚举值，1 表示包含该枚举值，0 表示不含该枚举值。因此位向量能表示的枚举值个数与向量长度有关，上面例子中一个 byte 类型最多能表示 8 个枚举值，所以 EnumSet 抽象类的两个实现类 RegularEnumSet 和 JumboEnumSet 分别定义了不同的向量长度。RegularEnumSet 使用 64 位的 long 类型变量作为位向量，而 JumboEnumSet 使用一个 long 类型数组作为向量（数组内存连续），故当我们通过 EnumSet 的工厂方法创建 EnumSet 集合时 EnumSet 会通过判断枚举类的枚举值数量决定使用两个子类的哪一个，如果枚举值个数小于等于 64 就用 RegularEnumSet，大于 64 就用 JumboEnumSet。</p>
 <p>简单来说 EnumSet 就是一个高效的枚举类集合。</p>
 <h2 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h2><p><img src="http://nas.beritra.com:18081/uploads/big/8fd5bf86f968ababd2e78669517c5c08.png" alt=""></p>
-<p>队列(Queue)可以当做一种特殊的线性表，遵循先进先出原则。而双向队列(Deque),是 Queue 的一个子接口，双向队列是指该队列两端的元素既能入队(offer)也能出队(poll),如果将 Deque 限制为只能从一端入队和出队，则可实现栈的数据结构。</p>
-<p>PriorityQueue 有一种特殊的队列，叫做优先队列。优先队列的作用是能保证每次取出的元素都是队列中权值最小的<strong>（Java的优先队列每次取最小元素，C++的优先队列每次取最大元素）。这里牵涉到了大小关系，</strong>元素大小的评判可以通过元素本身的自然顺序（natural ordering），也可以通过构造时传入的比较器（Comparator，类似于C++的仿函数）。</p>
-<p>Java 中 PriorityQueue 实现了 Queue 接口，不允许放入<code>null</code>元素；其通过堆实现，具体说是通过完全二叉树（complete binary tree）实现的<strong>小顶堆</strong>（任意一个非叶子节点的权值，都不大于其左右子节点的权值），也就意味着可以通过数组来作为 PriorityQueue 的底层实现。</p>
-<p>最小堆的完全二叉树有一个特性是根节点必定是最小节点，子女节点一定大于其父节点。还有一个特性是叶子节点数量=全部非叶子节点数量+1。</p>
+<p>队列(Queue)可以当做一种特殊的线性表，遵循先进先出原则。而双向队列(Deque)，是 Queue 的一个子接口，双向队列是指该队列两端的元素既能入队(offer)也能出队(poll),如果将 Deque 限制为只能从一端入队和出队，则可实现栈的数据结构。</p>
+<p>PriorityQueue 有一种特殊的队列，叫做优先队列。优先队列的作用是能保证每次取出的元素都是队列中权值最小的（Java的优先队列每次取最小元素，C++的优先队列每次取最大元素）。这里牵涉到了大小关系，元素大小的评判可以通过元素本身的自然顺序（natural ordering），也可以通过构造时传入的比较器（Comparator，类似于C++的仿函数）。</p>
+<p>Java 中 PriorityQueue 实现了 Queue 接口，不允许放入<code>null</code>元素；其通过堆实现，具体说是通过完全二叉树（complete binary tree）实现的小顶堆（任意一个非叶子节点的权值，都不大于其左右子节点的权值），也就意味着可以通过数组来作为 PriorityQueue 的底层实现。</p>
+<p>最小堆的完全二叉树有一个特性是根节点必定是最小节点，子女节点一定大于其父节点。还有一个特性是叶子节点数量 = 全部非叶子节点数量 +1。</p>
 <p>每次增删元素都有可能对树结构进行调整，所以 PriorityQueue 队列不适合进场出队入队的频繁操作，但是他的优先级特性非常适合一些对顺序有要求的数据处理场合。</p>
 <h2 id="concurrent包"><a href="#concurrent包" class="headerlink" title="concurrent包"></a>concurrent包</h2><h4 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h4><p>上面 HashMap 已经说到了 HashMap 在多个线程同时存取或者触发扩容的时候，都有可能出现错误，导致操作被覆盖或者丢失，那么怎么解决这个问题呐？</p>
 <p>第一反应当然是加锁，HashTable 就是这么做的，使用了<code>synchronized</code>关键字。虽然解决了并发访问的安全性问题，但是性能不怎么样。HashTable 中的增删改、甚至<code>equals</code>、<code>toString</code>方法等等都是方法级的锁，所以同时只能一个线程去操作，导致效率问题。</p>
-<p>在JDK1.7及之前版本，ConcurrentHashMap 采用的是 Segment 分段锁，即将数据分为一段一段的存储，然后给每一段数据加一把锁。当一个线程占用锁访问其中一个段数据时，其他段的数据也能被其他线程访问。</p>
-<p>在JDK1.8以后，ConcurrentHashMap 取消了 Segment 分段锁，采用 CAS 和<code>synchronized</code>来保证并发安全。 数据结构与 HashMap 1.8 的结构类似，数组+链表/红黑二叉树(链表长度&gt;8 时，转换为红黑树)。</p>
+<p>在 JDK 1.7 及之前版本，ConcurrentHashMap 采用的是 Segment 分段锁，即将数据分为一段一段的存储，然后给每一段数据加一把锁。当一个线程占用锁访问其中一个段数据时，其他段的数据也能被其他线程访问。</p>
+<p>在 JDK 1.8 以后，ConcurrentHashMap 取消了 Segment 分段锁，采用 CAS 和<code>synchronized</code>来保证并发安全。 数据结构与 HashMap 1.8 的结构类似，数组+链表/红黑二叉树(链表长度 &gt;8 时，转换为红黑树)。</p>
 <p>通过 JDK 的源码和官方文档看来， 他们认为的弃用分段锁的原因由以下几点：</p>
 <ol>
 <li>加入多个分段锁浪费内存空间。</li>
 <li>生产环境中， map 在放入时竞争同一个锁的概率非常小，分段锁反而会造成更新等操作的长时间等待。</li>
 <li>为了提高 GC 的效率。</li>
 </ol>
-<p>在 JDK11 下对 HashMap 和 ConcurrentHashMap 进行了简单测试，生成 5000 万条随机数然后插入，分别消耗 16348 毫秒和 19194 毫秒。其中包括随机数生成、插入和扩容的时间消耗，可见两者之间性能差距不大。</p>
+<p>在 JDK 11 下对 HashMap 和 ConcurrentHashMap 进行了简单测试，生成 5000 万条随机数然后插入，分别消耗 16348 毫秒和 19194 毫秒。其中包括随机数生成、插入和扩容的时间消耗，可见两者之间性能差距不大。</p>
 <p>然后使用 HashTable 在单线程下插入，同样的数据量时间在 17 秒所有，跟 HashMap 差别不大，可以当做是误差范围内。然后使用 20 个线程插入，消耗时间在 15 秒左右，提升并不明显。奇怪的是 ConcurrentHashMap 却使用了 45 秒。然后缩小数据量，在 1000 万以下的时候，ConcurrentHashMap 的插入速度又好于 HashTable 了。这个现象很有意思，有空了详细研究一下产生这个问题的原因。</p>
 <p>ConcurrentHashMap 的<strong>整体性能</strong>要优于 HashTable，但是某些场景不能替代 HashTable，例如<strong>强一致性</strong>的场景，ConcurrentHashMap 的<code>get</code>、<code>size</code>等方法都<strong>没有加锁</strong>，ConcurrentHashMap 是<strong>弱一致性</strong>的。更多关于 ConcurrentHashMap 的原理在另一个文章中单独分析。</p>
 <h4 id="ConcurrentSkipListMap"><a href="#ConcurrentSkipListMap" class="headerlink" title="ConcurrentSkipListMap"></a>ConcurrentSkipListMap</h4><p>ConcurrentSkipListMap 提供了一种线程安全的并发访问的排序映射表。内部是 SkipList（跳表）结构实现，在理论上能够在 O(logN) 时间内完成查找、插入、删除操作。</p>
@@ -2225,7 +2225,7 @@
   <entry>
     <title>HTTPS为什么安全？</title>
     <url>/2020/03/01/HTTPS%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%89%E5%85%A8%EF%BC%9F/</url>
-    <content><![CDATA[<p>知道HTTPS，也用过HTTPS，但是一直不知道原理，这次探究一下。</p>
+    <content><![CDATA[<p>知道 HTTPS，也用过 HTTPS，但是一直不知道原理，这次探究一下。</p>
 <a id="more"></a>
 
 <p>惯例，上 Wiki，什么是 HTTPS?</p>
@@ -2233,12 +2233,12 @@
 <p><strong>超文本传输安全协议</strong>（英语：<strong>H</strong>yper<strong>T</strong>ext <strong>T</strong>ransfer <strong>P</strong>rotocol <strong>S</strong>ecure，缩写：<strong>HTTPS</strong>；常称为HTTP over TLS、HTTP over SSL或HTTP Secure）是一种通过<a href="https://zh.wikipedia.org/wiki/計算機網絡" target="_blank" rel="noopener">计算机网络</a>进行安全通信的<a href="https://zh.wikipedia.org/wiki/網路傳輸協定" target="_blank" rel="noopener">传输协议</a>。HTTPS经由<a href="https://zh.wikipedia.org/wiki/HTTP" target="_blank" rel="noopener">HTTP</a>进行通信，但利用<a href="https://zh.wikipedia.org/wiki/传输层安全" target="_blank" rel="noopener">SSL/TLS</a>来<a href="https://zh.wikipedia.org/wiki/加密" target="_blank" rel="noopener">加密</a>数据包。HTTPS开发的主要目的，是提供对<a href="https://zh.wikipedia.org/wiki/網站" target="_blank" rel="noopener">网站</a>服务器的<a href="https://zh.wikipedia.org/wiki/身份验证" target="_blank" rel="noopener">身份认证</a>，保护交换数据的隐私与<a href="https://zh.wikipedia.org/wiki/完整性" target="_blank" rel="noopener">完整性</a>。这个协议由<a href="https://zh.wikipedia.org/wiki/網景" target="_blank" rel="noopener">网景</a>公司（Netscape）在1994年首次提出，随后扩展到<a href="https://zh.wikipedia.org/wiki/網際網路" target="_blank" rel="noopener">互联网</a>上。</p>
 </blockquote>
 <p>可以看出，Https 之所以安全，是经过了加密，那么新的问题又来了，SSL 和 TLS 分别是什么？是怎么加密的？</p>
-<h2 id="SSL-和-TLS"><a href="#SSL-和-TLS" class="headerlink" title="SSL 和 TLS"></a>SSL 和 TLS</h2><p>SSL：（Secure Socket Layer，安全套接字层），位于可靠的面向连接的<strong>网络层协议</strong>和<strong>应用层协议</strong>之间的一种协议层。SSL通过互相认证、使用数字签名确保完整性、使用加密确保私密性，以实现客户端和服务器之间的安全通讯。该协议由两层组成：SSL记录协议和SSL握手协议。</p>
+<h2 id="SSL-和-TLS"><a href="#SSL-和-TLS" class="headerlink" title="SSL 和 TLS"></a>SSL 和 TLS</h2><p>SSL：（Secure Socket Layer，安全套接字层），位于可靠的面向连接的<strong>网络层协议</strong>和<strong>应用层协议</strong>之间的一种协议层。SSL 通过互相认证、使用数字签名确保完整性、使用加密确保私密性，以实现客户端和服务器之间的安全通讯。该协议由两层组成：SSL 记录协议和 SSL 握手协议。</p>
 <p>TLS：(Transport Layer Security，传输层安全协议)，用于两个应用程序之间提供保密性和数据完整性。该协议由两层组成：TLS 记录协议和 TLS 握手协议。</p>
-<p>SSL 和 TLS 是一种能够在服务器，machines 和通过网络运行的应用程序（列如，客户端连接到 web 服务器）之间提供身份认证和数据加密的加密协议。SSL是TLS的前世。多年来，新版本的发布用来解决漏洞，提供更强大支持，更安全的密码套件和算法。</p>
-<p>SSL最初是由 Netscape 开发的，早在1995年以SSL 2.0的方式发布（1.0从未对公众发布）。在一些漏洞被发现之后，版本2.0在1996年很快被3.0所取代。注意：版本2.0和3.0有时会写成 SSLv2 和 SSLv3。</p>
+<p>SSL 和 TLS 是一种能够在服务器，machines 和通过网络运行的应用程序（列如，客户端连接到 web 服务器）之间提供身份认证和数据加密的加密协议。SSL 是 TLS 的前世。多年来，新版本的发布用来解决漏洞，提供更强大支持，更安全的密码套件和算法。</p>
+<p>SSL 最初是由 Netscape 开发的，早在 1995 年以 SSL 2.0 的方式发布（1.0从未对公众发布）。在一些漏洞被发现之后，版本 2.0 在 1996 年很快被 3.0 所取代。注意：版本 2.0 和 3.0 有时会写成 SSLv2 和 SSLv3。</p>
 <p><a href="https://tools.ietf.org/html/rfc2246" target="_blank" rel="noopener">TLS</a>以SSL 3.0为基础于1999年作为SSL的新版本推出。</p>
-<h3 id="应该选-SSL-还是-TLS？"><a href="#应该选-SSL-还是-TLS？" class="headerlink" title="应该选 SSL 还是 TLS？"></a>应该选 SSL 还是 TLS？</h3><p>SSL2.0和SSL3.0已经被IEFT组织废弃（分别在2011年，2015年）多年来，在被废弃的SSL协议中一直存在漏洞并被发现 (e.g. <a href="https://www.globalsign.com/en/blog/poodle-vulnerability-in-ssl-30/" target="_blank" rel="noopener">POODLE</a>, <a href="https://www.globalsign.com/en/blog/drown-attack-sslv2/" target="_blank" rel="noopener">DROWN</a>)。大多数现代浏览器遇到使用废弃协议的 web 服务时，会降低用户体验（红线穿过挂锁标志或者https表示警告）来表现。因为这些原因，你应该在服务端禁止使用 SSL 协议，仅仅保留 TLS 协议开启。</p>
+<h3 id="应该选-SSL-还是-TLS？"><a href="#应该选-SSL-还是-TLS？" class="headerlink" title="应该选 SSL 还是 TLS？"></a>应该选 SSL 还是 TLS？</h3><p>SSL 2.0 和 SSL 3.0 已经被 IEFT 组织废弃（分别在2011年，2015年）多年来，在被废弃的 SSL 协议中一直存在漏洞并被发现 (e.g. <a href="https://www.globalsign.com/en/blog/poodle-vulnerability-in-ssl-30/" target="_blank" rel="noopener">POODLE</a>, <a href="https://www.globalsign.com/en/blog/drown-attack-sslv2/" target="_blank" rel="noopener">DROWN</a>)。大多数现代浏览器遇到使用废弃协议的 web 服务时，会降低用户体验（红线穿过挂锁标志或者https表示警告）来表现。因为这些原因，你应该在服务端禁止使用 SSL 协议，仅仅保留 TLS 协议开启。</p>
 <h2 id="为什么要用-TLS-SSL？"><a href="#为什么要用-TLS-SSL？" class="headerlink" title="为什么要用 TLS/SSL？"></a>为什么要用 TLS/SSL？</h2><p>要想规避风险，要先知道风险点在哪。我们要知道 HTTPS 想要解决哪些问题，具体通过什么手段解决的。 </p>
 <p>常规的 HTTP 通信，有以下的问题。</p>
 <ol>
@@ -2270,7 +2270,7 @@
 <li>证书签名用到的Hash算法</li>
 <li>有效期等等其他信息</li>
 </ul>
-<p>这些内容都是明文，然后将明文通过摘要算法获取 hash，通过<strong>证书颁发机构</strong>的私钥进行非对称加密，得到签名信息，这个步骤叫做数字签名。明文+hash+数字签名共同组成了这个数字证书。</p>
+<p>这些内容都是明文，然后将明文通过摘要算法获取 hash，通过<strong>证书颁发机构</strong>的私钥进行非对称加密，得到签名信息，这个步骤叫做数字签名。明文 + hash + 数字签名共同组成了这个数字证书。</p>
 <p>现在客户端拿到了这个数字证书，使用证书里说明的 hash 算法对明文进行摘要运算，得到的 hash 值应该和证书里是一样的。然后客户端会查询这个证书的颁发机构名称，从自己内置的信任列表里找该机构的证书，这里有两种情况：</p>
 <ol>
 <li>找到了，说明是自己信任的 CA 颁发的，从该机构的数字证书中可以找到证书的公钥，用这个公钥解密之前拿到的数字证书，如果能成功解密，证明证书可信。会添加到信任列表。</li>
@@ -2563,7 +2563,7 @@
 <li>惰性过期（类比懒加载，这是懒过期）：只有当访问一个key时，才会判断该key是否已过期，过期则清除。该策略可以最大化地节省CPU资源，却对内存非常不友好。极端情况可能出现大量的过期key没有再次被访问，从而不会被清除，占用大量内存。</li>
 <li>定期过期：每隔一定的时间，会扫描一定数量的数据库的expires字典中一定数量的key，并清除其中已过期的key。该策略是前两者的一个折中方案。通过调整定时扫描的时间间隔和每次扫描的限定耗时，可以在不同情况下使得CPU和内存资源达到最优的平衡效果</li>
 </ol>
-<h3 id="3、-Redis的内存淘汰策略"><a href="#3、-Redis的内存淘汰策略" class="headerlink" title="3、 Redis的内存淘汰策略"></a>3、 Redis的内存淘汰策略</h3><p>Redis 的内存淘汰策略是指在 Redis 的用于缓存的内存不足时，怎么处理需要新写入且需要申请额外空间的数据。</p>
+<h3 id="3、-Redis-的内存淘汰策略"><a href="#3、-Redis-的内存淘汰策略" class="headerlink" title="3、 Redis 的内存淘汰策略"></a>3、 Redis 的内存淘汰策略</h3><p>Redis 的内存淘汰策略是指在 Redis 的用于缓存的内存不足时，怎么处理需要新写入且需要申请额外空间的数据。</p>
 <ul>
 <li>noeviction：当内存不足以容纳新写入数据时，新写入操作会报错。</li>
 <li>allkeys-lru：当内存不足以容纳新写入数据时，在键空间中，移除最近最少使用的 key。</li>
@@ -3014,7 +3014,7 @@
   <entry>
     <title>ConcurrentHashMap使用和原理</title>
     <url>/2019/12/21/ConcurrentHashMap%E4%BD%BF%E7%94%A8%E5%92%8C%E5%8E%9F%E7%90%86/</url>
-    <content><![CDATA[<p><code>ConcurrentHashMap</code>是在JDK1.5时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本节所有的讨论基于 JDK1.8。</p>
+    <content><![CDATA[<p><code>ConcurrentHashMap</code>是在 JDK 1.5 时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本节所有的讨论基于 JDK 1.8。</p>
 <a id="more"></a>
 
 <h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p><img src="http://nas.beritra.com:18081/uploads/big/dd9c8949bded2a52e865cdb1cdc668e0.png" alt=""></p>
@@ -3215,7 +3215,7 @@
 <p>为了确保每次日志都写入重做日志文件，在每次日志缓冲写入重做日志文件之后，InnoDB 存储引擎都需要调用一次<code>fsync</code>操作。由于重做日志文件打开并没有使用<code>O_DIRECT</code>选项，因此重做日志缓冲先写入文件系统缓存。由于<code>fsync</code>的效率取决于磁盘性能，因此磁盘的性能决定了事务提交的性能，也就是数据库的性能。</p>
 <p>InnoDB 存储引擎允许用户手动设置非持久性的情况发生，因此提高数据库的性能。当事务提交的时候，日志不写入重做日志文件，而是等待一个时间周期后再执行<code>fsync</code>操作。由于并非强制在事务提交的时候进行一次<code>fync</code>操作，显然可以提高数据库性能。但是在数据库发生宕机的时候，由于部分日志未发刷新到磁盘，因此会丢失最后一段时间的事务。</p>
 <p>参数<code>inndob_flush_log_at_trx_commit</code>用来控制重做日志刷新到磁盘的策略，默认值是 1，表示每次都会调用<code>fsync</code>操作。这个参数还可以设置为 0 或者 2。0 表示事务提交时不进行写入重做日志操作，这个操作仅在 master thread 中完成，而在 master thread 中每一秒会进行一次<code>fsync</code>操作。2 表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。在这个设置下，当 MySQL 数据库发生宕机而操作系统不发生宕机时，并不会导致事务的丢失。但是当操作系统宕机时，重启数据库后会丢失未从文件系统缓存刷新到重做日志文件那部分事务。</p>
-<p>下图是模拟插入 50 万行数据，参数为 1 是每插入一条就显示执行一次 COMMIT 操作，跟其他参数设置之间的数据库效率对比：</p>
+<p>下图是模拟插入 50 万行数据，参数为 1 是每插入一条就显式执行一次 COMMIT 操作，跟其他参数设置之间的数据库效率对比：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/d088781618cfc6c54fee66d97f5e098a.png" alt=""></p>
 <p>虽然用户可以通过设置参数<code>innodb_flush_log_at_trx_commit</code>为 0 或 2 来提高事务提交的性能，但是需要牢记的事，这种设置方法丧失了事务的 ACID 特性。而针对上述存储过程，为了提高事务的提交性能，应该在将 50 万行数据插入表后进行一次 COMMIT 操作，而不是在每插入一条记录之后进行一次 COMMIT 操作。</p>
 <p>在 MySQL 数据库中还有一种二进制日志（binlog），其用来进行 POINT-TIME（PIT）的恢复及主从复制（Replication）环境的建立。从表面上看其和重做日志非常相似，都是记录了对于数据库操作的日志。然而，从本质上来看，二者有着非常大的不同。</p>
@@ -3311,7 +3311,7 @@
 <p>其实无论上面哪个存储过程都存在一个问题，当发生错误的时候，数据库会停留在一个位置的位置。例如，用户需要插入 10000 条记录，但是当插入 5000 条时，发生了错误，这时前 5000 条记录都已经存放在数据库中，那应该怎么处理呐？另外一个问题性能问题，上面两个存储过程都不会比下面的存储过程更快，因为下面的存储过程将所有的<code>INSERT</code>都放在了一个事务中：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/adac784b49794e6d6b386295158a4c02.png" alt=""></p>
 <p>第三种方法要快的多！这是因为每次提交都要写一次重做日志，存储过程 load1 和 load2 实际上写了 10000 次重做日志文件，而对存储过程 load3 来说，实际上只写了 1 次。</p>
-<p>所以无论从何种角度出发，都不应该在一个循环中反复进行提交操作，无论是显示还是隐式的提交。</p>
+<p>所以无论从何种角度出发，都不应该在一个循环中反复进行提交操作，无论是显式还是隐式的提交。</p>
 <h3 id="使用自动提交"><a href="#使用自动提交" class="headerlink" title="使用自动提交"></a>使用自动提交</h3><p>使用自动提交不是一个好习惯，因为这会使初级 DBA 容易犯错，另外还可能是一些开发人员产生错误的理解。在编写程序开发时，最好把事务的控制权限交给开发人员，即在程序端进行事务的开始和结束。同时，开发人员必须了解是自动提交可能带来的问题。</p>
 <h3 id="使用自动回滚"><a href="#使用自动回滚" class="headerlink" title="使用自动回滚"></a>使用自动回滚</h3><p>InnoDB 存储引擎支持通过定义一个 HANDLER 来进行自动事务的回滚操作，如在一个存储过程中发生了错误会自动对其进行回滚操作。因此很多开发人员喜欢在应用程序的存储过程中使用自动回滚操作。</p>
 <p>在存储过程中使用自动回滚很容易丢失错误信息，所以应该在程序中控制而不是数据库中。在程序中控制事务的好处是用户可以得知发生错误的原因，然后根据发生的原因进一步调试程序。</p>
@@ -3335,8 +3335,7 @@
 <p>如果二级索引记录被标记为删除，或二级索引页被更新的事务更新， 则不使用<a href="https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_covering_index" target="_blank" rel="noopener">覆盖索引</a>技术。<code>InnoDB</code>在聚集索引中查找记录，而不是从索引结构中返回值。</p>
 <p>但是，如果启用了 <a href="https://dev.mysql.com/doc/refman/8.0/en/index-condition-pushdown-optimization.html" target="_blank" rel="noopener">索引条件下推（ICP）</a>优化，并且<code>WHERE</code>只能使用索引中的字段来评估部分条件，则 MySQL 服务器仍会将<code>WHERE</code>条件的这一部分下推到存储引擎，并使用索引。如果找不到匹配的记录，则避免聚集索引查找。如果找到了匹配的记录，即使在删除标记的记录中，也要在 <code>InnoDB</code>聚簇索引中查找记录。</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>我们了解了 InnoDB 存储引擎管理事务的许多方面。了解了事务如何工作以及如何使用。</p>
-<p>事务必须遵循 ACID 特性，即 Atomicity（原子性）、Consistency（一致性）、Isolation（隔离性）和 Durability（持久性）</p>
-<p>。隔离性通过锁来完成；原子性、一致性、隔离性通过 redo 和 undo 来完成。</p>
+<p>事务必须遵循 ACID 特性，即 Atomicity（原子性）、Consistency（一致性）、Isolation（隔离性）和 Durability（持久性）。隔离性通过锁来完成；原子性、一致性、隔离性通过 redo 和 undo 来完成。</p>
 ]]></content>
       <categories>
         <category>MySQL</category>
@@ -3818,10 +3817,10 @@
 <h2 id="MySQL数据类型"><a href="#MySQL数据类型" class="headerlink" title="MySQL数据类型"></a>MySQL数据类型</h2><h3 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h3><p>MySQL 支持所有标准 SQL 中的数值类型,其中包括严格数值类型(INTEGER、SMALLINT、DECIMAL 和 NUMERIC),以及近似数值数据类型(FLOAT、REAL 和 DOUBLE PRECISION),并在此基础上做了扩展。扩展后增加了TINYINT、MEDIUMINT 和 BIGINT 这 3 种长度不同的整型,并增加了 BIT 类型,用来存放位数据。</p>
 <h4 id="整型数据"><a href="#整型数据" class="headerlink" title="整型数据"></a>整型数据</h4><p>对于整型数据,MySQL 还支持在类型名称后面的小括号内指定显示宽度,例如 int(5)表示当数值宽度小于 5 位的时候在数字前面填满宽度,如果不显示指定宽度则默认为 int(11)，一般配合 zerofill 使用。</p>
 <p>设置了宽度限制后,如果插入大于宽度限制的值,不会对插入的数据有任何影响,还是按照类型的实际精度进行保存。</p>
-<h4 id="小数"><a href="#小数" class="headerlink" title="小数"></a>小数</h4><p>对于小数的表示,MySQL 分为两种方式:浮点数和定点数。浮点数包括 float(单精度)和 double(双精度),而定点数则只有 decimal 一种表示。定点数在 MySQL 内部以字符串形式存放,比浮点数更精确,适合用来表示货币等精度高的数据。</p>
-<p>浮点数和定点数都可以用类型名称后加“(M,D)”的方式来进行表示,“(M,D)”表示该值一共显示 M 位数字(整数位+小数位),其中 D 位位于小数点后面,M 和 D 又称为精度和标度。</p>
-<p>由于float和double分别以32位和64位存储，所以实际上是可能产生精度丢失的。比如一个float类型的列，插入0.123456789的时候，实际存储到数据库的只是近似值0.123457,，当位数更多的时候这个问题更明显，比如分别向float和double类型的列中插入987654321.123456789，会得到987654000和987654321.1234568。</p>
-<p>所以想要存储高精度、准确的数字，还是需要用decimal类型。</p>
+<h4 id="小数"><a href="#小数" class="headerlink" title="小数"></a>小数</h4><p>对于小数的表示，MySQL 分为两种方式:浮点数和定点数。浮点数包括 float(单精度)和 double(双精度),而定点数则只有 decimal 一种表示。定点数在 MySQL 内部以字符串形式存放,比浮点数更精确,适合用来表示货币等精度高的数据。</p>
+<p>浮点数和定点数都可以用类型名称后加“(M,D)”的方式来进行表示，“(M,D)”表示该值一共显示 M 位数字（整数位 + 小数位），其中 D 位位于小数点后面，M 和 D 又称为精度和标度。</p>
+<p>由于float和double分别以 32 位和 64 位存储，所以实际上是可能产生精度丢失的。比如一个 float 类型的列，插入 0.123456789 的时候，实际存储到数据库的只是近似值 0.123457,，当位数更多的时候这个问题更明显，比如分别向 float 和 double 类型的列中插入 987654321.123456789，会得到 987654000 和 987654321.1234568。</p>
+<p>所以想要存储高精度、准确的数字，还是需要用 decimal 类型。</p>
 <h3 id="日期时间类型"><a href="#日期时间类型" class="headerlink" title="日期时间类型"></a>日期时间类型</h3><p>MySQL中的事件类型有：<code>DATE</code>、<code>DATETIME</code>、<code>TIMESTAMP</code>、<code>TIME</code>、<code>YEAR</code></p>
 <p>这些数据类型的主要区别如下:</p>
 <ul>
@@ -3845,23 +3844,23 @@
 <li>33~64 成员的集合,占 8 个字节。</li>
 </ul>
 <h3 id="其他类型"><a href="#其他类型" class="headerlink" title="其他类型"></a>其他类型</h3><p>MySQL 8中还支持多种空间类型，应该是用来存储地理信息之类的结构化信息的，但是没找到太多中文资料，平时也没用过，就不误人子弟了。</p>
-<p>另外还有新增的JSON类型支持。</p>
-<h4 id="创建JSON字段"><a href="#创建JSON字段" class="headerlink" title="创建JSON字段"></a>创建JSON字段</h4><p>创建JSON类型的字段很简单，跟其他数据结构没什么区别：</p>
+<p>另外还有新增的 JSON 类型支持。</p>
+<h4 id="创建-JSON-字段"><a href="#创建-JSON-字段" class="headerlink" title="创建 JSON 字段"></a>创建 JSON 字段</h4><p>创建 JSON 类型的字段很简单，跟其他数据结构没什么区别：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CREATE TABLE t1 (jdoc JSON);</span></pre></td></tr></table></figure>
 
-<h4 id="插入JSON"><a href="#插入JSON" class="headerlink" title="插入JSON"></a>插入JSON</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">INSERT INTO t1 VALUES(&#39;&#123;&quot;key1&quot;: &quot;value1&quot;, &quot;key2&quot;: &quot;value2&quot;&#125;&#39;);</span></pre></td></tr></table></figure>
+<h4 id="插入-JSON"><a href="#插入-JSON" class="headerlink" title="插入 JSON"></a>插入 JSON</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">INSERT INTO t1 VALUES(&#39;&#123;&quot;key1&quot;: &quot;value1&quot;, &quot;key2&quot;: &quot;value2&quot;&#125;&#39;);</span></pre></td></tr></table></figure>
 
 <p>数据库会对JSON的格式进行校验，如果插入错误的格式会报错。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql&gt; INSERT INTO t1 VALUES(&#39;[1, 2,&#39;);</span></pre></td></tr><tr><td class="code"><pre><span class="line">ERROR 3140 (22032) at line 2: Invalid JSON text:</span></pre></td></tr><tr><td class="code"><pre><span class="line">&quot;Invalid value.&quot; at position 6 in value (or column) &#39;[1, 2,&#39;.</span></pre></td></tr></table></figure>
 
-<h4 id="查询JSON"><a href="#查询JSON" class="headerlink" title="查询JSON"></a>查询JSON</h4><p>查询 json 中的数据用 column-&gt;path 的形式，其中对象类型 path 这样表示 $.path, 而数组类型则是 $[index]</p>
-<p>查询testproject表student字段中json对象id为1的记录：</p>
+<h4 id="查询-JSON"><a href="#查询-JSON" class="headerlink" title="查询 JSON"></a>查询 JSON</h4><p>查询 JSON 中的数据用 column-&gt;path 的形式，其中对象类型 path 这样表示 $.path, 而数组类型则是 $[index]</p>
+<p>查询 testproject 表 student 字段中 JSON 对象 id 为 1 的记录：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT * FROM testproject WHERE student-&gt;&#39;$.id&#39;&#x3D; 1;</span></pre></td></tr></table></figure>
 
-<p>查询testproject表student字段中json对象id为1或者5的记录：</p>
+<p>查询 testproject 表 student 字段中 JSON 对象 id 为 1 或 5 的记录：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT * FROM testproject WHERE student-&gt;&#39;$.id&#39; in (1,5);</span></pre></td></tr><tr><td class="code"><pre><span class="line">SELECT * FROM testproject WHERE student-&gt;&#39;$.id&#39; &#x3D; 1 or student-&gt;&#39;$.id&#39; &#x3D; 5;</span></pre></td></tr></table></figure>
 
-<h4 id="更新数据"><a href="#更新数据" class="headerlink" title="更新数据"></a>更新数据</h4><p>MySQL 并不支持 column-&gt;path 的形式进行更新操作。如果是整个 json 更新的话，和插入时类似的。如果需要更新JSON中的某个值，需要用系统提供的函数：</p>
+<h4 id="更新数据"><a href="#更新数据" class="headerlink" title="更新数据"></a>更新数据</h4><p>MySQL 并不支持 column-&gt;path 的形式进行更新操作。如果是整个 JSON 更新的话，和插入时类似的。如果需要更新JSON中的某个值，需要用系统提供的函数：</p>
 <ul>
 <li>json_array_append：在json后面追加</li>
 <li>json_array_insert：在指定下标插入</li>
@@ -4084,7 +4083,7 @@
     <content><![CDATA[<p>本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。</p>
 <a id="more"></a>
 
-<h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><p>MySQL 5.0 支持的存储引擎包括 MyISAM、 InnoDB、 BDB、 MEMORY、 MERGE、 EXAMPLE、<br>NDB Cluster、ARCHIVE、CSV、BLACKHOLE、FEDERATED 等,其中 InnoDB 和 BDB 提供事务安<br>全表,其他存储引擎都是非事务安全表。</p>
+<h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><p>MySQL 5.0 支持的存储引擎包括 MyISAM、 InnoDB、 BDB、 MEMORY、 MERGE、 EXAMPLE、NDB Cluster、ARCHIVE、CSV、BLACKHOLE、FEDERATED 等，其中 InnoDB 和 BDB 提供事务安全表，其他存储引擎都是非事务安全表。</p>
 <p>使用<code>show engines</code>命令可以查看支持的存储引擎。我在 MySQL 8.0 中执行命令得到的结果如下：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/medium/0b0d90cb4b762609bbbd0ce373b25cc8.png" alt=""></p>
 <p>一般使用的都是 InnoDB 引擎，所以主要还是研究 InnoDB 的特性和原理。</p>
@@ -4121,13 +4120,13 @@
 
 
 
-<h3 id="B-树索引的原理"><a href="#B-树索引的原理" class="headerlink" title="B+树索引的原理"></a>B+树索引的原理</h3><p>关于B树和B+树的结构，可以参考这篇博文：<a href="https://www.cnblogs.com/nullzx/p/8729425.html" target="_blank" rel="noopener">B树和B+树的插入、删除图文详解</a></p>
-<p>B+树相比B树，优点包括：</p>
+<h3 id="B-树索引的原理"><a href="#B-树索引的原理" class="headerlink" title="B+树索引的原理"></a>B+树索引的原理</h3><p>关于 B 树和 B+ 树的结构，可以参考这篇博文：<a href="https://www.cnblogs.com/nullzx/p/8729425.html" target="_blank" rel="noopener">B树和B+树的插入、删除图文详解</a></p>
+<p>B+ 树相比 B 树，优点包括：</p>
 <ol>
-<li>B+<strong>树的层级更少</strong>：相较于B树B+每个<strong>非叶子</strong>节点存储的关键字数更多，树的层级更少所以查询数据更快；</li>
-<li>B+<strong>树查询速度更稳定</strong>：B+所有关键字数据地址都存在<strong>叶子</strong>节点上，所以每次查找的次数都相同所以查询速度要比B树更稳定;</li>
-<li>B+<strong>树天然具备排序功能：</strong>B+树所有的<strong>叶子</strong>节点数据构成了一个有序链表，在查询大小区间的数据时候更方便，数据紧密性很高，缓存的命中率也会比B树高。</li>
-<li>B+<strong>树全节点遍历更快：</strong>B+树遍历整棵树只需要遍历所有的<strong>叶子</strong>节点即可，，而不需要像B树一样需要对每一层进行遍历，这有利于数据库做全表扫描。</li>
+<li>B+ 树的层级更少：相较于 B 树 B+ 每个非叶子节点存储的关键字数更多，树的层级更少所以查询数据更快；</li>
+<li>B+ 树查询速度更稳定：B+ 所有关键字数据地址都存在叶子节点上，所以每次查找的次数都相同所以查询速度要比 B 树更稳定;</li>
+<li>B+ 树天然具备排序功能：B+ 树所有的叶子节点数据构成了一个有序链表，在查询大小区间的数据时候更方便，数据紧密性很高，缓存的命中率也会比 B 树高。</li>
+<li>B+ 树全节点遍历更快：B+ 树遍历整棵树只需要遍历所有的叶子节点即可，，而不需要像 B 树一样需要对每一层进行遍历，这有利于数据库做全表扫描。</li>
 </ol>
 <p>而 B 树相对于 B+ 树的优点是，如果经常访问的数据离根节点很近，而 B 树的非叶子节点本身存有关键字其数据的地址，所以这种数据检索的时候会要比 B+ 树快。</p>
 <h3 id="聚簇索引-amp-非聚簇索引"><a href="#聚簇索引-amp-非聚簇索引" class="headerlink" title="聚簇索引 &amp; 非聚簇索引"></a>聚簇索引 &amp; 非聚簇索引</h3><p>聚集索引与非聚集索引的区别是：叶节点是否存放一整行记录</p>
@@ -4135,9 +4134,9 @@
 <p>下图形象说明了聚簇索引表(InnoDB)和非聚簇索引(MyISAM)的区别：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/5a3086cee19057902e88e42f4653ba47.jpg" alt=""></p>
 <ol>
-<li><p>对于<strong>非聚簇索引表</strong>来说（右图），表数据和索引是分成两部分存储的，主键索引和二级索引存储上没有任何区别。使用的是 B+ 树作为索引的存储结构，所有的节点都是索引，叶子节点存储的是索引+索引对应的记录的数据。</p>
+<li><p>对于<strong>非聚簇索引表</strong>来说（右图），表数据和索引是分成两部分存储的，主键索引和二级索引存储上没有任何区别。使用的是 B+ 树作为索引的存储结构，所有的节点都是索引，叶子节点存储的是索引 + 索引对应的记录的数据。</p>
 </li>
-<li><p>对于<strong>聚簇索引表</strong>来说（左图），表数据是和主键一起存储的，主键索引的叶结点存储行数据(包含了主键值)，二级索引的叶结点存储行的主键值。使用的是 B+ 树作为索引的存储结构，非叶子节点都是索引关键字，但非叶子节点中的关键字中不存储对应记录的具体内容或内容地址。叶子节点上的数据是主键与具体记录(数据内容)。</p>
+<li><p>对于<strong>聚簇索引表</strong>来说（左图），表数据是和主键一起存储的，主键索引的叶结点存储行数据（包含了主键值），二级索引的叶结点存储行的主键值。使用的是 B+ 树作为索引的存储结构，非叶子节点都是索引关键字，但非叶子节点中的关键字中不存储对应记录的具体内容或内容地址。叶子节点上的数据是主键与具体记录（数据内容）。</p>
 </li>
 </ol>
 <p>聚簇索引的优点</p>
@@ -4151,13 +4150,13 @@
 </ol>
 <p>聚簇索引的缺点</p>
 <ol>
-<li><p><strong>插入速度严重依赖于插入顺序</strong>，按照主键的顺序插入是最快的方式，否则将会出现页分裂，严重影响性能。因此，对于 InnoDB 表，我们一般都会定义一个自增的 ID 列为主键。</p>
+<li><p>插入速度严重依赖于插入顺序，按照主键的顺序插入是最快的方式，否则将会出现页分裂，严重影响性能。因此，对于 InnoDB 表，我们一般都会定义一个自增的 ID 列为主键。</p>
 </li>
-<li><p><strong>更新主键的代价很高，因为将会导致被更新的行移动</strong>。因此，对于 InnoDB 表，我们一般定义主键为不可更新。</p>
+<li><p>更新主键的代价很高，因为将会导致被更新的行移动。因此，对于 InnoDB 表，我们一般定义主键为不可更新。</p>
 </li>
-<li><p><strong>二级索引访问需要两次索引查找，第一次找到主键值，第二次根据主键值找到行数据。</strong>二级索引的叶节点存储的是主键值，而不是行指针（非聚簇索引存储的是指针或者说是地址），这是为了减少当出现行移动或数据页分裂时二级索引的维护工作，但会让二级索引占用更多的空间。</p>
+<li><p>二级索引访问需要两次索引查找，第一次找到主键值，第二次根据主键值找到行数据。二级索引的叶节点存储的是主键值，而不是行指针（非聚簇索引存储的是指针或者说是地址），这是为了减少当出现行移动或数据页分裂时二级索引的维护工作，但会让二级索引占用更多的空间。</p>
 </li>
-<li><p><strong>采用聚簇索引插入新值比采用非聚簇索引插入新值的速度要慢很多</strong>，因为插入要保证主键不能重复，判断主键不能重复，采用的方式在不同的索引下面会有很大的性能差距，聚簇索引遍历所有的叶子节点，非聚簇索引也判断所有的叶子节点，但是聚簇索引的叶子节点除了带有主键还有记录值，记录的大小往往比主键要大的多。这样就会导致聚簇索引在判定新记录携带的主键是否重复时进行昂贵的I/O代价。</p>
+<li><p>采用聚簇索引插入新值比采用非聚簇索引插入新值的速度要慢很多，因为插入要保证主键不能重复，判断主键不能重复，采用的方式在不同的索引下面会有很大的性能差距，聚簇索引遍历所有的叶子节点，非聚簇索引也判断所有的叶子节点，但是聚簇索引的叶子节点除了带有主键还有记录值，记录的大小往往比主键要大的多。这样就会导致聚簇索引在判定新记录携带的主键是否重复时进行昂贵的 I/O 代价。</p>
 </li>
 </ol>
 <h3 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h3><p>联合索引是指对表上多个列进行索引，创建方法和单个索引一样，不同之处在于有多个索引列。</p>
@@ -4165,7 +4164,7 @@
 <p>联合索引的优势：</p>
 <ol>
 <li><p>避免回表</p>
-<p>在执行计划中，table access by index rowid 代表是回表动作。如在user的id列建有索引，<code>select id from user</code>这个不用回表，直接从索引中读取id的值，而<code>select id,name from user</code>中，不能返回除 id 列其他的值，所以必须要回表。如果建有了 id 和 name 列的联合索引，则可以避免回表。</p>
+<p>在执行计划中，<code>table access by index rowid</code>代表是回表动作。如在 user 的 id 列建有索引，<code>select id from user</code>这个不用回表，直接从索引中读取id的值，而<code>select id,name from user</code>中，不能返回除 id 列其他的值，所以必须要回表。如果建有了 id 和 name 列的联合索引，则可以避免回表。</p>
 <p>另外，建立了 id 和 name 的联合索引(id列在在前)，则<code>select id from user</code>可以避免回表，而不用单独建立 id 列的单列索引</p>
 </li>
 <li><p>两个单列查询返回行较多，同时查返回行较少，联合索引更高效。</p>
@@ -4176,7 +4175,7 @@
 <p><img src="http://nas.beritra.com:18081/blog/202005/d3b79d089a9811ea99b000d861792df0.jpg" alt="img"></p>
 <h3 id="一些其他的技巧"><a href="#一些其他的技巧" class="headerlink" title="一些其他的技巧"></a>一些其他的技巧</h3><ul>
 <li>通常来说简单的把可为 NUL 的列改为 NOT NULL 不会对性能提升有多少帮助，只是如果计划在列上创建索引，就应该将该列设置为 NOT NULL。</li>
-<li>对整数类型指定宽度，比如 INT(11)，没有任何卵用。INT 使用32位（4个字节）存储空间，那么它的表示范围已经确定，所以 INT(1)和 INT(20)对于存储和计算是相同的。</li>
+<li>对整数类型指定宽度，比如 INT(11)，没有任何卵用。INT 使用32位（4个字节）存储空间，那么它的表示范围已经确定，所以  INT(1) 和 INT(20) 对于存储和计算是相同的。</li>
 <li>UNSIGNED 表示不允许负值，大致可以使正数的上限提高一倍。</li>
 <li>大表 ALTER TABLE 非常耗时，MySQL 执行大部分修改表结果操作的方法是用新的结构创建一个张空表，从旧表中查出所有的数据插入新表，然后再删除旧表。</li>
 </ul>
@@ -4184,7 +4183,7 @@
 <h4 id="非独立的列"><a href="#非独立的列" class="headerlink" title="非独立的列"></a>非独立的列</h4><p>“独立的列”是指索引列不能是表达式的一部分，也不能是函数的参数。比如：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select * from where id + 1 &#x3D; 5</span></pre></td></tr></table></figure>
 
-<p>我们很容易看出其等价于 id = 4，但是MySQL无法自动解析这个表达式，使用函数是同样的道理。</p>
+<p>我们很容易看出其等价于 id = 4，但是 MySQL 无法自动解析这个表达式，使用函数是同样的道理。</p>
 <p>另外在查询条件里面用函数计算的话，也是一样的。</p>
 <h4 id="模糊查询"><a href="#模糊查询" class="headerlink" title="模糊查询"></a>模糊查询</h4><p>当然不是全部模糊查询都不走索引，如果查询条件前半部分是确定的，就会走索引，即<code>like &#39;xxx%&#39;</code>的情况。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">select * from compare_result where request_id like &#39;%0173f%&#39;;#不走索引</span></pre></td></tr><tr><td class="code"><pre><span class="line">select * from compare_result where request_id like &#39;0173f%&#39;;#走索引</span></pre></td></tr></table></figure>
@@ -4306,37 +4305,37 @@
     <content><![CDATA[<p>本文是《深入理解JVM虚拟机》的读书笔记和摘要</p>
 <a id="more"></a>
 
-<h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h3><p>根据Java1.7版本的虚拟机规范，Java虚拟机包括以下几个运行时数据区。</p>
+<h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h3><p>根据 Java1.7 版本的虚拟机规范，Java虚拟机包括以下几个运行时数据区。</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/28a3ed4f719f2d32c9c1ed4845a27b07.jpg" alt=""></p>
 <h4 id="一、程序计数器"><a href="#一、程序计数器" class="headerlink" title="一、程序计数器"></a>一、程序计数器</h4><p>程序计数器(Program Counter Register)是一块较小的内存空间，可以看做当前线程所执行的字节码的行号指示器。分支、循环、跳转、异常处理、线程恢复等等都依赖于计数器完成。</p>
 <p>每个线程拥有独立的计数器，互相不影响，独立存储。</p>
-<p>执行Java方法的时候计数器记录的是虚拟机字节码指令的地址，如果执行的是Native方法，那么计数器则为空(Undefined)。该内存区域是唯一一个在Java虚拟机规范中没有规定任何<code>OutOfMemoryError</code>情况的区域。</p>
-<h4 id="二、虚拟机栈"><a href="#二、虚拟机栈" class="headerlink" title="二、虚拟机栈"></a>二、虚拟机栈</h4><p>和程序计数器一样，Java虚拟机栈(Java Virtual Machine Stacks)也是线程私有的，它的生命周期和线程相同。虚拟机栈描述的是Java方法执行的内存模型：每个方法在执行的同时都会创建一个帧栈(Stack Frame)用来存储局部变量表、操作数栈、动态链接、方法出口等信息。每一个方法从调用直至执行完成，都对应着一个栈帧在虚拟机中入栈到出栈的过程。</p>
+<p>执行 Java 方法的时候计数器记录的是虚拟机字节码指令的地址，如果执行的是 Native 方法，那么计数器则为空(Undefined)。该内存区域是唯一一个在 Java 虚拟机规范中没有规定任何<code>OutOfMemoryError</code>情况的区域。</p>
+<h4 id="二、虚拟机栈"><a href="#二、虚拟机栈" class="headerlink" title="二、虚拟机栈"></a>二、虚拟机栈</h4><p>和程序计数器一样，Java 虚拟机栈(Java Virtual Machine Stacks)也是线程私有的，它的生命周期和线程相同。虚拟机栈描述的是Java方法执行的内存模型：每个方法在执行的同时都会创建一个帧栈(Stack Frame)用来存储局部变量表、操作数栈、动态链接、方法出口等信息。每一个方法从调用直至执行完成，都对应着一个栈帧在虚拟机中入栈到出栈的过程。</p>
 <p>常规把Java内存区分为堆内存和栈内存的方法过于粗糙，实际上的区域划分更加复杂。</p>
 <p>局部变量表存放了编译期可知的各种基本类型(boolean、byte、char、short、int、float、long、double)、对象引用(reference类型，它不等同于对象本身，可能是一个指向对象起始地址的引用指针，也可能是指向一个代表对象的句柄或其他与此对象相关的位置)、和<code>returnAddress</code>类型（指向一条字节码指令的地址）。</p>
-<p>64位长度的long和double类型会占用两个局部变量空间（Slot）,其余的数据类型占用一个。进入一个方法的时候，局部表量表的大小就是确定的，运行期间不会在改变。</p>
-<p>Java虚拟机规范中对这个区域规定了两种异常状况：如果线程请求的栈深度大于虚拟机所允许的深度，将会抛出<code>StackOverFlowError</code>异常。如果虚拟机栈可以动态扩展，扩展时无法申请足够内存，会抛出<code>OutOfMemoryError</code>异常。</p>
+<p>64 位长度的 long 和 double 类型会占用两个局部变量空间(Slot)，其余的数据类型占用一个。进入一个方法的时候，局部表量表的大小就是确定的，运行期间不会在改变。</p>
+<p>Java 虚拟机规范中对这个区域规定了两种异常状况：如果线程请求的栈深度大于虚拟机所允许的深度，将会抛出<code>StackOverFlowError</code>异常。如果虚拟机栈可以动态扩展，扩展时无法申请足够内存，会抛出<code>OutOfMemoryError</code>异常。</p>
 <p>总空间一定的情况下，局部变量表内容越多，栈帧越大，栈深度越小。进行大量递归的时候就有可能导致栈溢出。</p>
-<h4 id="三、本地方法栈"><a href="#三、本地方法栈" class="headerlink" title="三、本地方法栈"></a>三、本地方法栈</h4><p>本地方法栈(Native Method Stack)和虚拟机栈作用很相似，两者区别是后者为Java方法（字节码）服务，前者则为虚拟机使用到的Native方法服务。有的虚拟机就干脆合二为一（Sun HotSpot虚拟机），本地方法栈可能抛出的异常也是上面那两个。</p>
-<h4 id="四、Java堆"><a href="#四、Java堆" class="headerlink" title="四、Java堆"></a>四、Java堆</h4><p>对于多数应用来说，Java堆（Java Heap）是Java虚拟机管理的最大一块内存。Java堆被所有线程共享，在虚拟机启动的时候创建。此内存区域的唯一目的就是存放对象实例。Java虚拟机规范中规定所有的对象实例和数组都要在堆上分配，但是随着发展，现在变得并不这么绝对。</p>
-<p>Java堆内存是垃圾收集管理器管理的主要区域，所以也成为GC堆。从内存回收的角度来看，现代收集器都采用分代收集算法，所以Java堆还可以细分为：新生代和老年代。再细致一点有Eden空间、From Survivor空间、To Survivor空间。</p>
-<p>Java堆可以处在物理不连续的内存空间上，只要逻辑连续即可。</p>
-<h4 id="五、方法区"><a href="#五、方法区" class="headerlink" title="五、方法区"></a>五、方法区</h4><p>方法区（Method Area）也是所有线程共享的内存区域，用于存储虚拟机加载的类信息、常量、静态变量、即时编译器编译的代码等数据。也称作Non-Heap非堆内存。</p>
-<p>Java虚拟机规范堆方法区的限制非常宽松，可以选择不实现垃圾收集，但是这部分区域的回收确实是有必要的。</p>
+<h4 id="三、本地方法栈"><a href="#三、本地方法栈" class="headerlink" title="三、本地方法栈"></a>三、本地方法栈</h4><p>本地方法栈(Native Method Stack)和虚拟机栈作用很相似，两者区别是后者为 Java 方法（字节码）服务，前者则为虚拟机使用到的 Native 方法服务。有的虚拟机就干脆合二为一（Sun HotSpot虚拟机），本地方法栈可能抛出的异常也是上面那两个。</p>
+<h4 id="四、Java-堆"><a href="#四、Java-堆" class="headerlink" title="四、Java 堆"></a>四、Java 堆</h4><p>对于多数应用来说，Java 堆（Java Heap）是Java虚拟机管理的最大一块内存。Java 堆被所有线程共享，在虚拟机启动的时候创建。此内存区域的唯一目的就是存放对象实例。Java 虚拟机规范中规定所有的对象实例和数组都要在堆上分配，但是随着发展，现在变得并不这么绝对。</p>
+<p>Java 堆内存是垃圾收集管理器管理的主要区域，所以也成为 GC 堆。从内存回收的角度来看，现代收集器都采用分代收集算法，所以 Java 堆还可以细分为：新生代和老年代。再细致一点有 Eden 空间、From Survivor 空间、To Survivor 空间。</p>
+<p>Java 堆可以处在物理不连续的内存空间上，只要逻辑连续即可。</p>
+<h4 id="五、方法区"><a href="#五、方法区" class="headerlink" title="五、方法区"></a>五、方法区</h4><p>方法区（Method Area）也是所有线程共享的内存区域，用于存储虚拟机加载的类信息、常量、静态变量、即时编译器编译的代码等数据。也称作 Non-Heap 非堆内存。</p>
+<p>Java 虚拟机规范堆方法区的限制非常宽松，可以选择不实现垃圾收集，但是这部分区域的回收确实是有必要的。</p>
 <p>平时，说到永久带(PermGen space)的时候往往将其和方法区不加区别。这么理解在一定角度也说的过去。因为，《Java虚拟机规范》只是规定了有方法区这么个概念和它的作用，并没有规定如何去实现它。那么，在不同的 JVM 上方法区的实现肯定是不同的了。</p>
-<p>同时，大多数用的JVM都是Sun公司的HotSpot。在HotSpot上把GC分代收集扩展至方法区，或者说使用永久代来实现方法区。</p>
-<p>在JDK1.8及以后版本，永久带被移除，新出现的元空间（Metaspace）替代了它。元空间属于Native Memory Space</p>
-<p>在1.8中，可以使用如下参数来调节方法区的大小</p>
+<p>同时，大多数用的 JVM 都是 Sun 公司的 HotSpot。在 HotSpot 上把 GC 分代收集扩展至方法区，或者说使用永久代来实现方法区。</p>
+<p>在 JDK1.8 及以后版本，永久带被移除，新出现的元空间（Metaspace）替代了它。元空间属于 Native Memory Space</p>
+<p>在 1.8 中，可以使用如下参数来调节方法区的大小</p>
 <ul>
 <li>XX:MetaspaceSize 元空间初始大小</li>
-<li>XX:MaxMetaspaceSize 元空间最大大小<br>超过这个值将会抛出OutOfMemoryError异常:java.lang.OutOfMemoryError: Metadata space</li>
+<li>XX:MaxMetaspaceSize 元空间最大大小<br>超过这个值将会抛出 OutOfMemoryError 异常：<code>java.lang.OutOfMemoryError: Metadata space</code></li>
 </ul>
-<h4 id="六、运行时常量池"><a href="#六、运行时常量池" class="headerlink" title="六、运行时常量池"></a>六、运行时常量池</h4><p>运行时常量池（Runtime Constant Pool）是方法区的一部分。Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容在类加载后进入方法区的运行时常量池中存放。</p>
-<p>Java虚拟机堆Class文件的每一部分格式都有严格要求，要符合要求才能被虚拟机认、装载和执行。但是对于运行时常量池，Java虚拟机规范没有做任何细节要求。另外运行时常量池的一个重要特征就是具有动态性，运行期间可一个将新的常量放入池中 ，这种特性被开发人员利用得比较多的便是String类的<code>intern()</code>方法。</p>
+<h4 id="六、运行时常量池"><a href="#六、运行时常量池" class="headerlink" title="六、运行时常量池"></a>六、运行时常量池</h4><p>运行时常量池（Runtime Constant Pool）是方法区的一部分。Class 文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息是常量池（Constant Pool Table），用于存放编译期生成的各种字面量和符号引用，这部分内容在类加载后进入方法区的运行时常量池中存放。</p>
+<p>Java 虚拟机堆 Class 文件的每一部分格式都有严格要求，要符合要求才能被虚拟机认、装载和执行。但是对于运行时常量池，Java 虚拟机规范没有做任何细节要求。另外运行时常量池的一个重要特征就是具有动态性，运行期间可一个将新的常量放入池中 ，这种特性被开发人员利用得比较多的便是 String 类的<code>intern()</code>方法。</p>
 <h4 id="七、直接内存"><a href="#七、直接内存" class="headerlink" title="七、直接内存"></a>七、直接内存</h4><p>直接内存（Direct Memory）不是虚拟机运行时数据区的一部分，也不是虚拟机规范中定义的内存区域，但是也被频繁使用，也有可能导致<code>OutOfMemoryError</code>异常出现。</p>
-<p>在JDK1.4中新加入的NIO类，引入了基于通道与缓冲区的I/O模式，可以使用Native函数库直接分配堆外内存，然后通过存储在Java堆中的<code>DirectByteBuffer</code>对象作为内存的引用进行操作。</p>
+<p>在JDK1.4中新加入的NIO类，引入了基于通道与缓冲区的 I/O 模式，可以使用 Native 函数库直接分配堆外内存，然后通过存储在 Java 堆中的<code>DirectByteBuffer</code>对象作为内存的引用进行操作。</p>
 <p>这部分内存不受到Java堆大小的限制，但是仍然收到本机内存空间和处理器寻址空间的限制，也有可能出现<code>OutOfMemoryError</code>异常。</p>
-<h3 id="对象创建过程"><a href="#对象创建过程" class="headerlink" title="对象创建过程"></a>对象创建过程</h3><h4 id="类加载"><a href="#类加载" class="headerlink" title="类加载"></a>类加载</h4><p>虚拟机遇到一条new指令的时候，会首先检查指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否被加载、解析和初始化过。如果没有，就限制性类加载过程。这个部分后续讨论。</p>
+<h3 id="对象创建过程"><a href="#对象创建过程" class="headerlink" title="对象创建过程"></a>对象创建过程</h3><h4 id="类加载"><a href="#类加载" class="headerlink" title="类加载"></a>类加载</h4><p>虚拟机遇到一条 new 指令的时候，会首先检查指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否被加载、解析和初始化过。如果没有，就限制性类加载过程。这个部分后续讨论。</p>
 <h4 id="分配内存"><a href="#分配内存" class="headerlink" title="分配内存"></a>分配内存</h4><p>类加载检查完成之后，虚拟机会对新的对象分配内存。对象所需的内存大小在类加载完成之后就可以完全确定，为对象分配空间的任务等同于把一块确定大小的内存从堆内存中划分出来，这里有两种划分方式：</p>
 <ul>
 <li>如果内存绝对规整，分配内存就是把指针向后移动与对象大小相等的距离。这种方法叫做指针碰撞（Bump the Pointer）</li>
@@ -4345,10 +4344,10 @@
 <p>堆内存是否规整是由垃圾收集器是否带有压缩整理功能决定的。</p>
 <p>除此之外，还需要考虑的是对象创建中线程安全的问题，假如两个线程同时移动内存指针，就有可能出现错误，解决这个问题也有两个方案：</p>
 <ul>
-<li>使用CAS搭配失败重试的方式保证更新操作的原子性。</li>
-<li>或者把内存的分配动作按照线程划分在不同的空间之中进行，即每个线程在堆中预先分配一小块内存，成为本地内存分配缓冲区（Thread Local Allocation Buffer，TLAB），虚拟机是否启用TLAB可以用参数<code>-XX:+/-TLAB</code>来设定。</li>
+<li>使用 CAS 搭配失败重试的方式保证更新操作的原子性。</li>
+<li>或者把内存的分配动作按照线程划分在不同的空间之中进行，即每个线程在堆中预先分配一小块内存，成为本地内存分配缓冲区（Thread Local Allocation Buffer，TLAB），虚拟机是否启用 TLAB 可以用参数<code>-XX:+/-TLAB</code>来设定。</li>
 </ul>
-<h4 id="初始化信息"><a href="#初始化信息" class="headerlink" title="初始化信息"></a>初始化信息</h4><p>内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头），如果使用<code>TLAB</code>，这一工作过程也可以提前至<code>TLAB</code>分配时进行。这一操作保证了对象的实例字段在Java代码中可以不赋初值就直接使用。</p>
+<h4 id="初始化信息"><a href="#初始化信息" class="headerlink" title="初始化信息"></a>初始化信息</h4><p>内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头），如果使用<code>TLAB</code>，这一工作过程也可以提前至<code>TLAB</code>分配时进行。这一操作保证了对象的实例字段在 Java 代码中可以不赋初值就直接使用。</p>
 <p> 然后，虚拟机需要对对象进行必要的设置，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的 GC 分代年龄等信息。这些信息存放在对象的对象头（Object Header）中，根据虚拟机当前的运行状态不同，比如是否启用偏向锁等，对象头会有不同的设置方式。</p>
 <p>从虚拟机的视角，一个新的对象已经产生，但是从 Java 程序的视角来看，对象创建才刚刚开始，init 方法还没执行，所有字段还都为零。所以，执行 new 指令之后会接着执行 init 方法，把对象按照程序员意愿进行初始化。</p>
 <h3 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h3><p>在 HotSpot 虚拟机中，对象可以分为三个区域：对象头（Header）、实例数据（Instance Date）和对齐填充（Padding）。</p>
@@ -4377,10 +4376,10 @@
 <li>什么时候回收</li>
 <li>如何回收</li>
 </ul>
-<p>在Java内存运行时区域里，程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭；栈中的栈帧随着方法的进入和退出有条不紊的进行出栈和入栈操作。每个栈帧中分配的内存基本是在类结构确定下来的时候就是已知的。Java 堆和方法区不一样，只有在运行时才知道创建那些对象，所以这部分内存的分配和回收都是动态的，垃圾收集器所关注的也是这部分内存。</p>
-<h3 id="哪些内存需要回收"><a href="#哪些内存需要回收" class="headerlink" title="哪些内存需要回收"></a>哪些内存需要回收</h3><h4 id="引用计数器法"><a href="#引用计数器法" class="headerlink" title="引用计数器法"></a>引用计数器法</h4><p>引用计数器法是这样的：给对象添加一个引用计数器，每当有一个地方引用它时，计数器+1，引用失效的时候，计数器-1，任何时刻计数器为0的对象就不可能再被使用。</p>
-<p>主流的Java虚拟机中没有选用这个方法来管理内存的，最主要的原因是很难解决对象循环引用的问题。</p>
-<h4 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h4><p>主流的商用程序语言的主流实现中，都是通过可达性分析（Reachability Analysis）来判定对象是否存活的。这个算法的基本思路是通过一系列的成为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称之为引用链（Reference Chain），当一个对象到达GC Roots没有任何引用链相连时，证明此对象不可用。</p>
+<p>在 Java 内存运行时区域里，程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭；栈中的栈帧随着方法的进入和退出有条不紊的进行出栈和入栈操作。每个栈帧中分配的内存基本是在类结构确定下来的时候就是已知的。Java 堆和方法区不一样，只有在运行时才知道创建那些对象，所以这部分内存的分配和回收都是动态的，垃圾收集器所关注的也是这部分内存。</p>
+<h3 id="哪些内存需要回收"><a href="#哪些内存需要回收" class="headerlink" title="哪些内存需要回收"></a>哪些内存需要回收</h3><h4 id="引用计数器法"><a href="#引用计数器法" class="headerlink" title="引用计数器法"></a>引用计数器法</h4><p>引用计数器法是这样的：给对象添加一个引用计数器，每当有一个地方引用它时，计数器 +1，引用失效的时候，计数器 -1，任何时刻计数器为 0 的对象就不可能再被使用。</p>
+<p>主流的 Java 虚拟机中没有选用这个方法来管理内存的，最主要的原因是很难解决对象循环引用的问题。</p>
+<h4 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h4><p>主流的商用程序语言的主流实现中，都是通过可达性分析（Reachability Analysis）来判定对象是否存活的。这个算法的基本思路是通过一系列的成为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称之为引用链（Reference Chain），当一个对象到达 GC Roots 没有任何引用链相连时，证明此对象不可用。</p>
 <h4 id="引用类型"><a href="#引用类型" class="headerlink" title="引用类型"></a>引用类型</h4><p>无论通过计数器，还是通过可达性分析，判断对象是否存活都与“引用”有关。在JDK1.2之后，Java对引用状态进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）4种，这4种引用强度依次逐渐减弱。</p>
 <ul>
 <li>强引用就是指在代码中普遍存在的，类似于<code>Object obj=new Object()</code>这类引用，只要强引用还存在，垃圾收集器就永远不会回收被引用的对象。</li>
@@ -4389,7 +4388,7 @@
 <li>虚引用也称为幽灵引用或者幻影引用，是最弱的一种引用关系。一个对象是否有虚引用的的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用的唯一目的就是在这个对象被垃圾回收的时候收到一个系统通知。</li>
 </ul>
 <h4 id="生存还是死亡"><a href="#生存还是死亡" class="headerlink" title="生存还是死亡"></a>生存还是死亡</h4><p>即使在可达性分析算法中不可达的对象，也不是必定被回收，他们暂时处于“缓刑”阶段。要真正宣告一个对象死亡，至少要经历两次标记过程：第一次在可达性分析中发现没有引用链，会被标记并且进行筛选，筛选条件条件是此对象是否有必要执行<code>finalize()</code>方法。当对象没有覆盖<code>finalize()</code>方法或者已经被虚拟机调用过，虚拟机将这两种情况视为“没有必要执行”。</p>
-<p>如果有必要执行，对象会被放置在一个叫F-Queue的队列中，稍后由一个虚拟机建立的、低优先级的Finalizer线程去执行。这个“执行”是指虚拟机触发这个方法，但是不承诺等待执行完毕。<code>finalize()</code>方法是对象逃脱死亡的最后一次机会，如果对象要在其中拯救自己，那么与任何一个引用链上的对象建立关联即可。如果建立的关联，比如将自己赋值给了某个类变量，那么第二次标记的时候就会被移除“即将回收”的集合。</p>
+<p>如果有必要执行，对象会被放置在一个叫 F-Queue 的队列中，稍后由一个虚拟机建立的、低优先级的 Finalizer 线程去执行。这个“执行”是指虚拟机触发这个方法，但是不承诺等待执行完毕。<code>finalize()</code>方法是对象逃脱死亡的最后一次机会，如果对象要在其中拯救自己，那么与任何一个引用链上的对象建立关联即可。如果建立的关联，比如将自己赋值给了某个类变量，那么第二次标记的时候就会被移除“即将回收”的集合。</p>
 <h3 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h3><p>由于垃圾收集算法的实现涉及大量的程序细节，而且各个平台的虚拟机操作内存的方法有各不相同，所以只介绍几种算法的思想和发展过程。</p>
 <h4 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h4><p>最基础的算法是“标记-清除”（Mark-Sweep）算法，如名字一样，算法分为“标记”和“清除”两个阶段：首先标记需要回收的对象，然后统一回收。他是最基础的收集算法，但是主要有两点不足：</p>
 <ul>
@@ -4397,22 +4396,22 @@
 <li>空间问题，标记清除之后会有大量的不连续内存碎片，空间碎片太多导致后续分配大对象内存的时候，无法找到足够的连续内存而不得不触发另一次垃圾收集动作。</li>
 </ul>
 <h4 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h4><p>复制算法提高了效率，他可以将内存按照容量划分为大小相等的两块，每次使用其中一块。当一块的内存用完之后，把存活的对象移动到另一块，然后把已经使用的空间一次性清理掉。这个方式实现简单运行高效，但是代价是内存缩小为原来的一半。</p>
-<p>现在的商业虚拟机都是采用这种收集算法来回收新生代，由于98%的对象都是“朝生夕死”的，所以不需要1:1的比例划分内存空间，而是划分一块较大的Eden和两块较小的Survivor空间，每次使用Eden和其中一块Survivor。回收的时候，将Eden和Survivor中还存活的对象一次性复制到另一块Survivor中，然后清理掉Eden和使用的Survivor空间。HotSpot虚拟机中默认的Eden和Survivor空间比例划分是8:1。但是，98%的对象可回收只是一般场景下的数据，我们不能保证每次回收都是这样，所以当Survivor空间不够使用时，需要依赖其他内存（这里指老年代）进行分配担保（Handle Promotion）。</p>
-<p>当一块Survivor空间中没有足够的空间存放上一次新生代收集下来的存活对象的时候，这些对象会直接通过分配担保机制进入老年代。</p>
-<h4 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h4><p>复制收集算法在对象存活率较高的时候就要进行较多的复制操作，效率将会变低。更关键的是如果不想浪费50%的空间，就需要额外空间进行担保，所以老年代不能直接选用这种算法。</p>
+<p>现在的商业虚拟机都是采用这种收集算法来回收新生代，由于 98% 的对象都是“朝生夕死”的，所以不需要 1:1 的比例划分内存空间，而是划分一块较大的 Eden 和两块较小的 Survivor 空间，每次使用 Eden 和其中一块 Survivor。回收的时候，将 Eden 和 Survivor 中还存活的对象一次性复制到另一块 Survivor 中，然后清理掉 Eden 和使用的 Survivor 空间。HotSpot 虚拟机中默认的 Eden和 Survivor 空间比例划分是 8:1。但是，98% 的对象可回收只是一般场景下的数据，我们不能保证每次回收都是这样，所以当 Survivor 空间不够使用时，需要依赖其他内存（这里指老年代）进行分配担保（Handle Promotion）。</p>
+<p>当一块 Survivor 空间中没有足够的空间存放上一次新生代收集下来的存活对象的时候，这些对象会直接通过分配担保机制进入老年代。</p>
+<h4 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h4><p>复制收集算法在对象存活率较高的时候就要进行较多的复制操作，效率将会变低。更关键的是如果不想浪费 50% 的空间，就需要额外空间进行担保，所以老年代不能直接选用这种算法。</p>
 <p>根据老年代的特点，有人提出了另外一种“标记-整理”算法，标记过程与“标记-清除”一样，但是后续不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。</p>
-<h4 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h4><p>当代商业虚拟机的垃圾收集都是采用分代收集（Generational Collection）算法，根据对象存活周期将不同内存划分为几块。一般是把Java堆分为新生代和老年代，这样可以根据各个年代的特点采用最适当的收集算法。在新生代中，每次垃圾收集都有大量的对象死去，只有少量存活，那就选用复制算法。而老年代存活率高、没有额外空间进行担保，就必须使用“标记-清理”或者“标记-整理”算法来回收。</p>
-<h3 id="HotSpot算法实现"><a href="#HotSpot算法实现" class="headerlink" title="HotSpot算法实现"></a>HotSpot算法实现</h3><h4 id="枚举根节点"><a href="#枚举根节点" class="headerlink" title="枚举根节点"></a>枚举根节点</h4><p>可以作为GC Roots的节点主要在全局的引用（例如常量或者静态属性）与执行上下文（栈帧中的本地变量表）中，如果逐个检查里面的引用，会耗费很多时间。</p>
-<p>另外，可达性分析对执行的敏感还体现在GC的停顿上，这项分析工作必须在能确保一致性的快照中进行，不可以出现分析过程中对象还在不断变化的情况。所以这导致GC进行时需要停顿所有的Java执行线程（Sun将这个事情称为“Stop The Word”）</p>
-<p>由于目前主流的Java虚拟机使用的都是准确式GC，所以当执行系统停顿下来之后，不需要一个不漏的检查玩所有执行上下文和全局的引用位置，虚拟机有办法直接得知哪些地方存放着对象引用。在HotSpot的实现中，是通过使用一组称为OopMap的数据接口来达到这个目的。在类加载完成的时候，HotSpot就把对象内偏移量上是什么类型的数据计算出来，在JIT编译过程中，也会在特定的位置记录下帧和寄存器中哪些位置是引用的。</p>
-<h4 id="安全点"><a href="#安全点" class="headerlink" title="安全点"></a>安全点</h4><p>在OopMap的帮助下，HotSpot可以快速的完成GC Root的枚举，但是随着引用变化，不可能每次指令都生成新的OopMap。实际上只有“特定的位置”才会暂停开始GC，这个位置叫做安全点（Safepoint）。Safepoint的选定既不能太少以至于GC等待时间过长，也不能太频繁以至于增大运行时负荷。</p>
-<p>对于Safepoint另一个需要考虑的问题是如何在GC发生时让所有线程都跑在最近的安全点上再停下来。这里有两个方案：</p>
+<h4 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h4><p>当代商业虚拟机的垃圾收集都是采用分代收集（Generational Collection）算法，根据对象存活周期将不同内存划分为几块。一般是把 Java 堆分为新生代和老年代，这样可以根据各个年代的特点采用最适当的收集算法。在新生代中，每次垃圾收集都有大量的对象死去，只有少量存活，那就选用复制算法。而老年代存活率高、没有额外空间进行担保，就必须使用“标记-清理”或者“标记-整理”算法来回收。</p>
+<h3 id="HotSpot算法实现"><a href="#HotSpot算法实现" class="headerlink" title="HotSpot算法实现"></a>HotSpot算法实现</h3><h4 id="枚举根节点"><a href="#枚举根节点" class="headerlink" title="枚举根节点"></a>枚举根节点</h4><p>可以作为 GC Roots 的节点主要在全局的引用（例如常量或者静态属性）与执行上下文（栈帧中的本地变量表）中，如果逐个检查里面的引用，会耗费很多时间。</p>
+<p>另外，可达性分析对执行的敏感还体现在 GC 的停顿上，这项分析工作必须在能确保一致性的快照中进行，不可以出现分析过程中对象还在不断变化的情况。所以这导致 GC 进行时需要停顿所有的Java执行线程（Sun将这个事情称为“Stop The Word”）</p>
+<p>由于目前主流的 Java 虚拟机使用的都是准确式 GC，所以当执行系统停顿下来之后，不需要一个不漏的检查玩所有执行上下文和全局的引用位置，虚拟机有办法直接得知哪些地方存放着对象引用。在 HotSpot 的实现中，是通过使用一组称为 OopMap 的数据接口来达到这个目的。在类加载完成的时候，HotSpo t就把对象内偏移量上是什么类型的数据计算出来，在 JIT 编译过程中，也会在特定的位置记录下帧和寄存器中哪些位置是引用的。</p>
+<h4 id="安全点"><a href="#安全点" class="headerlink" title="安全点"></a>安全点</h4><p>在 OopMap 的帮助下，HotSpot 可以快速的完成GC Root的枚举，但是随着引用变化，不可能每次指令都生成新的 OopMap。实际上只有“特定的位置”才会暂停开始 GC，这个位置叫做安全点（Safepoint）。Safepoint 的选定既不能太少以至于 GC 等待时间过长，也不能太频繁以至于增大运行时负荷。</p>
+<p>对于 Safepoint 另一个需要考虑的问题是如何在 GC 发生时让所有线程都跑在最近的安全点上再停下来。这里有两个方案：</p>
 <ul>
-<li>抢先式中断（Preemptive Suspension）：不需要线程的执行代码主动配合，GC发生的时候先中断全部线程，如果发现有的线程中断地方不在安全点上，就恢复线程，让他跑到安全点上。现在几乎没有虚拟机实现抢先式中断来暂停线程。</li>
-<li>主动式中断（Voluntary Suspension）：当GC需要中断线程的时候，不直接对线程操作，而是仅仅设置一个标志，各个线程主动轮询这个标志，发现标志为真的时候主动中断挂起。轮讯标志的地方和安全点是重合的。</li>
+<li>抢先式中断（Preemptive Suspension）：不需要线程的执行代码主动配合，GC 发生的时候先中断全部线程，如果发现有的线程中断地方不在安全点上，就恢复线程，让他跑到安全点上。现在几乎没有虚拟机实现抢先式中断来暂停线程。</li>
+<li>主动式中断（Voluntary Suspension）：当 GC 需要中断线程的时候，不直接对线程操作，而是仅仅设置一个标志，各个线程主动轮询这个标志，发现标志为真的时候主动中断挂起。轮讯标志的地方和安全点是重合的。</li>
 </ul>
-<h4 id="安全区域"><a href="#安全区域" class="headerlink" title="安全区域"></a>安全区域</h4><p>程序执行的时候，通过Safepoint可以解决如何进入GC的问题，但是程序“不执行”的时候呐？比如线程处于Sleep状态或者Blocked状态，这时候线程无法相应JVM的中断请求，JVM也不太可能等待线程被重新分配CPU时间。对于这种情况，需要安全区域（Safe Region）来解决。</p>
-<p>安全区域是指在一段代码中，引用关系不会发生变化，在这个区域中的任何位置进行GC都是安全的。当线程执行到Safe Region中的代码时，会标识自己已经进入了Safe Region，这样发起GC的时候就不用管进入Safe Region状态的线程了。</p>
+<h4 id="安全区域"><a href="#安全区域" class="headerlink" title="安全区域"></a>安全区域</h4><p>程序执行的时候，通过 Safepoint 可以解决如何进入 GC 的问题，但是程序“不执行”的时候呐？比如线程处于 Sleep 状态或者 Blocked 状态，这时候线程无法相应 JVM 的中断请求，JVM 也不太可能等待线程被重新分配 CPU 时间。对于这种情况，需要安全区域（Safe Region）来解决。</p>
+<p>安全区域是指在一段代码中，引用关系不会发生变化，在这个区域中的任何位置进行 GC 都是安全的。当线程执行到 Safe Region 中的代码时，会标识自己已经进入了 Safe Region，这样发起 GC 的时候就不用管进入 Safe Region 状态的线程了。</p>
 <h3 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h3><p>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。</p>
 <p>常见的垃圾收集器有以下几种：</p>
 <p><img src="http://nas.beritra.com:18081/uploads/big/b5af81a71b8415ae3b4d6378cdd3019f.jpeg" alt=""></p>
@@ -4421,54 +4420,54 @@
 <p>jdk1.8 默认垃圾收集器Parallel Scavenge（新生代）+Serial Old（老年代）</p>
 <p>jdk1.9 默认垃圾收集器G1</p>
 <p>jdk10 默认垃圾收集器G1</p>
-<h4 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h4><p>Serial收集器是最基本、历史最悠久的收集器。它是一个单线程收集器，不仅仅是说只是用一个CPU进行垃圾收集工作，更重要的是进行垃圾收集的时候，必须暂停 其他所有工作线程直到收集结束。</p>
-<p>Serial依然是Client模式下新生代默认的收集器，他也有着优于其他收集器的地方：简单而高效（单线程环境下）。</p>
-<h4 id="ParNew收集器"><a href="#ParNew收集器" class="headerlink" title="ParNew收集器"></a>ParNew收集器</h4><p>ParNew其实就是Serial收集器的多线程版本，除了使用多条线程进行垃圾收集之外，其余行为包括Serial收集器可用的所有控制参数、收集算法、Stop The Wrokd、对象分配规则、回收策略等都与Serial收集器完全一样。</p>
-<p>ParNew是许多运行在Server模式下的虚拟机中首选的新生代收集器，有一个重要的原因是除了Serial收集器外，它是唯一能与CMS收集器配合工作。ParNew在单CPU环境中不会比Serial有更好的效果，甚至由于线程切换的开销可能性能更低。</p>
-<h4 id="Parallel-Scavenge收集器"><a href="#Parallel-Scavenge收集器" class="headerlink" title="Parallel Scavenge收集器"></a>Parallel Scavenge收集器</h4><p>Parallel Scavenge收集器是一个新生代收集器，也是使用复制算法的收集器，又是并行的多线程收集器。</p>
-<p>Parallel Scavenge收集器的特点是它的关注点与其他收集器不同，CMS等收集器的关注点是尽可能缩短垃圾收集时用户线程的停顿时间，而Parallel Scavenge收集器的目的是达到一个可控制的吞吐量（Throughput）。所谓吞吐量就是CPU用于运行用户代码的时间和总的消耗时间的比值。虚拟机总共运行了100分钟，99分钟用来运行代码，1分钟垃圾收集，那么吞吐量就是99%。</p>
-<p>Parallel Scavenge收集器提供了两个参数进行进准控制吞吐量，分别是控制最大垃圾收集停顿时间的<code>-XX:MaxGCPauseMillis</code>参数以及直接设置吞吐量大小的<code>-XX:GCTimeRatio</code>参数。</p>
-<p><code>MaxGCPauseMillis</code>参数允许的值是一个大于0的毫秒数，收集器将尽可能的保证内存回收花费的时间不超过设定值。但是这个值不是越小越好，GC停顿时间缩短是以牺牲吞吐量和新生代空间换取的，停顿时间降下来很可能吞吐量也下降了。</p>
-<p><code>GCTimeRatio</code>参数的值应当是一个大于0且小于100的整数，也就是垃圾收集时间占总时间的比率，相当于吞吐量的倒数。</p>
-<h4 id="Serial-Old收集器"><a href="#Serial-Old收集器" class="headerlink" title="Serial Old收集器"></a>Serial Old收集器</h4><p>Serial Old是Serial收集器的老年代版本，他同样是一个单线程收集器，使用“标记-整理”算法。这个收集器的主要意义也是给Client模式下的虚拟机使用。</p>
-<h4 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h4><p>CMS（Concurrent Mark Sweep）收集器是一种以最短回收停顿时间为目标的收集器。从名字就可以看出，CMS收集器是基于“标记-清除”算法实现的，它的运作过程相对于前面几个收集器来说更复杂一点，整个过程分为4个步骤：</p>
+<h4 id="Serial-收集器"><a href="#Serial-收集器" class="headerlink" title="Serial 收集器"></a>Serial 收集器</h4><p>Serial 收集器是最基本、历史最悠久的收集器。它是一个单线程收集器，不仅仅是说只是用一个 CPU 进行垃圾收集工作，更重要的是进行垃圾收集的时候，必须暂停 其他所有工作线程直到收集结束。</p>
+<p>Serial 依然是 Client 模式下新生代默认的收集器，他也有着优于其他收集器的地方：简单而高效（单线程环境下）。</p>
+<h4 id="ParNew-收集器"><a href="#ParNew-收集器" class="headerlink" title="ParNew 收集器"></a>ParNew 收集器</h4><p>ParNew 其实就是 Serial 收集器的多线程版本，除了使用多条线程进行垃圾收集之外，其余行为包括 Serial 收集器可用的所有控制参数、收集算法、Stop The World、对象分配规则、回收策略等都与 Serial 收集器完全一样。</p>
+<p>ParNew 是许多运行在 Server 模式下的虚拟机中首选的新生代收集器，有一个重要的原因是除了 Serial 收集器外，它是唯一能与 CMS 收集器配合工作。ParNew 在单 CPU 环境中不会比 Serial 有更好的效果，甚至由于线程切换的开销可能性能更低。</p>
+<h4 id="Parallel-Scavenge-收集器"><a href="#Parallel-Scavenge-收集器" class="headerlink" title="Parallel Scavenge 收集器"></a>Parallel Scavenge 收集器</h4><p>Parallel Scavenge 收集器是一个新生代收集器，也是使用复制算法的收集器，又是并行的多线程收集器。</p>
+<p>Parallel Scavenge 收集器的特点是它的关注点与其他收集器不同，CMS 等收集器的关注点是尽可能缩短垃圾收集时用户线程的停顿时间，而 Parallel Scavenge 收集器的目的是达到一个可控制的吞吐量（Throughput）。所谓吞吐量就是 CPU 用于运行用户代码的时间和总的消耗时间的比值。虚拟机总共运行了 100 分钟，99 分钟用来运行代码，1 分钟垃圾收集，那么吞吐量就是 99%。</p>
+<p>Parallel Scavenge 收集器提供了两个参数进行进准控制吞吐量，分别是控制最大垃圾收集停顿时间的<code>-XX:MaxGCPauseMillis</code>参数以及直接设置吞吐量大小的<code>-XX:GCTimeRatio</code>参数。</p>
+<p><code>MaxGCPauseMillis</code>参数允许的值是一个大于0的毫秒数，收集器将尽可能的保证内存回收花费的时间不超过设定值。但是这个值不是越小越好，GC 停顿时间缩短是以牺牲吞吐量和新生代空间换取的，停顿时间降下来很可能吞吐量也下降了。</p>
+<p><code>GCTimeRatio</code>参数的值应当是一个大于 0 且小于 100 的整数，也就是垃圾收集时间占总时间的比率，相当于吞吐量的倒数。</p>
+<h4 id="Serial-Old-收集器"><a href="#Serial-Old-收集器" class="headerlink" title="Serial Old 收集器"></a>Serial Old 收集器</h4><p>Serial Old 是 Serial 收集器的老年代版本，他同样是一个单线程收集器，使用“标记-整理”算法。这个收集器的主要意义也是给 Client 模式下的虚拟机使用。</p>
+<h4 id="CMS-收集器"><a href="#CMS-收集器" class="headerlink" title="CMS 收集器"></a>CMS 收集器</h4><p>CMS（Concurrent Mark Sweep）收集器是一种以最短回收停顿时间为目标的收集器。从名字就可以看出，CMS 收集器是基于“标记-清除”算法实现的，它的运作过程相对于前面几个收集器来说更复杂一点，整个过程分为 4 个步骤：</p>
 <ul>
 <li>初始标记（initial mark）</li>
 <li>并发标记（concurrent mark）</li>
 <li>重新标记（remark）</li>
 <li>并发清除（concurrent sweep）</li>
 </ul>
-<p>其中，初始标记和重新标记仍然需要“Stop The World”。初始标记仅仅标记一下GC Roots能直接关联到的对象，速度很快，并发标记阶段是进行GC Roots Tracing的过程，而重新标记则是为了修正并发标记期间用户程序继续运作而导致的标记变动，这个阶段的停顿时间一般会比初始阶段稍长，但是远比并发标记阶段耗时短。</p>
+<p>其中，初始标记和重新标记仍然需要“Stop The World”。初始标记仅仅标记一下 GC Roots 能直接关联到的对象，速度很快，并发标记阶段是进行 GC Roots Tracing 的过程，而重新标记则是为了修正并发标记期间用户程序继续运作而导致的标记变动，这个阶段的停顿时间一般会比初始阶段稍长，但是远比并发标记阶段耗时短。</p>
 <p>由于整个过程中耗时最长的并发标记和并发清除过程都可以和用户线程一起工作，所以总体来说CMS收集器的内存回收过程是和用户线程一起并发执行的。</p>
-<p>但是，CMS同样有以下明显的缺点：</p>
+<p>但是，CMS 同样有以下明显的缺点：</p>
 <ul>
-<li><p>CMS收集器对CPU资源非常敏感，默认启动了（CPU数量+3）/4个线程执行回收，也就是当CPU在4个以上并发回收时收集线程占用不少于25%的CPU资源，并且随着CPU数量增加而下降。CPU数量少的时候对用户的影响就很大了。</p>
+<li><p>CMS 收集器对 CPU 资源非常敏感，默认启动了（CPU数量+3）/4个线程执行回收，也就是当 CPU 在4个以上并发回收时收集线程占用不少于25%的CPU资源，并且随着 CPU 数量增加而下降。CPU 数量少的时候对用户的影响就很大了。</p>
 </li>
-<li><p>CMS无法处理浮动垃圾（Floating Garbage），可能出现<code>Concurrent Mode Failure</code>失败而导致另一个Full GC产生。即CMS在并发清除过程中产生的新的垃圾，只能在下一次GC时再处理。</p>
+<li><p>CMS 无法处理浮动垃圾（Floating Garbage），可能出现<code>Concurrent Mode Failure</code>失败而导致另一个 Full GC 产生。即 CMS 在并发清除过程中产生的新的垃圾，只能在下一次GC时再处理。</p>
 </li>
-<li><p>最后一个缺点，由于CMS基于“标记-清除”算法实现，意味着收集结束可能会有大量的空间碎片产生。空间碎片过多会对大内存分配产生麻烦，导致分配内存的时候不得不提前触发Full GC。</p>
+<li><p>最后一个缺点，由于 CMS 基于“标记-清除”算法实现，意味着收集结束可能会有大量的空间碎片产生。空间碎片过多会对大内存分配产生麻烦，导致分配内存的时候不得不提前触发 Full GC。</p>
 </li>
 </ul>
-<h4 id="G1收集器"><a href="#G1收集器" class="headerlink" title="G1收集器"></a>G1收集器</h4><p>G1是jdk9版本之后JVM默认的垃圾收集器，它具有以下特点：</p>
+<h4 id="G1-收集器"><a href="#G1-收集器" class="headerlink" title="G1 收集器"></a>G1 收集器</h4><p>G1 是 JDK9 版本之后JVM默认的垃圾收集器，它具有以下特点：</p>
 <ul>
-<li>并行和并发：G1可以充分利用多CPU、多核环境下的硬件优势，使用多个CPU来缩短Stop The World停顿的时间。</li>
-<li>分代收集：分代概念仍然在G1中保留，但是G1可以不需要与其他收集器配合独自管理整个GC堆。</li>
-<li>空间整合：与CMS的“标记-清理”算法不同，G1从整体上看是基于“标记-整理”算法实现，但是从局部（两个Region）来看是基于“复制”算法实现的。无论如何，这两种算法一位置G1运作期间不会产生内存碎片，收集完成后可以提供规整可用的内存。</li>
-<li>可预测的停顿：这是G1相对于CMS的另一大优势，G1除了追求低停顿之外，还能建立可预测的停顿时间模型，让使用者明确指定在一个长度为M毫秒的时间片断内，消耗在垃圾收集上的时间不超过N毫秒。</li>
+<li>并行和并发：G1 可以充分利用多 CPU、多核环境下的硬件优势，使用多个 CPU 来缩短 Stop The World 停顿的时间。</li>
+<li>分代收集：分代概念仍然在 G1 中保留，但是 G1 可以不需要与其他收集器配合独自管理整个 GC 堆。</li>
+<li>空间整合：与 CMS 的“标记-清理”算法不同，G1 从整体上看是基于“标记-整理”算法实现，但是从局部（两个Region）来看是基于“复制”算法实现的。无论如何，这两种算法一位置 G1 运作期间不会产生内存碎片，收集完成后可以提供规整可用的内存。</li>
+<li>可预测的停顿：这是 G1 相对于 CMS 的另一大优势，G1 除了追求低停顿之外，还能建立可预测的停顿时间模型，让使用者明确指定在一个长度为 M 毫秒的时间片断内，消耗在垃圾收集上的时间不超过 N 毫秒。</li>
 </ul>
-<p>G1之前的收集器进行收集的范围都是整个新生代或者老年代，而G1不再是这样。使用G1收集器时，Java堆内存的布局就与其他收集器有很大差别，他将整个Java堆划分为多个大小相等的独立区域（Region）虽然还保留新生代和老年代的概念，但是新生代和老年代不再是物理隔离，都是一部分Region（不需要连续）的集合。</p>
-<p>G1收集器之所以能建立可预测的时间模型，因为它有计划地避免在整个Java堆中进行全区域的垃圾收集。G1追踪各个Region里面垃圾堆积的价值大小（回收所获得的空间大小以及回收所需时间的经验值），在后台维护一个优先列表，每次根据允许的时间优先回收价值最大的Region。</p>
-<p>在G1收集器中，Region之间的对象应用以及其他收集器中的新生代及老年代之间的对象引用，虚拟机都是使用Remembered Set来避免全堆扫描的。G1中每个Region都有一个与之对应的Remembered Set，虚拟机发现程序对Reference类型的数据进行写操作的时候，会产生一个Write Barrier暂时中断写操作，检查Reference引用的对象是否处于不同的Region之中，如果是，就通过CardTable把相关引用信息记录到被引用的对象所属的Region的Remembered Set中。内存回收的时候，在GC根节点的枚举范围中加入Remembered Set即可保证不对全堆扫描也不会有遗漏。</p>
-<p>除了维护Remembered Set的操作，G1收集器的运作大致可以分为以下几个步骤：</p>
+<p>G1 之前的收集器进行收集的范围都是整个新生代或者老年代，而 G1 不再是这样。使用 G1 收集器时，Java 堆内存的布局就与其他收集器有很大差别，他将整个 Java 堆划分为多个大小相等的独立区域（Region）虽然还保留新生代和老年代的概念，但是新生代和老年代不再是物理隔离，都是一部分 Region（不需要连续）的集合。</p>
+<p>G1 收集器之所以能建立可预测的时间模型，因为它有计划地避免在整个Java堆中进行全区域的垃圾收集。G1 追踪各个 Region 里面垃圾堆积的价值大小（回收所获得的空间大小以及回收所需时间的经验值），在后台维护一个优先列表，每次根据允许的时间优先回收价值最大的 Region。</p>
+<p>在 G1 收集器中，Region 之间的对象应用以及其他收集器中的新生代及老年代之间的对象引用，虚拟机都是使用 Remembered Set 来避免全堆扫描的。G1 中每个 Region 都有一个与之对应的 Remembered Set，虚拟机发现程序对 Reference 类型的数据进行写操作的时候，会产生一个 Write Barrier 暂时中断写操作，检查 Reference 引用的对象是否处于不同的 Region 之中，如果是，就通过 CardTable 把相关引用信息记录到被引用的对象所属的 Region 的 Remembered Set 中。内存回收的时候，在 GC 根节点的枚举范围中加入 Remembered Set 即可保证不对全堆扫描也不会有遗漏。</p>
+<p>除了维护 Remembered Set 的操作，G1 收集器的运作大致可以分为以下几个步骤：</p>
 <ul>
 <li>初始标记（Initial Marking）</li>
 <li>并发标记（Concurrent Marking）</li>
 <li>最终标记（Final Marking）</li>
 <li>筛选回收（Live Data Counting and Evacuation）</li>
 </ul>
-<p>可以看出这几个步骤的运作过程和CMS有很多相似之处。初始标记阶段只是标记一下GC Roots能直接关联到的对象，并且修改TAMS（Next Top at Mark Star）的值，让下一阶段用户程序并发运行的时候，能在正确可用的Region中创建对象，这个阶段需要停顿线程，但是耗时很短。并发标记阶段是从GC Roots开始进行可达性分析，这个阶段耗时较长但是可以和用户程序并发执行。最终标记阶段则是修正并发标记阶段产生的标记变动，合并到Remembered Set中。这个阶段需要停顿线程，但是可以并行执行。最后筛选阶段首先对各个Region的回收价值和成本排序，根据用户指定的GC停顿时间来制定回收计划。</p>
-<h4 id="GC日志"><a href="#GC日志" class="headerlink" title="GC日志"></a>GC日志</h4><p>一般情况可以通过两种方式来获取GC日志，一种是使用命令动态查看，一种是在容器中设置相关参数打印GC日志。</p>
-<p>可以通过jstat命令查看当前正在运行的Java进程的GC状态，命令如下：</p>
+<p>可以看出这几个步骤的运作过程和CMS有很多相似之处。初始标记阶段只是标记一下 GC Roots 能直接关联到的对象，并且修改TAMS（Next Top at Mark Star）的值，让下一阶段用户程序并发运行的时候，能在正确可用的 Region 中创建对象，这个阶段需要停顿线程，但是耗时很短。并发标记阶段是从 GC Roots 开始进行可达性分析，这个阶段耗时较长但是可以和用户程序并发执行。最终标记阶段则是修正并发标记阶段产生的标记变动，合并到 Remembered Set 中。这个阶段需要停顿线程，但是可以并行执行。最后筛选阶段首先对各个 Region 的回收价值和成本排序，根据用户指定的 GC 停顿时间来制定回收计划。</p>
+<h4 id="GC日志"><a href="#GC日志" class="headerlink" title="GC日志"></a>GC日志</h4><p>一般情况可以通过两种方式来获取 GC 日志，一种是使用命令动态查看，一种是在容器中设置相关参数打印 GC 日志。</p>
+<p>可以通过 jstat 命令查看当前正在运行的 Java 进程的 GC 状态，命令如下：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">jstat -gc java进程号 毫秒单位的时间间隔</span></pre></td></tr></table></figure>
 
 <p>结果含义：</p>
@@ -4506,7 +4505,7 @@ S1CMX ：年轻代中第二个survivor（幸存区）的最大容量 (字节)
 ECMX：年轻代中Eden（伊甸园）的最大容量 (字节) 
 DSS：当前需要survivor（幸存区）的容量 (字节)（Eden区已满） 
 TT： 持有次数限制 
-MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参数" class="headerlink" title="GC参数"></a>GC参数</h4><p>JVM的GC日志的主要参数包括如下几个：</p>
+MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-参数" class="headerlink" title="GC 参数"></a>GC 参数</h4><p>JVM 的 GC 日志的主要参数包括如下几个：</p>
 <ul>
 <li><code>-XX:+PrintGC</code> 输出GC日志</li>
 <li><code>-XX:+PrintGCDetails</code> 输出GC的详细日志</li>
@@ -4516,12 +4515,12 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <li><code>-Xloggc:../logs/gc.log</code> 日志文件的输出路径</li>
 </ul>
 <p>在生产环境中，根据需要配置相应的参数来监控JVM运行情况</p>
-<h3 id="内存分配和回收策略"><a href="#内存分配和回收策略" class="headerlink" title="内存分配和回收策略"></a>内存分配和回收策略</h3><p>Java的内存管理可以归结为内存的自动分配和自动回收，上面讲了内存回收的策略，下面再说一下内存分配。</p>
-<h4 id="对象优先在Eden分配"><a href="#对象优先在Eden分配" class="headerlink" title="对象优先在Eden分配"></a>对象优先在Eden分配</h4><p>大多数情况下，对象在新生代Eden区中分配，当Eden区没足够空间的时候，虚拟机将发起一次Mino GC。</p>
+<h3 id="内存分配和回收策略"><a href="#内存分配和回收策略" class="headerlink" title="内存分配和回收策略"></a>内存分配和回收策略</h3><p>Java 的内存管理可以归结为内存的自动分配和自动回收，上面讲了内存回收的策略，下面再说一下内存分配。</p>
+<h4 id="对象优先在Eden分配"><a href="#对象优先在Eden分配" class="headerlink" title="对象优先在Eden分配"></a>对象优先在Eden分配</h4><p>大多数情况下，对象在新生代 Eden 区中分配，当 Eden 区没足够空间的时候，虚拟机将发起一次 Mino GC。</p>
 <p>虚拟机提供了<code>-XX:+PrintGCDetail</code>这个参数，告诉虚拟机在发生垃圾内存收集行为的时候打印内存回首日志，并且在进程退出的时候输出当前内存各个区域的分配情况。</p>
-<h4 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h4><p>所谓大的对象是指需要大量连续空间的Java对象，最典型的是很长的字符串和数组。</p>
-<p>虚拟机提供了<code>-XX:PretenureSizeThreshold</code>参数，另大于这个设置值的对象直接在老年代分配。目的是避免Eden区及两个Survivor区之间大量的内存复制。</p>
-<h4 id="长期存活的对象进入老年代"><a href="#长期存活的对象进入老年代" class="headerlink" title="长期存活的对象进入老年代"></a>长期存活的对象进入老年代</h4><p> 为了分配哪些对象放在新生代，哪些放在老年代，虚拟机给每个对象定义了一个对象年龄（Age）计数器，如果对象在Eden出生并经过第一次 Minor GC 后仍然存活，并且能被Survivor容纳的话，将被移动到 Survivor 空间中，并且对象年龄设为1。对象在 Survivor 中每经过一次 Minor GC，年龄就增加一岁，当年龄增加到一定程度（默认是 15 岁），就会被晋升到老年代，这个阈值可以通过参数<code>-XX:MaxTenuringThreshold</code>设置。</p>
+<h4 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h4><p>所谓大的对象是指需要大量连续空间的 Java 对象，最典型的是很长的字符串和数组。</p>
+<p>虚拟机提供了<code>-XX:PretenureSizeThreshold</code>参数，另大于这个设置值的对象直接在老年代分配。目的是避免 Eden 区及两个 Survivor 区之间大量的内存复制。</p>
+<h4 id="长期存活的对象进入老年代"><a href="#长期存活的对象进入老年代" class="headerlink" title="长期存活的对象进入老年代"></a>长期存活的对象进入老年代</h4><p> 为了分配哪些对象放在新生代，哪些放在老年代，虚拟机给每个对象定义了一个对象年龄（Age）计数器，如果对象在 Eden 出生并经过第一次 Minor GC 后仍然存活，并且能被 Survivor 容纳的话，将被移动到 Survivor 空间中，并且对象年龄设为1。对象在 Survivor 中每经过一次 Minor GC，年龄就增加一岁，当年龄增加到一定程度（默认是 15 岁），就会被晋升到老年代，这个阈值可以通过参数<code>-XX:MaxTenuringThreshold</code>设置。</p>
 <h4 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h4><p>为了适应不同程序的内存状况，不是只有对象年龄大于 MaxTenuringThreshold 才能晋升老年代。如果 Survivor 空间中相同年龄所有对象大小总和大于 Survivor 空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代。</p>
 <h4 id="空间分配担保"><a href="#空间分配担保" class="headerlink" title="空间分配担保"></a>空间分配担保</h4><p>在发生 Minor GC 之前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有的对象总空间，如果这个条件成立，那么 Minor GC 可以确保是安全的。如果不成立，则虚拟机会查看<code>HandlePromotionFailure</code>设置值是否允许担保失败。如果允许，那么会继续检查老年代最大可用的连续空间是否大于晋升到老年代对象的平均大小。如果大于就尝试进行一次 Minor GC，尽管这次 GC 是有风险的。如果小于，或者不允许冒险，就改为进行一次 Full GC。</p>
 <h2 id="虚拟机性能监控和故障处理"><a href="#虚拟机性能监控和故障处理" class="headerlink" title="虚拟机性能监控和故障处理"></a>虚拟机性能监控和故障处理</h2><h3 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h3><table>
@@ -4533,11 +4532,11 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </thead>
 <tbody><tr>
 <td align="center">jps</td>
-<td align="center">JVM Process Status Tool，显示制定系统内所有的HotSpot虚拟机进程</td>
+<td align="center">JVM Process Status Tool，显示制定系统内所有的 HotSpot 虚拟机进程</td>
 </tr>
 <tr>
 <td align="center">jstat</td>
-<td align="center">JVM Statistics Monitoring Tool，用于收集HotSpot虚拟机各方面的运行数据</td>
+<td align="center">JVM Statistics Monitoring Tool，用于收集 HotSpot 虚拟机各方面的运行数据</td>
 </tr>
 <tr>
 <td align="center">jinfo</td>
@@ -4549,14 +4548,14 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </tr>
 <tr>
 <td align="center">jhat</td>
-<td align="center">JVM Heap Dump Browser，用于分析heapdump文件，它会建立一个HTTP/HTML服务器，让用户可以在浏览器上查看分析结果</td>
+<td align="center">JVM Heap Dump Browser，用于分析 heapdump 文件，它会建立一个 HTTP/HTML 服务器，让用户可以在浏览器上查看分析结果</td>
 </tr>
 <tr>
 <td align="center">jstack</td>
 <td align="center">Stack Track for Java，显示虚拟机的线程快照</td>
 </tr>
 </tbody></table>
-<h4 id="jps：虚拟机进程状况工具"><a href="#jps：虚拟机进程状况工具" class="headerlink" title="jps：虚拟机进程状况工具"></a>jps：虚拟机进程状况工具</h4><p>jps除了名字像ps命令之外，功能也很类似：可以列出正在运行的虚拟机进程，并且显示虚拟机执行主类（Main Class，Main()函数所在的类）名称以及这些进程的本地虚拟机唯一ID（Local Virtual Machine Identifier，LVMID）。虽然功能简单，但是它是最常用的工具，因为其他JDK工具需要输入它查询出来的LVMID来确定监控的是哪个虚拟机进程。在本地虚拟机进程来说，LVMID和ps命令或者Windows中任务管理器中查到的进程号是一致的。但是如果启动了多个虚拟机进程，就要依赖jps命令根据主类来区分了。</p>
+<h4 id="jps：虚拟机进程状况工具"><a href="#jps：虚拟机进程状况工具" class="headerlink" title="jps：虚拟机进程状况工具"></a>jps：虚拟机进程状况工具</h4><p>jps 除了名字像 ps 命令之外，功能也很类似：可以列出正在运行的虚拟机进程，并且显示虚拟机执行主类（Main Class，Main()函数所在的类）名称以及这些进程的本地虚拟机唯一ID（Local Virtual Machine Identifier，LVMID）。虽然功能简单，但是它是最常用的工具，因为其他 JDK 工具需要输入它查询出来的 LVMID 来确定监控的是哪个虚拟机进程。在本地虚拟机进程来说，LVMID 和 ps 命令或者 Windows 中任务管理器中查到的进程号是一致的。但是如果启动了多个虚拟机进程，就要依赖 jps 命令根据主类来区分了。</p>
 <table>
 <thead>
 <tr>
@@ -4566,30 +4565,30 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </thead>
 <tbody><tr>
 <td align="center">-q</td>
-<td align="center">只输出LVMID，省略主类的名称</td>
+<td align="center">只输出 LVMID，省略主类的名称</td>
 </tr>
 <tr>
 <td align="center">-m</td>
-<td align="center">输出虚拟机级进程启动的时候传给主类main()函数的参数</td>
+<td align="center">输出虚拟机级进程启动的时候传给主类 main() 函数的参数</td>
 </tr>
 <tr>
 <td align="center">-l</td>
-<td align="center">输出主类的全名，如果进程执行的是Jar包，输出Jar包路径</td>
+<td align="center">输出主类的全名，如果进程执行的是 Jar 包，输出 Jar 包路径</td>
 </tr>
 <tr>
 <td align="center">-v</td>
-<td align="center">输出虚拟机进程启动时JVM参数</td>
+<td align="center">输出虚拟机进程启动时 JVM 参数</td>
 </tr>
 </tbody></table>
-<h4 id="jstat：虚拟机统计信息监视工具"><a href="#jstat：虚拟机统计信息监视工具" class="headerlink" title="jstat：虚拟机统计信息监视工具"></a>jstat：虚拟机统计信息监视工具</h4><p>jstat（JVM Statistics Monitoring Tool）适用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或远程虚拟机中的类装载、内存、垃圾收集、JIT编译等运行数据。</p>
-<p>jstat命令格式为：</p>
+<h4 id="jstat：虚拟机统计信息监视工具"><a href="#jstat：虚拟机统计信息监视工具" class="headerlink" title="jstat：虚拟机统计信息监视工具"></a>jstat：虚拟机统计信息监视工具</h4><p>jstat（JVM Statistics Monitoring Tool）适用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或远程虚拟机中的类装载、内存、垃圾收集、JIT 编译等运行数据。</p>
+<p>jstat 命令格式为：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">jstat -&lt;option&gt; [-t] [-h&lt;lines&gt;] &lt;vmid&gt; [&lt;interval&gt; [&lt;count&gt;]]</span></pre></td></tr></table></figure>
 
-<p>对于命令格式中的VMID与LVMID需要说明的是，如果是本地虚拟机进程，VMID与LVMID是一致的，如果远程的虚拟机进程，VMID格式应当是：</p>
+<p>对于命令格式中的 VMID 与 LVMID 需要说明的是，如果是本地虚拟机进程，VMID 与 LVMID 是一致的，如果远程的虚拟机进程， VMID 格式应当是：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[protocol]:[&#x2F;&#x2F;]lvmid[@hostname[:port]&#x2F;servername]</span></pre></td></tr></table></figure>
 
-<p>参数interval和count代表查询间隔和次数，如果省略这两个参数，说明只查询一次。</p>
-<p>选项option代表着用户希望查询的虚拟机信息，主要分为3类：类装载、垃圾收集、运行期编译状况。</p>
+<p>参数 interval 和 count 代表查询间隔和次数，如果省略这两个参数，说明只查询一次。</p>
+<p>选项 option 代表着用户希望查询的虚拟机信息，主要分为 3 类：类装载、垃圾收集、运行期编译状况。</p>
 <table>
 <thead>
 <tr>
@@ -4603,66 +4602,66 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </tr>
 <tr>
 <td align="center">-gc</td>
-<td align="center">监视Java堆状况，包括Eden区、两个survivor区、老年代、永久带等的容量、已用空间、GC时间合计等信息</td>
+<td align="center">监视Java堆状况，包括 Eden 区、两个 Survivor 区、老年代、永久带等的容量、已用空间、GC 时间合计等信息</td>
 </tr>
 <tr>
 <td align="center">-gccapacity</td>
-<td align="center">监视内容与-gc基本相同，但是输出主要关注Java堆各个区域使用的最大、最小空间</td>
+<td align="center">监视内容与<code>-gc</code>基本相同，但是输出主要关注 Java 堆各个区域使用的最大、最小空间</td>
 </tr>
 <tr>
 <td align="center">-gcutil</td>
-<td align="center">监视内容与-gc基本相同，但是输出主要关注已使用空间占总空间的百分比</td>
+<td align="center">监视内容与<code>-gc</code>基本相同，但是输出主要关注已使用空间占总空间的百分比</td>
 </tr>
 <tr>
 <td align="center">-gccause</td>
-<td align="center">与gcutil功能一样，但是会额外输出导致上一次GC产生的原因</td>
+<td align="center">与<code>-gcutil</code>功能一样，但是会额外输出导致上一次 GC 产生的原因</td>
 </tr>
 <tr>
 <td align="center">-gcnew</td>
-<td align="center">监视新生代GC状况</td>
+<td align="center">监视新生代 GC 状况</td>
 </tr>
 <tr>
 <td align="center">-gcnewcapacity</td>
-<td align="center">监视内容与-gcnew基本相同，输出主要关注使用到的最大、最小空间</td>
+<td align="center">监视内容与<code>-gcnew</code>基本相同，输出主要关注使用到的最大、最小空间</td>
 </tr>
 <tr>
 <td align="center">-gcold</td>
-<td align="center">监视老年代GC状况</td>
+<td align="center">监视老年代 GC 状况</td>
 </tr>
 <tr>
 <td align="center">-gcoldcapacity</td>
-<td align="center">监视内容与-gcold基本相同，输出主要关注使用到的最大、最小空间</td>
+<td align="center">监视内容与<code>-gcold</code>基本相同，输出主要关注使用到的最大、最小空间</td>
 </tr>
 <tr>
 <td align="center">-gcpermcapaciry</td>
-<td align="center">输出到永久带使用到的最大、最小空间。注意，由于永久带在JDK1.8之后已经被元空间替代，所以1.8之后都没有了这个选项</td>
+<td align="center">输出到永久带使用到的最大、最小空间。注意，由于永久带在 JDK1.8 之后已经被元空间替代，所以 1.8 之后都没有了这个选项</td>
 </tr>
 <tr>
 <td align="center">-compiler</td>
-<td align="center">输出JIT编译器编译过的方法、耗时等信息</td>
+<td align="center">输出 JIT 编译器编译过的方法、耗时等信息</td>
 </tr>
 <tr>
 <td align="center">-printcompilation</td>
-<td align="center">输出已经被JIT编译的方法</td>
+<td align="center">输出已经被 JIT 编译的方法</td>
 </tr>
 </tbody></table>
-<h4 id="jinfo：Java配置信息工具"><a href="#jinfo：Java配置信息工具" class="headerlink" title="jinfo：Java配置信息工具"></a>jinfo：Java配置信息工具</h4><p>jinfo（Configuration Info for Java）的作用是实时地查看和调整虚拟机各项参数。</p>
+<h4 id="jinfo：Java-配置信息工具"><a href="#jinfo：Java-配置信息工具" class="headerlink" title="jinfo：Java 配置信息工具"></a>jinfo：Java 配置信息工具</h4><p>jinfo(Configuration Info for Java)的作用是实时地查看和调整虚拟机各项参数。</p>
 <p>用法如下：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Usage:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    jinfo [option] &lt;pid&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        (to connect to running process)</span></pre></td></tr><tr><td class="code"><pre><span class="line">    jinfo [option] &lt;executable &lt;core&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        (to connect to a core file)</span></pre></td></tr><tr><td class="code"><pre><span class="line">    jinfo [option] [server_id@]&lt;remote server IP or hostname&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        (to connect to remote debug server)</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">where</span> &lt;option&gt; is one of:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    -flag &lt;name&gt;         to <span class="built_in">print</span> the value of the named VM flag</span></pre></td></tr><tr><td class="code"><pre><span class="line">    -flag [+|-]&lt;name&gt;    to <span class="built_in">enable</span> or <span class="built_in">disable</span> the named VM flag</span></pre></td></tr><tr><td class="code"><pre><span class="line">    -flag &lt;name&gt;=&lt;value&gt; to <span class="built_in">set</span> the named VM flag to the given value</span></pre></td></tr><tr><td class="code"><pre><span class="line">    -flags               to <span class="built_in">print</span> VM flags</span></pre></td></tr><tr><td class="code"><pre><span class="line">    -sysprops            to <span class="built_in">print</span> Java system properties</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &lt;no option&gt;          to <span class="built_in">print</span> both of the above</span></pre></td></tr><tr><td class="code"><pre><span class="line">    -h | -<span class="built_in">help</span>           to <span class="built_in">print</span> this <span class="built_in">help</span> message</span></pre></td></tr></table></figure>
 
-<p>比如使用<code>-flag</code>查看JVM参数<br> <code>jinfo -flag MaxMetaspaceSize 18348</code>，得到结果<code>-XX:MaxMetaspaceSize=536870912</code>，即MaxMetaspaceSize为512M<br><code>jinfo -flag ThreadStackSize 18348</code>，得到结果<code>-XX:ThreadStackSize=256</code>，即Xss为256K</p>
-<p>jinfo也可以调整JVM参数：</p>
-<p>如果是布尔类型的JVM参数: jinfo -flag [+|-]<name>  PID，enable or disable the named VM flag<br> 如果是数字/字符串类型的JVM参数    jinfo  -flag <name>=<value> PID，to set the named VM flag to the given value</p>
-<p>那么怎么知道有哪些JVM参数可以动态修改呐？可以用下面这个命令：</p>
+<p>比如使用<code>-flag</code>查看 JVM 参数<br> <code>jinfo -flag MaxMetaspaceSize 18348</code>，得到结果<code>-XX:MaxMetaspaceSize=536870912</code>，即MaxMetaspaceSize为512M<br><code>jinfo -flag ThreadStackSize 18348</code>，得到结果<code>-XX:ThreadStackSize=256</code>，即Xss为256K</p>
+<p>jinfo 也可以调整 JVM 参数：</p>
+<p>如果是布尔类型的 JVM 参数：<code>jinfo -flag [+|-]&lt;name&gt;  PID，enable or disable the named VM flag</code><br> 如果是数字/字符串类型的 JVM 参数：<code>jinfo  -flag &lt;name&gt;=&lt;value&gt; PID，to set the named VM flag to the given value</code></p>
+<p>那么怎么知道有哪些 JVM 参数可以动态修改呐？可以用下面这个命令：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Linux环境：java -XX:+PrintFlagsInitial | grep manageable</span></pre></td></tr><tr><td class="code"><pre><span class="line">Window环境：java -XX:+PrintFlagsInitial | findstr manageable</span></pre></td></tr></table></figure>
 
 
 
-<h4 id="jmap：Java内存映像工具"><a href="#jmap：Java内存映像工具" class="headerlink" title="jmap：Java内存映像工具"></a>jmap：Java内存映像工具</h4><p>jmap（Memory Map for Java）命令用于生成堆转储快照（一般称为heapdump或者dump文件）。如果不适用jmap命令，想要获取Java堆转储快照，还有一些比较暴力的手段：比如使用<code>-XX:+HeapDumpOnOutOfMemoryError</code>参数，可以让虚拟机在OOM异常出现之后自动生成dump文件，通过<code>-XX:+HeapDumpOnCtrlBreak</code>参数则可以使用[ctrl]+[Break]键让虚拟机生成dump文件，又或者在Linux系统下通过<code>Kill -3</code>命令发送进程退出信号“吓唬”一下虚拟机，也能拿到dump文件。</p>
-<p>除此之外，jmap还可以查询finalize执行队列，Java堆和永久带的详细信息，如空间使用率、当前使用的哪种收集器等。</p>
-<p>jmap命令格式：</p>
+<h4 id="jmap-Java-内存映像工具"><a href="#jmap-Java-内存映像工具" class="headerlink" title="jmap:Java 内存映像工具"></a>jmap:Java 内存映像工具</h4><p>jmap(Memory Map for Java)命令用于生成堆转储快照（一般称为 heapdump 或者 dump 文件）。如果不适用 jmap 命令，想要获取 Java 堆转储快照，还有一些比较暴力的手段：比如使用<code>-XX:+HeapDumpOnOutOfMemoryError</code>参数，可以让虚拟机在 OOM 异常出现之后自动生成dump文件，通过<code>-XX:+HeapDumpOnCtrlBreak</code>参数则可以使用[ctrl]+[Break]键让虚拟机生成 dump 文件，又或者在 Linux 系统下通过<code>Kill -3</code>命令发送进程退出信号“吓唬”一下虚拟机，也能拿到 dump 文件。</p>
+<p>除此之外，jmap 还可以查询 finalize 执行队列，Java 堆和永久带的详细信息，如空间使用率、当前使用的哪种收集器等。</p>
+<p>jmap 命令格式：</p>
 <p><code>jmap [option] vmid</code></p>
-<p>option选项的合法值与具体含义如下：</p>
+<p>option 选项的合法值与具体含义如下：</p>
 <table>
 <thead>
 <tr>
@@ -4672,15 +4671,15 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </thead>
 <tbody><tr>
 <td align="center">-dump</td>
-<td align="center">生成Java堆转储快照。格式为：<code>-dump:[live, ]format=b，files=&lt;filename&gt;</code>，其中live子参数说明是否只dump出存活的对象</td>
+<td align="center">生成 Java 堆转储快照。格式为：<code>-dump:[live, ]format=b，files=&lt;filename&gt;</code>，其中 live 子参数说明是否只 dump 出存活的对象</td>
 </tr>
 <tr>
 <td align="center">-finalizerinfo</td>
-<td align="center">显示在F-Queue中等待FInalizer线程执行finalizer方法的对象。只在Linux/Solaris平台下有效</td>
+<td align="center">显示在 F-Queue 中等待 finalizer 线程执行 finalizer 方法的对象。只在 Linux/Solaris 平台下有效</td>
 </tr>
 <tr>
 <td align="center">-heap</td>
-<td align="center">显示Java堆详细信息，如使用哪种回收器、参数配置、分代状况等。只在Linux/Solaris平台下有效。</td>
+<td align="center">显示 Java 堆详细信息，如使用哪种回收器、参数配置、分代状况等。只在 Linux/Solaris 平台下有效。</td>
 </tr>
 <tr>
 <td align="center">-histo</td>
@@ -4688,11 +4687,11 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </tr>
 <tr>
 <td align="center">-permstat</td>
-<td align="center">以ClassLoader为统计口径显示永久带内存状态。只在Linux/Solaris平台下有效</td>
+<td align="center">以 ClassLoader 为统计口径显示永久带内存状态。只在 Linux/Solaris 平台下有效</td>
 </tr>
 <tr>
 <td align="center">-F</td>
-<td align="center">当虚拟机进程没有对-dump选项响应时，可以使用这个选项强制生成dump快照。只在Linux/Solaris平台下有效</td>
+<td align="center">当虚拟机进程没有对<code>-dump</code>选项响应时，可以使用这个选项强制生成 dump 快照。只在 Linux/Solaris 平台下有效</td>
 </tr>
 <tr>
 <td align="center">-clstats</td>
@@ -4700,13 +4699,13 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </tr>
 <tr>
 <td align="center">-J</td>
-<td align="center">传递参数给jmap的JVM</td>
+<td align="center">传递参数给 jmap 的 JVM</td>
 </tr>
 </tbody></table>
-<h4 id="jhat：虚拟机堆转储快照分析工具"><a href="#jhat：虚拟机堆转储快照分析工具" class="headerlink" title="jhat：虚拟机堆转储快照分析工具"></a>jhat：虚拟机堆转储快照分析工具</h4><p>Sun  JDK提供jhat（JVM Heap Analysis Tool）命令与jmap搭配使用，来分析jmap生成的堆转储快照。jhatm内置了一个微型的HTTP/HTML服务器，生成dump文件的分析成果后，可以在浏览器中查看。</p>
-<p>执行命令<code>jhatp 文件名</code>，屏幕显示<code>Server is ready</code>的提示后，打开浏览器localhost的7000端口就可以看到分析结果。</p>
-<h4 id="jstack：Java堆栈跟踪工具"><a href="#jstack：Java堆栈跟踪工具" class="headerlink" title="jstack：Java堆栈跟踪工具"></a>jstack：Java堆栈跟踪工具</h4><p>jstack（Stack Track for Java）命令用于生成虚拟机当前时刻的线程快照（一般称为threaddump或者javacore文件）。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生成快照的主要目的是定位线程出现长时间停顿的原因，如线程死锁、死循环、请求外部资源导致的长时间等待等。</p>
-<p>jstack命令的格式：</p>
+<h4 id="jhat：虚拟机堆转储快照分析工具"><a href="#jhat：虚拟机堆转储快照分析工具" class="headerlink" title="jhat：虚拟机堆转储快照分析工具"></a>jhat：虚拟机堆转储快照分析工具</h4><p>Sun JDK 提供 jhat(JVM Heap Analysis Tool)命令与 jmap 搭配使用，来分析 jmap 生成的堆转储快照。jhat 内置了一个微型的 HTTP/HTML 服务器，生成 dump 文件的分析成果后，可以在浏览器中查看。</p>
+<p>执行命令<code>jhatp 文件名</code>，屏幕显示<code>Server is ready</code>的提示后，打开浏览器 localhost 的 7000 端口就可以看到分析结果。</p>
+<h4 id="jstack-Java-堆栈跟踪工具"><a href="#jstack-Java-堆栈跟踪工具" class="headerlink" title="jstack:Java 堆栈跟踪工具"></a>jstack:Java 堆栈跟踪工具</h4><p>jstack(Stack Track for Java)命令用于生成虚拟机当前时刻的线程快照（一般称为 threaddump 或者 javacore 文件）。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生成快照的主要目的是定位线程出现长时间停顿的原因，如线程死锁、死循环、请求外部资源导致的长时间等待等。</p>
+<p>jstack 命令的格式：</p>
 <p><code>jstack [option] vmid</code></p>
 <table>
 <thead>
@@ -4725,26 +4724,26 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 </tr>
 <tr>
 <td align="center">-m</td>
-<td align="center">如果调用本地方法的话，可以显示C/C++的堆栈</td>
+<td align="center">如果调用本地方法的话，可以显示 C/C++ 的堆栈</td>
 </tr>
 </tbody></table>
-<p><code>java.lang.Thread</code>类的<code>getAllStackTraces()</code>方法可以获取所有线程的<code>StackTraceElement</code>对象。使用这个方法可以用简单的几行代码完成jstack的大部分功能。</p>
-<h4 id="Jconsole：Java监视与管理控制台"><a href="#Jconsole：Java监视与管理控制台" class="headerlink" title="Jconsole：Java监视与管理控制台"></a>Jconsole：Java监视与管理控制台</h4><p>JConsole（Java Monitoring and Management Console）是一种基于JMX的可视化管理工具。</p>
-<p>通过JDK/bin目录下的<code>jsonsole</code>应用就可以启动JConsole，启动后将自动搜索本机运行的所有虚拟机进程。双击选择一个进城之后即可开始监控。</p>
-<p>监控页面一目了然，不需要做太多说明。JConsole可以监控包括堆内存、线程、类、CPU等各个使用情况，</p>
-<h4 id="VisualVM：多合一故障处理工具"><a href="#VisualVM：多合一故障处理工具" class="headerlink" title="VisualVM：多合一故障处理工具"></a>VisualVM：多合一故障处理工具</h4><p>VisualVM（All-in-One Java Troubleshooting Tool）是目前为止随JDK发布的功能最强大的故障处理工具，并且在可预见的未来都是官方主力发展的虚拟机故障处理工具。</p>
-<p>VisualVM可以做到：</p>
+<p><code>java.lang.Thread</code>类的<code>getAllStackTraces()</code>方法可以获取所有线程的<code>StackTraceElement</code>对象。使用这个方法可以用简单的几行代码完成 jstack 的大部分功能。</p>
+<h4 id="Jconsole-Java-监视与管理控制台"><a href="#Jconsole-Java-监视与管理控制台" class="headerlink" title="Jconsole:Java 监视与管理控制台"></a>Jconsole:Java 监视与管理控制台</h4><p>JConsole（Java Monitoring and Management Console）是一种基于JMX 的可视化管理工具。</p>
+<p>通过 JDK/bin 目录下的<code>jsonsole</code>应用就可以启动 JConsole，启动后将自动搜索本机运行的所有虚拟机进程。双击选择一个进城之后即可开始监控。</p>
+<p>监控页面一目了然，不需要做太多说明。JConsole 可以监控包括堆内存、线程、类、CPU 等各个使用情况，</p>
+<h4 id="VisualVM：多合一故障处理工具"><a href="#VisualVM：多合一故障处理工具" class="headerlink" title="VisualVM：多合一故障处理工具"></a>VisualVM：多合一故障处理工具</h4><p>VisualVM（All-in-One Java Troubleshooting Tool）是目前为止随 JDK 发布的功能最强大的故障处理工具，并且在可预见的未来都是官方主力发展的虚拟机故障处理工具。</p>
+<p>VisualVM 可以做到：</p>
 <ul>
 <li>显示虚拟机进程以及进程的配置、环境信息（jps、jinfo）。</li>
-<li>监视应用程序的CPU、GC、堆、方法去以及线程的信息（jps、jstack）。</li>
-<li>dump以及分析堆转储快照（jamp、jhat）。</li>
+<li>监视应用程序的 CPU、GC、堆、方法去以及线程的信息（jps、jstack）。</li>
+<li>dump 以及分析堆转储快照（jamp、jhat）。</li>
 <li>方法记得性能运行性能分析，找出被调用最多、运行时间最长的方法。</li>
-<li>离线程序快照：收集程序的运行时配置、线程dump、内存dump等信息建立一个快照，可以将快照发送给开发者处进行Bug反馈。</li>
-<li>其他Plugins</li>
+<li>离线程序快照：收集程序的运行时配置、线程 dump、内存 dump 等信息建立一个快照，可以将快照发送给开发者处进行 Bug 反馈。</li>
+<li>其他 Plugins</li>
 </ul>
-<p>Intellij IDEA已经集成了VisualVM，详细的使用方法先留个坑，后续再填。</p>
-<h2 id="类文件结构"><a href="#类文件结构" class="headerlink" title="类文件结构"></a>类文件结构</h2><h3 id="Class文件的结构"><a href="#Class文件的结构" class="headerlink" title="Class文件的结构"></a>Class文件的结构</h3><p>Class文件是一组以8位字节为基础的二进制流，各个数据项目严格按照顺序紧凑的排列在Class文件之中，中间没有添加任何分隔符，这使得整个Class文件中存储的内容几乎全部是程序运行的必要数据，没有空隙存在。当遇到占用8字节以上空间的数据项时，会按照高位在前的方式分割成若干8位字节进行存储。</p>
-<p>根据Java虚拟机规范的规定，Class文件格式 采用一种类似于C语言结构体的伪结构来存储数据，这种伪结构只有两种数据类型：无符号数和表。</p>
+<p>Intellij IDEA 已经集成了 VisualVM，详细的使用方法先留个坑，后续再填。</p>
+<h2 id="类文件结构"><a href="#类文件结构" class="headerlink" title="类文件结构"></a>类文件结构</h2><h3 id="Class-文件的结构"><a href="#Class-文件的结构" class="headerlink" title="Class 文件的结构"></a>Class 文件的结构</h3><p>Class 文件是一组以 8 位字节为基础的二进制流，各个数据项目严格按照顺序紧凑的排列在 Class 文件之中，中间没有添加任何分隔符，这使得整个 Class 文件中存储的内容几乎全部是程序运行的必要数据，没有空隙存在。当遇到占用 8 字节以上空间的数据项时，会按照高位在前的方式分割成若干 8 位字节进行存储。</p>
+<p>根据J ava 虚拟机规范的规定，Class 文件格式 采用一种类似于 C 语言结构体的伪结构来存储数据，这种伪结构只有两种数据类型：无符号数和表。</p>
 <h2 id="类加载机制"><a href="#类加载机制" class="headerlink" title="类加载机制"></a>类加载机制</h2><p>Class 文件中描述的各种信息，最终都要加载到虚拟机之中才能运行和使用。而虚拟机如何加载这些 Class 文件？Class 文件中的信息进入到虚拟机后会发生什么变化？这些都是本章需要讲解的内容。</p>
 <p>虚拟机把描述类的数据从 Class 文件加载到内存，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的 Java 类型，就是虚拟机的类加载机制。在 Java 语言中，类型的加载、连接和初始化过程都是在程序运行期间完成的。</p>
 <h3 id="类加载的时机"><a href="#类加载的时机" class="headerlink" title="类加载的时机"></a>类加载的时机</h3><p>类从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期包括：</p>
@@ -4767,8 +4766,9 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <li>当初始化一个类的时候，如果发现其父类还没有进行过初始化，则先需要出发其父类的初始化。</li>
 <li>当虚拟机启动时，用户需要指定一个要执行的主类（包含<code>main()</code>方法的那个类），虚拟机会先初始化这个主类。</li>
 <li>当使用 JDK 1.7 的动态语言支持时，如果一个<code>java.lang.invoke.MethodHandle</code>实例最后的解析结果是<code>REF_getStatic</code>、<code>REF_putStatic</code>、<code>REF_invokeStatic</code>的方法句柄，并且这个方法句柄所对应的类没有进行过初始化，则需要先触发其初始化。</li>
+<li>当一个接口中定义了JDK 8 新加入的默认方法（被 default 关键字修饰的接口方法）时，如果有这个接口的实现类发生了初始化，那该接口要在其之前被初始化。</li>
 </ul>
-<p>对于这 5 种会触发类进行初始化的场景，虚拟机规范中使用了一个很强烈的限定于：“有且只有”，这 5 种场景中的行为成为对一个类进行主动引用。除此之外，所有的引用类的方式都不会触发初始化，称为被动引用。</p>
+<p>对于这 6 种会触发类进行初始化的场景，虚拟机规范中使用了一个很强烈的限定于：“有且只有”，这 6 种场景中的行为成为对一个类进行主动引用。除此之外，所有的引用类的方式都不会触发初始化，称为被动引用。</p>
 <p>对于静态字段，只有直接定义这个字段的类才会被初始化，因此通过子类来引用父类中定义的静态字段，只会出发父类的初始化而不会触发子类的初始化。至于是否要触发子类的加载和验证，在虚拟机规范中尚未明确规定，这点取决于虚拟机的具体实现。对于 Sun HotSpot 虚拟机来说，可以通过<code>-XX:TraceClassLoading</code>参数观察到此操作会导致子类的加载。</p>
 <p>使用类的常亮也不会对这个类进行初始化，而是在编译阶段通过常量传播优化，将该常量存储到使用这个常亮的类的常量池中，后续对该常量的调用都会转化为该类堆自身常量池的引用。</p>
 <p>接口的加载过程和类加载过程稍有一些不同，针对接口需要做一些特殊说明：接口也有初始化过程，这一点与类是一致的。接口中不能使用<code>static{}</code>代码块，但是编译期仍然会为接口生成<code>&lt;clinit&gt;()</code>类构造器，用于初始化接口中所定义的成员变量。接口与类真正有区别的是前面所讲说的 5 种“有且只有”需要开始初始化场景中的第 3 种：当一个类在初始化时，要求其父类全部都已经初始化过了，但是一个接口在初始化时，并不要求其父接口全部都完成了初始化，只有在真正用到父接口的时候（如引用接口定义的常亮）才会初始化。</p>
@@ -4817,7 +4817,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <h4 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h4><p>解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程。直接引用与符号引用的关系：</p>
 <ul>
 <li>符号引用（Symbolic References）：符号引用以一组符号来描述所引用的目标，符号可以是任何形式的字面量。符号引用与虚拟机实现的内存布局无关，引用的目标不一定已经加载到内存中。</li>
-<li>直接饮用（Direct References）：直接饮用可以是直接指向目标的指针、相对偏移量或一个能间接定位到目标的句柄。直接引用是和虚拟机实现的内存布局相关的，如果有了直接饮用，那引用的目标一定已经在内存中存在了。</li>
+<li>直接饮用（Direct References）：直接引用可以是直接指向目标的指针、相对偏移量或一个能间接定位到目标的句柄。直接引用是和虚拟机实现的内存布局相关的，如果有了直接饮用，那引用的目标一定已经在内存中存在了。</li>
 </ul>
 <h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>类初始化阶段是加载过程的最后一步，在前面的过程中，除了加载阶段用户应用程序可以通过自定义类加载器参与之外，其余动作完全由虚拟机主导和控制的。到了初始化阶段，才真正开始执行类中定义的 Java 程序代码。</p>
 <p> 在准备阶段，变量已经赋值过一次系统要求的初始值，而在初始化阶段，则根据程序员通过程序定制的主观计划区初始化类变量和其他字段，或者从另外一个角度表达：初始化阶段是执行类构造器<code>&lt;clinit&gt;()</code>方法的过程。</p>
@@ -4843,6 +4843,12 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
 <p>双亲委派模型的工作过程是：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父加载器反馈自己无法完成这个加载请求（它的搜索范围内没有找到所需的类）时，子加载器才尝试自己加载。</p>
 <p>使用双亲委派模型来组织类加载器之间的关系，有一个显而易见的好处就是 Java 类随着它的类加载器一起具备了带有优先级的层次关系。例如类<code>java.lang.Object</code>，它存放在<code>rt.jar</code>中，无论哪一个类加载器需要加载这个类，最终都是委派个处于模型最顶端的启动类加载器进行加载，因此<code>Object</code>类在程序的各种类加载器环境中都是同一个类。相反，如果没有使用双亲委派模型，由各个类加载器去自行加载的话，如果用户自己编写了一个<code>java.lang.Object</code>的类，也放在程序的<code>ClassPath</code>下，那么系统就会出现多个不同的<code>Object</code>类，Java 类型基础的行为也不能保证了。</p>
 <p>双亲委派模型对于保证 Java 程序的稳定运行非常重要，但是实现却很简单，实现双亲委派模型的代码都集中在<code>java.lang.ClassLoader</code>的<code>loadClass()</code>方法中，逻辑清晰易懂：先检查是否已经被加载过，如果没有加载则调用父加载器的<code>loadClass()</code>方法，若父加载器为空则默认使用启动类加载器作为父加载器。如果父加载器加载失败，抛出<code>ClassNotFoundException</code>异常后，再调用自己的<code>findClass()</code>方法进行加载。</p>
+<h4 id="双亲委派模型-1"><a href="#双亲委派模型-1" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h4><p>上文提到过双亲委派模型并不是一个具有强制性约束的模型，而是 Java 设计者推荐给开发者们的类加载器实现方式。在 Java 的世界中大部分的类加载器都遵循这个模型，但也有例外的情况，直到 Java 模块化出现为止，双亲委派模型主要出现过 3 次较大规模“被破坏”的情况。</p>
+<ul>
+<li>第一次破坏是由于双亲委派机制是 JDK 1.2 才出现的，所以面对已经存在的用户自定义类加载器的代码，需要进行兼容，所以进行了妥协。</li>
+<li>第二次被破坏是由这个模型自身的缺陷导致的，有时候基础类型需要调用用户编写的类，比如 JNDI。JNDI 服务引入线程上下文类加载器加载所需的 SPI 服务代码，这是一种父类加载器去请求子类加载器完成类加载的行为，这种行为实际上是打通了双亲委派模型的层次结构来逆向使用类加载器，已经违背了双亲委派模型的一般性原则，但也是无可奈何的事情。Java 中涉及 SPI 的加载基本上都采用这种方式来完成，例如 JNDI、JDBC、JCE、JAXB 和 JBI 等。</li>
+<li>第三次“被破坏”是由于用户对程序动态性的追求而导致的，这里所说的“动态性”指的是一些非常“热”门的名词：代码热替换（Hot Swap）、模块热部署（HotDeployment）等。</li>
+</ul>
 <p>参考目录：</p>
 <p><a href="https://www.jianshu.com/p/c321d0808a1b" target="_blank" rel="noopener">jinfo命令详解</a></p>
 ]]></content>
@@ -6049,29 +6055,29 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC参数"><a href="#GC参�
     <url>/2017/04/05/Java%E5%85%B3%E9%94%AE%E5%AD%97/</url>
     <content><![CDATA[<p>Java里面的关键字和相关的知识点</p>
 <a id="more"></a>
-<h2 id="final关键字"><a href="#final关键字" class="headerlink" title="final关键字"></a>final关键字</h2><p>final可以声明成员变、方法、类和本地变量。一旦将引用声明为final，这个引用就不能改变了。</p>
-<h3 id="final变量"><a href="#final变量" class="headerlink" title="final变量"></a>final变量</h3><p>凡是对成员变量或者本地变量(在方法中的或者代码块中的变量称为本地变量)声明为final的都叫作final变量。final变量经常和static关键字一起使用，作为常量。</p>
-<h3 id="final方法"><a href="#final方法" class="headerlink" title="final方法"></a>final方法</h3><p>声明为final 的方法不能被子类的方法重写。<br>final方法比非final方法要快，因为编译的时候已经静态绑定，不需要运行时再动态绑定。</p>
-<h3 id="final类"><a href="#final类" class="headerlink" title="final类"></a>final类</h3><p>final修饰的类不能被继承。Java中有String，Integer和其他包装类都是final类。</p>
+<h2 id="final-关键字"><a href="#final-关键字" class="headerlink" title="final 关键字"></a>final 关键字</h2><p>final 可以声明成员变、方法、类和本地变量。一旦将引用声明为 final，这个引用就不能改变了。</p>
+<h3 id="final-变量"><a href="#final-变量" class="headerlink" title="final 变量"></a>final 变量</h3><p>凡是对成员变量或者本地变量(在方法中的或者代码块中的变量称为本地变量)声明为 final 的都叫作 final 变量。final 变量经常和 static 关键字一起使用，作为常量。</p>
+<h3 id="final-方法"><a href="#final-方法" class="headerlink" title="final 方法"></a>final 方法</h3><p>声明为 final 的方法不能被子类的方法重写。<br>final 方法比非 final 方法要快，因为编译的时候已经静态绑定，不需要运行时再动态绑定。</p>
+<h3 id="final类"><a href="#final类" class="headerlink" title="final类"></a>final类</h3><p>final 修饰的类不能被继承。Java 中有 String，Integer 和其他包装类都是 final 类。</p>
 <h3 id="final关键字的好处"><a href="#final关键字的好处" class="headerlink" title="final关键字的好处"></a>final关键字的好处</h3><ol>
-<li>提高性能，JVM和Java应用都会缓存final变量。</li>
+<li>提高性能，JVM 和 Java 应用都会缓存final变量。</li>
 <li>可以在安全的多线程环境下进行共享，不需要额外的同步开销。</li>
-<li>使用final关键字，JVM会对方法、变量和类进行优化。</li>
+<li>使用 final 关键字，JVM 会对方法、变量和类进行优化。</li>
 </ol>
-<h3 id="不可变类"><a href="#不可变类" class="headerlink" title="不可变类"></a>不可变类</h3><p>不可变类是指对象一旦创建就不能更改，要使用final关键字创建。</p>
+<h3 id="不可变类"><a href="#不可变类" class="headerlink" title="不可变类"></a>不可变类</h3><p>不可变类是指对象一旦创建就不能更改，要使用 final 关键字创建。</p>
 <h4 id="为什么字符串类需要是不可变的？"><a href="#为什么字符串类需要是不可变的？" class="headerlink" title="为什么字符串类需要是不可变的？"></a>为什么字符串类需要是不可变的？</h4><ul>
-<li>实现字符串池，节省heap空间。如果是可变的那么String interning就不能实现了，因为这样的话如果变量改变了他的值，那么这个值的变量的值也会一起改变。</li>
+<li>实现字符串池，节省 heap 空间。如果是可变的那么 String interning 就不能实现了，因为这样的话如果变量改变了他的值，那么这个值的变量的值也会一起改变。</li>
 <li>安全问题：比如数据库的用户名密码都是字符串形式传入数据库的连接，可变的话就有风险被篡改。</li>
 <li>多线程安全，字符串可以被多个线程共享。</li>
-<li>类加载器要用到字符串。比如你想加载java.sql.Connection类，而这个值被改成了myhacked.Connection，那么会对你的数据库造成不可知的破坏。</li>
-<li>创建的时候hashcode就被缓存了，不需要重新计算。这使得字符串很适合作为Map中的键，字符串的处理速度要快过其他的键对象。</li>
+<li>类加载器要用到字符串。比如你想加载 java.sql.Connection 类，而这个值被改成了 myhacked.Connection，那么会对你的数据库造成不可知的破坏。</li>
+<li>创建的时候 hashcode 就被缓存了，不需要重新计算。这使得字符串很适合作为Map中的键，字符串的处理速度要快过其他的键对象。</li>
 </ul>
 <h4 id="如何写一个不可变类"><a href="#如何写一个不可变类" class="headerlink" title="如何写一个不可变类"></a><a href="http://www.importnew.com/7535.html" target="_blank" rel="noopener">如何写一个不可变类</a></h4><h3 id="其他要点"><a href="#其他要点" class="headerlink" title="其他要点"></a>其他要点</h3><ul>
-<li>final成员变量必须在声明的时候初始化或者在构造器中初始化，否则编译报错。</li>
-<li>匿名类所有变量必须是final的。</li>
-<li>接口中所有变量本身是final的/</li>
-<li>final和abstract是冲突的，不能同时使用。</li>
-<li>集合对象声明为final，引用不能被更改，但是不影响增删改查内部元素。</li>
+<li>final 成员变量必须在声明的时候初始化或者在构造器中初始化，否则编译报错。</li>
+<li>匿名类所有变量必须是 final 的。</li>
+<li>接口中所有变量本身是 final 的</li>
+<li>final 和 abstract 是冲突的，不能同时使用。</li>
+<li>集合对象声明为 final，引用不能被更改，但是不影响增删改查内部元素。</li>
 </ul>
 <p>(来源:<a href="http://www.importnew.com/7553.html" target="_blank" rel="noopener">深入理解Java中的final关键字</a>、<a href="http://www.importnew.com/7440.html" target="_blank" rel="noopener">为什么String类是不可变的</a>)</p>
 ]]></content>

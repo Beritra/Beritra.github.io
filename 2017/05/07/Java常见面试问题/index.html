@@ -46,21 +46,21 @@
   };
 </script>
 
-  <meta name="description" content="整理下面试的时候可能会问到的Java常用API问题">
+  <meta name="description" content="整理下面试常见的，自己可能掌握不牢固的问题。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java API 常见面试问题">
-<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2017&#x2F;05&#x2F;02&#x2F;Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98&#x2F;index.html">
+<meta property="og:title" content="Java 常见面试问题">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2017&#x2F;05&#x2F;07&#x2F;Java%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
-<meta property="og:description" content="整理下面试的时候可能会问到的Java常用API问题">
-<meta property="article:published_time" content="2017-05-01T16:21:53.000Z">
-<meta property="article:modified_time" content="2020-05-20T11:45:05.417Z">
+<meta property="og:description" content="整理下面试常见的，自己可能掌握不牢固的问题。">
+<meta property="article:published_time" content="2017-05-07T08:46:29.000Z">
+<meta property="article:modified_time" content="2020-06-06T16:47:58.951Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="Java">
+<meta property="article:tag" content="多线程">
 <meta property="article:tag" content="面试">
-<meta property="article:tag" content="API">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://beritra.github.com/2017/05/02/Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
+<link rel="canonical" href="http://beritra.github.com/2017/05/07/Java%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
 
 
 <script id="page-configurations">
@@ -72,7 +72,7 @@
   };
 </script>
 
-  <title>Java API 常见面试问题 | Beritra</title>
+  <title>Java 常见面试问题 | Beritra</title>
   
 
 
@@ -212,7 +212,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2017/05/02/Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2017/05/07/Java%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avator.jpg">
@@ -225,7 +225,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Java API 常见面试问题
+          Java 常见面试问题
         </h1>
 
         <div class="post-meta">
@@ -235,14 +235,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2017-05-02 00:21:53" itemprop="dateCreated datePublished" datetime="2017-05-02T00:21:53+08:00">2017-05-02</time>
+              <time title="创建时间：2017-05-07 16:46:29" itemprop="dateCreated datePublished" datetime="2017-05-07T16:46:29+08:00">2017-05-07</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-20 19:45:05" itemprop="dateModified" datetime="2020-05-20T19:45:05+08:00">2020-05-20</time>
+                <time title="修改时间：2020-06-07 00:47:58" itemprop="dateModified" datetime="2020-06-07T00:47:58+08:00">2020-06-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -262,14 +262,14 @@
                 <i class="fa fa-file-word-o"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2k</span>
+              <span>3.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="fa fa-clock-o"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>5 分钟</span>
             </span>
 
         </div>
@@ -281,21 +281,27 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>整理下面试的时候可能会问到的Java常用API问题</p>
+        <p>整理下面试常见的，自己可能掌握不牢固的问题。</p>
 <a id="more"></a>
 
-<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h4 id="怎么将byte转换为String？"><a href="#怎么将byte转换为String？" class="headerlink" title="怎么将byte转换为String？"></a>怎么将byte转换为String？</h4><p>可以使用String接收byte[]参数的构造器来进行转换，需要注意的是使用正确的编码。</p>
+<h1 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h1><h4 id="现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"><a href="#现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？" class="headerlink" title="现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"></a>现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？</h4><p>join方法</p>
+<h4 id="在java中wait和sleep方法的不同？"><a href="#在java中wait和sleep方法的不同？" class="headerlink" title="在java中wait和sleep方法的不同？"></a>在java中wait和sleep方法的不同？</h4><p>最大的不同是wait会在等待时释放锁，而sleep会持有锁。wait通常会被用于线程之间的交互，sleep通常被用于暂停执行。</p>
+<h4 id="volatile能提供什么保证？"><a href="#volatile能提供什么保证？" class="headerlink" title="volatile能提供什么保证？"></a>volatile能提供什么保证？</h4><p>volatile变量提供顺序保证和可见性保证，比如JVM或者JIT会为了更好的性能对语句重排顺序，使用volatile修饰的变量即使在没有同步块的情况下赋值也不会与其他语句重拍序。volatile提供happens-before保证，确保一个线程的修改能对其他线程可见。<br>在某些情况下还能提供原子性，比如long和double类型的数据。</p>
+<h4 id="Java中能创建volatile数组吗"><a href="#Java中能创建volatile数组吗" class="headerlink" title="Java中能创建volatile数组吗?"></a>Java中能创建volatile数组吗?</h4><p>能，Java中能创建volatile数组，但是只是一个指向数组的引用，而不是整个数组，也就是说如果多个线程同时改变数组的元素，volatile标识符就不能起到保护作用。、</p>
+<h4 id="volatile标识符能使一个非原子操作变成一个原子操作吗？"><a href="#volatile标识符能使一个非原子操作变成一个原子操作吗？" class="headerlink" title="volatile标识符能使一个非原子操作变成一个原子操作吗？"></a>volatile标识符能使一个非原子操作变成一个原子操作吗？</h4><p>一个典型的例子就是一个long类型。Java中读取long类型变量不是原子的，需要分成两步，如果一个线程正在修改该long变量的值，另一个线程可能就只能看到该值的一半（前32位）。但是如果对一个volatile修饰的long或者double变量的读写是原子的。</p>
+<h1 id="Java-基础"><a href="#Java-基础" class="headerlink" title="Java 基础"></a>Java 基础</h1><h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><h4 id="怎么将byte转换为String？"><a href="#怎么将byte转换为String？" class="headerlink" title="怎么将byte转换为String？"></a>怎么将byte转换为String？</h4><p>可以使用String接收byte[]参数的构造器来进行转换，需要注意的是使用正确的编码。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> String(<span class="string">"你好啊"</span>.getBytes(), StandardCharsets.UTF_8);</span></pre></td></tr></table></figure>
 
 <h4 id="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><a href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？" class="headerlink" title="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"></a>我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</h4><p>是的，可以强制转换,但是Java中int是32位的，而byte是8位的，所以，如果强制转化，int类型的高24位将会被丢弃，byte类型的范围是-127到128。</p>
 <h4 id="Java中的-操作符是线程安全的吗？"><a href="#Java中的-操作符是线程安全的吗？" class="headerlink" title="Java中的++操作符是线程安全的吗？"></a>Java中的++操作符是线程安全的吗？</h4><p>不是，这个操作实际上涉及三个指令：读取变量值，增加，再存储会内存，这个过程有可能出现多个线程交叉。</p>
 <h4 id="3-0-1-0-3-将会返回什么？true-还是-false？"><a href="#3-0-1-0-3-将会返回什么？true-还是-false？" class="headerlink" title="3*0.1 == 0.3 将会返回什么？true 还是 false？"></a>3*0.1 == 0.3 将会返回什么？true 还是 false？</h4><p>false，因为有些浮点数不能精确度的表示出来。<br>可以用<code>BigDecimal</code>转换后进行精确计算：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">BigDecimal bigDecimal = <span class="keyword">new</span> BigDecimal(<span class="string">"0.2"</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">System.out.println(bigDecimal.multiply(<span class="keyword">new</span> BigDecimal(<span class="string">"6"</span>)).doubleValue());</span></pre></td></tr></table></figure>
+
 <p>这里注意要用BigDecimal的String构造器，如果是用double类型，仍然是不精确的。<br>参考：<a href="https://my.oschina.net/junn/blog/136978" target="_blank" rel="noopener">Java中浮点型数据Float和Double进行精确计算的问题</a></p>
 <h4 id="可以用Switch中使用String吗？"><a href="#可以用Switch中使用String吗？" class="headerlink" title="可以用Switch中使用String吗？"></a>可以用Switch中使用String吗？</h4><p>从Java7开始，我们可以在switch case中使用字符串，但这仅仅是一个语法糖。内部实现在switch中使用字符串的hash code。</p>
 <h4 id="String和StringBuilder-StringBuffer"><a href="#String和StringBuilder-StringBuffer" class="headerlink" title="String和StringBuilder/StringBuffer"></a>String和StringBuilder/StringBuffer</h4><p>String是只读字符串，它所引用的字符串内容是不能被改变的。而StringBuffer和StringBuilder表示的字符串对象是可以修改的。StringBuilder是JDK1.5引入的，区别在于它是在单线程环境下使用的，所有方面都没有被synchronized修饰，因此它的效率也比StringBuffer高。<br>关于性能问题，有个知乎问题：<a href="https://www.zhihu.com/question/20101840" target="_blank" rel="noopener">JAVA 中的 StringBuilder 和 StringBuffer 适用的场景是什么？</a> 评论区提到，现在用+号拼接字符串已经没有了性能损失，除非在一个循环里面重复执行，因为这样会多次创建StringBuilder</p>
 <p>有一个面试题问：有没有哪种情况用 + 做字符串连接比调用 StringBuffer / StringBuilder 对象的 append 方法性能更好？如果连接后得到的字符串在静态存储区中是早已存在的，那么用+做字符串连接是优于 StringBuffer / StringBuilder 的 append 方法的。</p>
-<h1 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h1><h4 id="ArrayList和LinkedList区别是什么"><a href="#ArrayList和LinkedList区别是什么" class="headerlink" title="ArrayList和LinkedList区别是什么"></a>ArrayList和LinkedList区别是什么</h4><p>ArrayList底层使用数组，随机访问效率高，插入和删除元素的效率低，需要连续空间；LinkedList底层使用链表，随机访问元素效率低，插入和删除效率高，不需要连续空间。</p>
+<h2 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h2><h4 id="ArrayList和LinkedList区别是什么"><a href="#ArrayList和LinkedList区别是什么" class="headerlink" title="ArrayList和LinkedList区别是什么"></a>ArrayList和LinkedList区别是什么</h4><p>ArrayList底层使用数组，随机访问效率高，插入和删除元素的效率低，需要连续空间；LinkedList底层使用链表，随机访问元素效率低，插入和删除效率高，不需要连续空间。</p>
 <h4 id="LinkedHashMap-和-PriorityQueue-的区别是什么？"><a href="#LinkedHashMap-和-PriorityQueue-的区别是什么？" class="headerlink" title="LinkedHashMap 和 PriorityQueue 的区别是什么？"></a>LinkedHashMap 和 PriorityQueue 的区别是什么？</h4><p>PriorityQueue保证最高或者最低优先级的元素总在队列头部，但是LinkedHashMap维持的顺序是元素插入的顺序。当遍历一个PriorityQueue时，没有任何顺序保证，但是LinkedHashMap保证按照插入顺序。</p>
 <h4 id="Java中怎么打印数组？"><a href="#Java中怎么打印数组？" class="headerlink" title="Java中怎么打印数组？"></a>Java中怎么打印数组？</h4><p>用Arrays.toString()和Arrays.deepToString()方法。</p>
 <h4 id="TreeMap是用什么实现的？"><a href="#TreeMap是用什么实现的？" class="headerlink" title="TreeMap是用什么实现的？"></a>TreeMap是用什么实现的？</h4><p>红黑树。</p>
@@ -307,6 +313,14 @@
 </ul>
 <h4 id="快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><a href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？" class="headerlink" title="快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？"></a>快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</h4><p>Iterator的安全失败是基于对底层集合做拷贝，因此，它不受源集合上修改的影响。java.util包下面的所有集合都是快速失败的，而java.util.current包下面的所有类都是安全失败的。快速失败的迭代器会抛出CurrentModificationException异常，而安全失败的迭代器永远不会抛出这样的异常。</p>
 <h4 id="用什么方法来实现集合的排序？"><a href="#用什么方法来实现集合的排序？" class="headerlink" title="用什么方法来实现集合的排序？"></a>用什么方法来实现集合的排序？</h4><p>可以使用有序集合比如TreeSet或者TreeMap，你也可以使用Collections.sort()来排序</p>
+<h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><h4 id="64位JVM中，int的长度是多少位？"><a href="#64位JVM中，int的长度是多少位？" class="headerlink" title="64位JVM中，int的长度是多少位？"></a>64位JVM中，int的长度是多少位？</h4><p>Java中，int类型变量的长度是一个固定值，与平台无关，都是32位。</p>
+<h4 id="对象分配规则"><a href="#对象分配规则" class="headerlink" title="对象分配规则"></a>对象分配规则</h4><ul>
+<li>对象优先分配在<code>Eden</code>区，如果<code>Eden</code>区没有足够的空间时，虚拟机执行一次<code>Minor GC</code>.</li>
+<li>大对象直接进入老年代。这么做的目的是避免频繁在<code>Eden</code>区和两个<code>Survivor</code>区之间发生大量的内存拷贝。</li>
+<li>长期存活的对象进入老年代。虚拟机为每个对象定义了一个年龄计数器，如果对象经过一次<code>Minor GC</code>那么对象会进入<code>Survivor</code>区，之后每经过一次<code>Minor GC</code>对象的年龄就会增加一，直到达到阈值，对象进入老年代。</li>
+<li>动态判断对象的年龄。如果<code>Survivor</code>区中相同年龄的所有对象大小的总和大于<code>Survivor</code>空间的一半，年龄大于或等于该年龄的对象可以直接进入老年代。</li>
+<li>空间分配担保。每次进行<code>Minor GC</code>时，<code>JVM</code>会计算<code>Survivor</code>区移动到老年区的对象的平均大小，如果这个值大于老年区的剩余值则进行一次<code>Full GC</code>，如果小于就检查<code>HandlePromotionFailure</code>设置，设置为<code>true</code>的话只进行<code>Minor GC</code>，如果<code>false</code>则进行<code>Full GC</code>。</li>
+</ul>
 
     </div>
 
@@ -317,8 +331,8 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
               <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
-              <a href="/tags/API/" rel="tag"># API</a>
           </div>
 
         
@@ -331,8 +345,8 @@
       <i class="fa fa-chevron-left"></i> JavaFX简单入门
     </a></div>
       <div class="post-nav-item">
-    <a href="/2017/05/07/Java-JVM-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/" rel="next" title="Java JVM 常见面试问题">
-      Java JVM 常见面试问题 <i class="fa fa-chevron-right"></i>
+    <a href="/2018/01/11/dockerfile%E6%8C%87%E5%8D%97%E5%8F%8A%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" rel="next" title="dockerfile指南及最佳实践">
+      dockerfile指南及最佳实践 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -393,7 +407,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据类型"><span class="nav-number">1.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#怎么将byte转换为String？"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">怎么将byte转换为String？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中的-操作符是线程安全的吗？"><span class="nav-number">1.0.0.3.</span> <span class="nav-text">Java中的++操作符是线程安全的吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-0-1-0-3-将会返回什么？true-还是-false？"><span class="nav-number">1.0.0.4.</span> <span class="nav-text">3*0.1 &#x3D;&#x3D; 0.3 将会返回什么？true 还是 false？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以用Switch中使用String吗？"><span class="nav-number">1.0.0.5.</span> <span class="nav-text">可以用Switch中使用String吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#String和StringBuilder-StringBuffer"><span class="nav-number">1.0.0.6.</span> <span class="nav-text">String和StringBuilder&#x2F;StringBuffer</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集合"><span class="nav-number">2.</span> <span class="nav-text">集合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayList和LinkedList区别是什么"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">ArrayList和LinkedList区别是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LinkedHashMap-和-PriorityQueue-的区别是什么？"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">LinkedHashMap 和 PriorityQueue 的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中怎么打印数组？"><span class="nav-number">2.0.0.3.</span> <span class="nav-text">Java中怎么打印数组？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeMap是用什么实现的？"><span class="nav-number">2.0.0.4.</span> <span class="nav-text">TreeMap是用什么实现的？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayList和HashMap的默认大小是多少？"><span class="nav-number">2.0.0.5.</span> <span class="nav-text">ArrayList和HashMap的默认大小是多少？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Iterator和ListIterator的区别是什么？"><span class="nav-number">2.0.0.6.</span> <span class="nav-text">Iterator和ListIterator的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><span class="nav-number">2.0.0.7.</span> <span class="nav-text">快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用什么方法来实现集合的排序？"><span class="nav-number">2.0.0.8.</span> <span class="nav-text">用什么方法来实现集合的排序？</span></a></li></ol></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#多线程"><span class="nav-number">1.</span> <span class="nav-text">多线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在java中wait和sleep方法的不同？"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">在java中wait和sleep方法的不同？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#volatile能提供什么保证？"><span class="nav-number">1.0.0.3.</span> <span class="nav-text">volatile能提供什么保证？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中能创建volatile数组吗"><span class="nav-number">1.0.0.4.</span> <span class="nav-text">Java中能创建volatile数组吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#volatile标识符能使一个非原子操作变成一个原子操作吗？"><span class="nav-number">1.0.0.5.</span> <span class="nav-text">volatile标识符能使一个非原子操作变成一个原子操作吗？</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-基础"><span class="nav-number">2.</span> <span class="nav-text">Java 基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据类型"><span class="nav-number">2.1.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#怎么将byte转换为String？"><span class="nav-number">2.1.0.1.</span> <span class="nav-text">怎么将byte转换为String？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><span class="nav-number">2.1.0.2.</span> <span class="nav-text">我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中的-操作符是线程安全的吗？"><span class="nav-number">2.1.0.3.</span> <span class="nav-text">Java中的++操作符是线程安全的吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-0-1-0-3-将会返回什么？true-还是-false？"><span class="nav-number">2.1.0.4.</span> <span class="nav-text">3*0.1 &#x3D;&#x3D; 0.3 将会返回什么？true 还是 false？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以用Switch中使用String吗？"><span class="nav-number">2.1.0.5.</span> <span class="nav-text">可以用Switch中使用String吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#String和StringBuilder-StringBuffer"><span class="nav-number">2.1.0.6.</span> <span class="nav-text">String和StringBuilder&#x2F;StringBuffer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集合"><span class="nav-number">2.2.</span> <span class="nav-text">集合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayList和LinkedList区别是什么"><span class="nav-number">2.2.0.1.</span> <span class="nav-text">ArrayList和LinkedList区别是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LinkedHashMap-和-PriorityQueue-的区别是什么？"><span class="nav-number">2.2.0.2.</span> <span class="nav-text">LinkedHashMap 和 PriorityQueue 的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java中怎么打印数组？"><span class="nav-number">2.2.0.3.</span> <span class="nav-text">Java中怎么打印数组？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TreeMap是用什么实现的？"><span class="nav-number">2.2.0.4.</span> <span class="nav-text">TreeMap是用什么实现的？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayList和HashMap的默认大小是多少？"><span class="nav-number">2.2.0.5.</span> <span class="nav-text">ArrayList和HashMap的默认大小是多少？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Iterator和ListIterator的区别是什么？"><span class="nav-number">2.2.0.6.</span> <span class="nav-text">Iterator和ListIterator的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><span class="nav-number">2.2.0.7.</span> <span class="nav-text">快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用什么方法来实现集合的排序？"><span class="nav-number">2.2.0.8.</span> <span class="nav-text">用什么方法来实现集合的排序？</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM"><span class="nav-number">3.</span> <span class="nav-text">JVM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#64位JVM中，int的长度是多少位？"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">64位JVM中，int的长度是多少位？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对象分配规则"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">对象分配规则</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -409,7 +423,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

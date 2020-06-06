@@ -1270,11 +1270,11 @@
   <entry>
     <title>Linux文本处理三剑客grep、awk和sed</title>
     <url>/2020/03/07/Linux%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2grep%E3%80%81awk%E5%92%8Csed/</url>
-    <content><![CDATA[<p>awk、grep、sed是linux操作文本的三大利器，合称文本三剑客，也是必须掌握的linux命令之一。三者的功能都是处理文本，但侧重点各不相同，其中属awk功能最强大，但也最复杂。grep更适合单纯的查找或匹配文本，sed更适合编辑匹配到的文本，awk更适合格式化文本，对文本进行较复杂格式处理。</p>
+    <content><![CDATA[<p>awk、grep、sed 是 Linux 操作文本的三大利器，合称文本三剑客，也是必须掌握的 Linux 命令之一。三者的功能都是处理文本，但侧重点各不相同，其中属 awk 功能最强大，但也最复杂。grep 更适合单纯的查找或匹配文本，sed 更适合编辑匹配到的文本，awk 更适合格式化文本，对文本进行较复杂格式处理。</p>
 <a id="more"></a>
 
-<h2 id="grep"><a href="#grep" class="headerlink" title="grep"></a>grep</h2><p>Linux 系统中 grep 命令是一种强大的文本搜索工具，它能使用正则表达式搜索文本，并把匹配的行打印出来。grep全称是 Global Regular Expression Print，表示全局正则表达式版本，它的使用权限是所有用户。</p>
-<p>grep可用于shell脚本，因为grep通过返回一个状态值来说明搜索的状态，如果模板搜索成功，则返回0，如果搜索不成功，则返回1，如果搜索的文件不存在，则返回2。我们利用这些返回值就可进行一些自动化的文本处理工作。</p>
+<h2 id="grep"><a href="#grep" class="headerlink" title="grep"></a>grep</h2><p>Linux 系统中 grep 命令是一种强大的文本搜索工具，它能使用正则表达式搜索文本，并把匹配的行打印出来。grep 全称是 Global Regular Expression Print，表示全局正则表达式版本，它的使用权限是所有用户。</p>
+<p>grep 可用于 shell 脚本，因为grep通过返回一个状态值来说明搜索的状态，如果模板搜索成功，则返回 0，如果搜索不成功，则返回1，如果搜索的文件不存在，则返回 2。我们利用这些返回值就可进行一些自动化的文本处理工作。</p>
 <p>命令的基本格式：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">grep [option] pattern file</span></pre></td></tr></table></figure>
 
@@ -1422,7 +1422,7 @@
 
 <p>这个命令其实就是先把<code>Linux</code>替换成<code>Windows</code>，再把<code>Windows</code>替换成<code>Mac OS</code>。</p>
 <h4 id="写入文件"><a href="#写入文件" class="headerlink" title="写入文件"></a>写入文件</h4><p>上面介绍的所有文件操作都支持在缓存中处理然后打印到控制台，实际上没有对文件修改。想要保存到原文件的话可以用<code>&gt; file</code>或者<code>-i</code>来保存到文件</p>
-<h2 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h2><p>awk是一个强大的文本分析工具，相对于grep的查找，sed的编辑，awk在其对数据分析并生成报告时，显得尤为强大。简单来说awk就是把文件逐行的读入，以空格为默认分隔符将每行切片，切开的部分再进行各种分析处理。</p>
+<h2 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h2><p>awk 是一个强大的文本分析工具，相对于 grep 的查找，sed 的编辑，awk 在其对数据分析并生成报告时，显得尤为强大。简单来说awk 就是把文件逐行的读入，以空格为默认分隔符将每行切片，切开的部分再进行各种分析处理。</p>
 <h4 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">awk [选项参数] <span class="string">'script'</span> var=value file(s)</span></pre></td></tr><tr><td class="code"><pre><span class="line">或</span></pre></td></tr><tr><td class="code"><pre><span class="line">awk [选项参数] -f scriptfile var=value file(s)</span></pre></td></tr></table></figure>
 
 <p>参数说明：</p>
@@ -4387,7 +4387,7 @@
 <h3 id="哪些内存需要回收"><a href="#哪些内存需要回收" class="headerlink" title="哪些内存需要回收"></a>哪些内存需要回收</h3><h4 id="引用计数器法"><a href="#引用计数器法" class="headerlink" title="引用计数器法"></a>引用计数器法</h4><p>引用计数器法是这样的：给对象添加一个引用计数器，每当有一个地方引用它时，计数器 +1，引用失效的时候，计数器 -1，任何时刻计数器为 0 的对象就不可能再被使用。</p>
 <p>主流的 Java 虚拟机中没有选用这个方法来管理内存的，最主要的原因是很难解决对象循环引用的问题。</p>
 <h4 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h4><p>主流的商用程序语言的主流实现中，都是通过可达性分析（Reachability Analysis）来判定对象是否存活的。这个算法的基本思路是通过一系列的成为“GC Roots”的对象作为起始点，从这些节点开始向下搜索，搜索所走过的路径称之为引用链（Reference Chain），当一个对象到达 GC Roots 没有任何引用链相连时，证明此对象不可用。</p>
-<h4 id="引用类型"><a href="#引用类型" class="headerlink" title="引用类型"></a>引用类型</h4><p>无论通过计数器，还是通过可达性分析，判断对象是否存活都与“引用”有关。在JDK1.2之后，Java对引用状态进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）4种，这4种引用强度依次逐渐减弱。</p>
+<h4 id="引用类型"><a href="#引用类型" class="headerlink" title="引用类型"></a>引用类型</h4><p>无论通过计数器，还是通过可达性分析，判断对象是否存活都与“引用”有关。在 JDK1.2 之后，Java对引用状态进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）4种，这4种引用强度依次逐渐减弱。</p>
 <ul>
 <li>强引用就是指在代码中普遍存在的，类似于<code>Object obj=new Object()</code>这类引用，只要强引用还存在，垃圾收集器就永远不会回收被引用的对象。</li>
 <li>软引用用来描述一些还有用但是不必须的对象。在系统将要发生内存溢出异常之前，将会把这些对象列进回收范围之内进行二次回收。如果这次回收之后还是没有足够内存，才会抛出内存溢出异常。</li>
@@ -5834,31 +5834,41 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
       </tags>
   </entry>
   <entry>
-    <title>Java 多线程 常见面试问题</title>
-    <url>/2017/05/07/Java-%E5%A4%9A%E7%BA%BF%E7%A8%8B-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>整理下Java多线程相关知识点和面试可能会问到的问题</p>
+    <title>Java 常见面试问题</title>
+    <url>/2017/05/07/Java%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>整理下面试常见的，自己可能掌握不牢固的问题。</p>
 <a id="more"></a>
-<h4 id="现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"><a href="#现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？" class="headerlink" title="现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"></a>现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？</h4><p>join方法</p>
+
+<h1 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h1><h4 id="现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"><a href="#现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？" class="headerlink" title="现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？"></a>现在有T1、T2、T3三个线程，你怎样保证T2在T1执行完后执行，T3在T2执行完后执行？</h4><p>join方法</p>
 <h4 id="在java中wait和sleep方法的不同？"><a href="#在java中wait和sleep方法的不同？" class="headerlink" title="在java中wait和sleep方法的不同？"></a>在java中wait和sleep方法的不同？</h4><p>最大的不同是wait会在等待时释放锁，而sleep会持有锁。wait通常会被用于线程之间的交互，sleep通常被用于暂停执行。</p>
 <h4 id="volatile能提供什么保证？"><a href="#volatile能提供什么保证？" class="headerlink" title="volatile能提供什么保证？"></a>volatile能提供什么保证？</h4><p>volatile变量提供顺序保证和可见性保证，比如JVM或者JIT会为了更好的性能对语句重排顺序，使用volatile修饰的变量即使在没有同步块的情况下赋值也不会与其他语句重拍序。volatile提供happens-before保证，确保一个线程的修改能对其他线程可见。<br>在某些情况下还能提供原子性，比如long和double类型的数据。</p>
 <h4 id="Java中能创建volatile数组吗"><a href="#Java中能创建volatile数组吗" class="headerlink" title="Java中能创建volatile数组吗?"></a>Java中能创建volatile数组吗?</h4><p>能，Java中能创建volatile数组，但是只是一个指向数组的引用，而不是整个数组，也就是说如果多个线程同时改变数组的元素，volatile标识符就不能起到保护作用。、</p>
 <h4 id="volatile标识符能使一个非原子操作变成一个原子操作吗？"><a href="#volatile标识符能使一个非原子操作变成一个原子操作吗？" class="headerlink" title="volatile标识符能使一个非原子操作变成一个原子操作吗？"></a>volatile标识符能使一个非原子操作变成一个原子操作吗？</h4><p>一个典型的例子就是一个long类型。Java中读取long类型变量不是原子的，需要分成两步，如果一个线程正在修改该long变量的值，另一个线程可能就只能看到该值的一半（前32位）。但是如果对一个volatile修饰的long或者double变量的读写是原子的。</p>
-]]></content>
-      <categories>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>多线程</tag>
-        <tag>面试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java JVM 常见面试问题</title>
-    <url>/2017/05/07/Java-JVM-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>整理下JVM相关知识点和面试可能会问到的问题</p>
-<a id="more"></a>
-<h4 id="64位JVM中，int的长度是多少位？"><a href="#64位JVM中，int的长度是多少位？" class="headerlink" title="64位JVM中，int的长度是多少位？"></a>64位JVM中，int的长度是多少位？</h4><p>Java中，int类型变量的长度是一个固定值，与平台无关，都是32位。</p>
+<h1 id="Java-基础"><a href="#Java-基础" class="headerlink" title="Java 基础"></a>Java 基础</h1><h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><h4 id="怎么将byte转换为String？"><a href="#怎么将byte转换为String？" class="headerlink" title="怎么将byte转换为String？"></a>怎么将byte转换为String？</h4><p>可以使用String接收byte[]参数的构造器来进行转换，需要注意的是使用正确的编码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> String(<span class="string">"你好啊"</span>.getBytes(), StandardCharsets.UTF_8);</span></pre></td></tr></table></figure>
+
+<h4 id="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><a href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？" class="headerlink" title="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"></a>我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</h4><p>是的，可以强制转换,但是Java中int是32位的，而byte是8位的，所以，如果强制转化，int类型的高24位将会被丢弃，byte类型的范围是-127到128。</p>
+<h4 id="Java中的-操作符是线程安全的吗？"><a href="#Java中的-操作符是线程安全的吗？" class="headerlink" title="Java中的++操作符是线程安全的吗？"></a>Java中的++操作符是线程安全的吗？</h4><p>不是，这个操作实际上涉及三个指令：读取变量值，增加，再存储会内存，这个过程有可能出现多个线程交叉。</p>
+<h4 id="3-0-1-0-3-将会返回什么？true-还是-false？"><a href="#3-0-1-0-3-将会返回什么？true-还是-false？" class="headerlink" title="3*0.1 == 0.3 将会返回什么？true 还是 false？"></a>3*0.1 == 0.3 将会返回什么？true 还是 false？</h4><p>false，因为有些浮点数不能精确度的表示出来。<br>可以用<code>BigDecimal</code>转换后进行精确计算：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">BigDecimal bigDecimal = <span class="keyword">new</span> BigDecimal(<span class="string">"0.2"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">System.out.println(bigDecimal.multiply(<span class="keyword">new</span> BigDecimal(<span class="string">"6"</span>)).doubleValue());</span></pre></td></tr></table></figure>
+
+<p>这里注意要用BigDecimal的String构造器，如果是用double类型，仍然是不精确的。<br>参考：<a href="https://my.oschina.net/junn/blog/136978" target="_blank" rel="noopener">Java中浮点型数据Float和Double进行精确计算的问题</a></p>
+<h4 id="可以用Switch中使用String吗？"><a href="#可以用Switch中使用String吗？" class="headerlink" title="可以用Switch中使用String吗？"></a>可以用Switch中使用String吗？</h4><p>从Java7开始，我们可以在switch case中使用字符串，但这仅仅是一个语法糖。内部实现在switch中使用字符串的hash code。</p>
+<h4 id="String和StringBuilder-StringBuffer"><a href="#String和StringBuilder-StringBuffer" class="headerlink" title="String和StringBuilder/StringBuffer"></a>String和StringBuilder/StringBuffer</h4><p>String是只读字符串，它所引用的字符串内容是不能被改变的。而StringBuffer和StringBuilder表示的字符串对象是可以修改的。StringBuilder是JDK1.5引入的，区别在于它是在单线程环境下使用的，所有方面都没有被synchronized修饰，因此它的效率也比StringBuffer高。<br>关于性能问题，有个知乎问题：<a href="https://www.zhihu.com/question/20101840" target="_blank" rel="noopener">JAVA 中的 StringBuilder 和 StringBuffer 适用的场景是什么？</a> 评论区提到，现在用+号拼接字符串已经没有了性能损失，除非在一个循环里面重复执行，因为这样会多次创建StringBuilder</p>
+<p>有一个面试题问：有没有哪种情况用 + 做字符串连接比调用 StringBuffer / StringBuilder 对象的 append 方法性能更好？如果连接后得到的字符串在静态存储区中是早已存在的，那么用+做字符串连接是优于 StringBuffer / StringBuilder 的 append 方法的。</p>
+<h2 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h2><h4 id="ArrayList和LinkedList区别是什么"><a href="#ArrayList和LinkedList区别是什么" class="headerlink" title="ArrayList和LinkedList区别是什么"></a>ArrayList和LinkedList区别是什么</h4><p>ArrayList底层使用数组，随机访问效率高，插入和删除元素的效率低，需要连续空间；LinkedList底层使用链表，随机访问元素效率低，插入和删除效率高，不需要连续空间。</p>
+<h4 id="LinkedHashMap-和-PriorityQueue-的区别是什么？"><a href="#LinkedHashMap-和-PriorityQueue-的区别是什么？" class="headerlink" title="LinkedHashMap 和 PriorityQueue 的区别是什么？"></a>LinkedHashMap 和 PriorityQueue 的区别是什么？</h4><p>PriorityQueue保证最高或者最低优先级的元素总在队列头部，但是LinkedHashMap维持的顺序是元素插入的顺序。当遍历一个PriorityQueue时，没有任何顺序保证，但是LinkedHashMap保证按照插入顺序。</p>
+<h4 id="Java中怎么打印数组？"><a href="#Java中怎么打印数组？" class="headerlink" title="Java中怎么打印数组？"></a>Java中怎么打印数组？</h4><p>用Arrays.toString()和Arrays.deepToString()方法。</p>
+<h4 id="TreeMap是用什么实现的？"><a href="#TreeMap是用什么实现的？" class="headerlink" title="TreeMap是用什么实现的？"></a>TreeMap是用什么实现的？</h4><p>红黑树。</p>
+<h4 id="ArrayList和HashMap的默认大小是多少？"><a href="#ArrayList和HashMap的默认大小是多少？" class="headerlink" title="ArrayList和HashMap的默认大小是多少？"></a>ArrayList和HashMap的默认大小是多少？</h4><p>ArrayList的默认大小是是个元素，HashMap的默认大小是16个元素（必须是2的幂）</p>
+<h4 id="Iterator和ListIterator的区别是什么？"><a href="#Iterator和ListIterator的区别是什么？" class="headerlink" title="Iterator和ListIterator的区别是什么？"></a>Iterator和ListIterator的区别是什么？</h4><ul>
+<li>Iterator可以用来遍历Set和List集合，但是ListIterator只能用来遍历List。</li>
+<li>Iterator对集合只能是前向遍历，但是ListIterator可以前向也可以后向。</li>
+<li>ListIterator实现了Iterator接口，并且包含其他功能。比如：增加元素，替换元素，获取前一个和后一个元素的索引等等。</li>
+</ul>
+<h4 id="快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><a href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？" class="headerlink" title="快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？"></a>快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</h4><p>Iterator的安全失败是基于对底层集合做拷贝，因此，它不受源集合上修改的影响。java.util包下面的所有集合都是快速失败的，而java.util.current包下面的所有类都是安全失败的。快速失败的迭代器会抛出CurrentModificationException异常，而安全失败的迭代器永远不会抛出这样的异常。</p>
+<h4 id="用什么方法来实现集合的排序？"><a href="#用什么方法来实现集合的排序？" class="headerlink" title="用什么方法来实现集合的排序？"></a>用什么方法来实现集合的排序？</h4><p>可以使用有序集合比如TreeSet或者TreeMap，你也可以使用Collections.sort()来排序</p>
+<h1 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h1><h4 id="64位JVM中，int的长度是多少位？"><a href="#64位JVM中，int的长度是多少位？" class="headerlink" title="64位JVM中，int的长度是多少位？"></a>64位JVM中，int的长度是多少位？</h4><p>Java中，int类型变量的长度是一个固定值，与平台无关，都是32位。</p>
 <h4 id="对象分配规则"><a href="#对象分配规则" class="headerlink" title="对象分配规则"></a>对象分配规则</h4><ul>
 <li>对象优先分配在<code>Eden</code>区，如果<code>Eden</code>区没有足够的空间时，虚拟机执行一次<code>Minor GC</code>.</li>
 <li>大对象直接进入老年代。这么做的目的是避免频繁在<code>Eden</code>区和两个<code>Survivor</code>区之间发生大量的内存拷贝。</li>
@@ -5872,47 +5882,8 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
       </categories>
       <tags>
         <tag>Java</tag>
+        <tag>多线程</tag>
         <tag>面试</tag>
-        <tag>JVM</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java API 常见面试问题</title>
-    <url>/2017/05/02/Java-API-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>整理下面试的时候可能会问到的Java常用API问题</p>
-<a id="more"></a>
-
-<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h4 id="怎么将byte转换为String？"><a href="#怎么将byte转换为String？" class="headerlink" title="怎么将byte转换为String？"></a>怎么将byte转换为String？</h4><p>可以使用String接收byte[]参数的构造器来进行转换，需要注意的是使用正确的编码。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> String(<span class="string">"你好啊"</span>.getBytes(), StandardCharsets.UTF_8);</span></pre></td></tr></table></figure>
-
-<h4 id="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"><a href="#我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？" class="headerlink" title="我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？"></a>我们能将int强制转换位byte类型的变量吗？如果该值大于byte类型的范围，将会出现什么现象？</h4><p>是的，可以强制转换,但是Java中int是32位的，而byte是8位的，所以，如果强制转化，int类型的高24位将会被丢弃，byte类型的范围是-127到128。</p>
-<h4 id="Java中的-操作符是线程安全的吗？"><a href="#Java中的-操作符是线程安全的吗？" class="headerlink" title="Java中的++操作符是线程安全的吗？"></a>Java中的++操作符是线程安全的吗？</h4><p>不是，这个操作实际上涉及三个指令：读取变量值，增加，再存储会内存，这个过程有可能出现多个线程交叉。</p>
-<h4 id="3-0-1-0-3-将会返回什么？true-还是-false？"><a href="#3-0-1-0-3-将会返回什么？true-还是-false？" class="headerlink" title="3*0.1 == 0.3 将会返回什么？true 还是 false？"></a>3*0.1 == 0.3 将会返回什么？true 还是 false？</h4><p>false，因为有些浮点数不能精确度的表示出来。<br>可以用<code>BigDecimal</code>转换后进行精确计算：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">BigDecimal bigDecimal = <span class="keyword">new</span> BigDecimal(<span class="string">"0.2"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">System.out.println(bigDecimal.multiply(<span class="keyword">new</span> BigDecimal(<span class="string">"6"</span>)).doubleValue());</span></pre></td></tr></table></figure>
-<p>这里注意要用BigDecimal的String构造器，如果是用double类型，仍然是不精确的。<br>参考：<a href="https://my.oschina.net/junn/blog/136978" target="_blank" rel="noopener">Java中浮点型数据Float和Double进行精确计算的问题</a></p>
-<h4 id="可以用Switch中使用String吗？"><a href="#可以用Switch中使用String吗？" class="headerlink" title="可以用Switch中使用String吗？"></a>可以用Switch中使用String吗？</h4><p>从Java7开始，我们可以在switch case中使用字符串，但这仅仅是一个语法糖。内部实现在switch中使用字符串的hash code。</p>
-<h4 id="String和StringBuilder-StringBuffer"><a href="#String和StringBuilder-StringBuffer" class="headerlink" title="String和StringBuilder/StringBuffer"></a>String和StringBuilder/StringBuffer</h4><p>String是只读字符串，它所引用的字符串内容是不能被改变的。而StringBuffer和StringBuilder表示的字符串对象是可以修改的。StringBuilder是JDK1.5引入的，区别在于它是在单线程环境下使用的，所有方面都没有被synchronized修饰，因此它的效率也比StringBuffer高。<br>关于性能问题，有个知乎问题：<a href="https://www.zhihu.com/question/20101840" target="_blank" rel="noopener">JAVA 中的 StringBuilder 和 StringBuffer 适用的场景是什么？</a> 评论区提到，现在用+号拼接字符串已经没有了性能损失，除非在一个循环里面重复执行，因为这样会多次创建StringBuilder</p>
-<p>有一个面试题问：有没有哪种情况用 + 做字符串连接比调用 StringBuffer / StringBuilder 对象的 append 方法性能更好？如果连接后得到的字符串在静态存储区中是早已存在的，那么用+做字符串连接是优于 StringBuffer / StringBuilder 的 append 方法的。</p>
-<h1 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h1><h4 id="ArrayList和LinkedList区别是什么"><a href="#ArrayList和LinkedList区别是什么" class="headerlink" title="ArrayList和LinkedList区别是什么"></a>ArrayList和LinkedList区别是什么</h4><p>ArrayList底层使用数组，随机访问效率高，插入和删除元素的效率低，需要连续空间；LinkedList底层使用链表，随机访问元素效率低，插入和删除效率高，不需要连续空间。</p>
-<h4 id="LinkedHashMap-和-PriorityQueue-的区别是什么？"><a href="#LinkedHashMap-和-PriorityQueue-的区别是什么？" class="headerlink" title="LinkedHashMap 和 PriorityQueue 的区别是什么？"></a>LinkedHashMap 和 PriorityQueue 的区别是什么？</h4><p>PriorityQueue保证最高或者最低优先级的元素总在队列头部，但是LinkedHashMap维持的顺序是元素插入的顺序。当遍历一个PriorityQueue时，没有任何顺序保证，但是LinkedHashMap保证按照插入顺序。</p>
-<h4 id="Java中怎么打印数组？"><a href="#Java中怎么打印数组？" class="headerlink" title="Java中怎么打印数组？"></a>Java中怎么打印数组？</h4><p>用Arrays.toString()和Arrays.deepToString()方法。</p>
-<h4 id="TreeMap是用什么实现的？"><a href="#TreeMap是用什么实现的？" class="headerlink" title="TreeMap是用什么实现的？"></a>TreeMap是用什么实现的？</h4><p>红黑树。</p>
-<h4 id="ArrayList和HashMap的默认大小是多少？"><a href="#ArrayList和HashMap的默认大小是多少？" class="headerlink" title="ArrayList和HashMap的默认大小是多少？"></a>ArrayList和HashMap的默认大小是多少？</h4><p>ArrayList的默认大小是是个元素，HashMap的默认大小是16个元素（必须是2的幂）</p>
-<h4 id="Iterator和ListIterator的区别是什么？"><a href="#Iterator和ListIterator的区别是什么？" class="headerlink" title="Iterator和ListIterator的区别是什么？"></a>Iterator和ListIterator的区别是什么？</h4><ul>
-<li>Iterator可以用来遍历Set和List集合，但是ListIterator只能用来遍历List。</li>
-<li>Iterator对集合只能是前向遍历，但是ListIterator可以前向也可以后向。</li>
-<li>ListIterator实现了Iterator接口，并且包含其他功能。比如：增加元素，替换元素，获取前一个和后一个元素的索引等等。</li>
-</ul>
-<h4 id="快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？"><a href="#快速失败-fail-fast-和安全失败-fail-safe-的区别是什么？" class="headerlink" title="快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？"></a>快速失败(fail-fast)和安全失败(fail-safe)的区别是什么？</h4><p>Iterator的安全失败是基于对底层集合做拷贝，因此，它不受源集合上修改的影响。java.util包下面的所有集合都是快速失败的，而java.util.current包下面的所有类都是安全失败的。快速失败的迭代器会抛出CurrentModificationException异常，而安全失败的迭代器永远不会抛出这样的异常。</p>
-<h4 id="用什么方法来实现集合的排序？"><a href="#用什么方法来实现集合的排序？" class="headerlink" title="用什么方法来实现集合的排序？"></a>用什么方法来实现集合的排序？</h4><p>可以使用有序集合比如TreeSet或者TreeMap，你也可以使用Collections.sort()来排序</p>
-]]></content>
-      <categories>
-        <category>面试</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>面试</tag>
-        <tag>API</tag>
       </tags>
   </entry>
   <entry>

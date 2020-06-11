@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="整理了一些常见的架构设计面试题，主要记录关键点，具体细节就不详细叙述了，案例慢慢补充。目前想起以下问题：  秒杀系统 短链接生成 高并发的红包系统 分布式ID生成 分布式限流 分布式定时任务 新浪微博怎么推送微博 大文件有限内存排序">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的架构设计面试题">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;06&#x2F;12&#x2F;%E5%B8%B8%E8%A7%81%E7%9A%84%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E9%9D%A2%E8%AF%95%E9%A2%98&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="整理了一些常见的架构设计面试题，主要记录关键点，具体细节就不详细叙述了，案例慢慢补充。目前想起以下问题：  秒杀系统 短链接生成 高并发的红包系统 分布式ID生成 分布式限流 分布式定时任务 新浪微博怎么推送微博 大文件有限内存排序">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;721ceeff.png">
+<meta property="article:published_time" content="2020-06-11T16:21:59.000Z">
+<meta property="article:modified_time" content="2020-06-11T16:23:34.531Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="面试">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;721ceeff.png">
+
+<link rel="canonical" href="http://beritra.github.com/2020/06/12/%E5%B8%B8%E8%A7%81%E7%9A%84%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>常见的架构设计面试题 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/06/12/%E5%B8%B8%E8%A7%81%E7%9A%84%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          常见的架构设计面试题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-12 00:21:59 / 修改时间：00:23:34" itemprop="dateCreated datePublished" datetime="2020-06-12T00:21:59+08:00">2020-06-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index">
+                    <span itemprop="name">面试</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>整理了一些常见的架构设计面试题，主要记录关键点，具体细节就不详细叙述了，案例慢慢补充。目前想起以下问题：</p>
+<ul>
+<li>秒杀系统</li>
+<li>短链接生成</li>
+<li>高并发的红包系统</li>
+<li>分布式ID生成</li>
+<li>分布式限流</li>
+<li>分布式定时任务</li>
+<li>新浪微博怎么推送微博</li>
+<li>大文件有限内存排序</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="秒杀系统"><a href="#秒杀系统" class="headerlink" title="秒杀系统"></a>秒杀系统</h2><p>秒杀系统基本面试被问烂了，网上资料也很多，基本整理了内容如下：</p>
+<p>设计难点：并发量大，应用、数据库都承受不了。另外难控制超卖。</p>
+<p>设计要点：</p>
+<ul>
+<li>将请求尽量拦截在系统上游，html尽量静态化，部署到cdn上面。按钮及时设置为不可用，禁止用户重复提交请求。</li>
+<li>设置页面缓存，针对同一个页面和uid一段时间内返回缓存页面。</li>
+<li>数据用缓存抗，不直接落到数据库。</li>
+<li>读数据的时候不做强一致性教研，写数据的时候再做。</li>
+<li>在每台物理机上也缓存商品信息等等变动不大的相关的数据<ul>
+<li>像商品中的标题和描述这些本身不变的会在秒杀开始之前全量推送到秒杀机器上并一直缓存直到秒杀结束。</li>
+<li>像库存这种动态数据会采用被动失效的方式缓存一定时间（一般是数秒），失效后再去Tair缓存拉取最新的数据。</li>
+</ul>
+</li>
+<li>如果允许的话，用异步的模式，等缓存都落库之后再返回结果。</li>
+<li>如果允许的话，增加答题教研等验证措施。</li>
+</ul>
+<p>其他业务和技术保障措施：</p>
+<ul>
+<li><p>业务隔离。把秒杀做成一种营销活动，卖家要参加秒杀这种营销活动需要单独报名，从技术上来说，卖家报名后对我们来说就是已知热点，当真正开始时我们可以提前做好预热。</p>
+</li>
+<li><p>系统隔离。系统隔离更多是运行时的隔离，可以通过分组部署的方式和另外 99% 分开。秒杀还申请了单独的域名，目的也是让请求落到不同的集群中。</p>
+</li>
+<li><p>数据隔离。秒杀所调用的数据大部分都是热数据，比如会启用单独 cache 集群或 MySQL 数据库来放热点数据，目前也是不想0.01%的数据影响另外99.99%。</p>
+</li>
+</ul>
+<p>另外需要复习缓存穿透、雪崩等等问题，主要的流量都落在了缓存数据库上，需要针对缓存数据库的高可用作保障。</p>
+<h2 id="短链接生成"><a href="#短链接生成" class="headerlink" title="短链接生成"></a>短链接生成</h2><p>这个应该是比较公认的方案了：</p>
+<ol>
+<li>分布式ID生成器产生ID</li>
+<li>ID转62进制字符串</li>
+<li>记录数据库，根据业务要求确定过期时间，可以保留部分永久链接</li>
+</ol>
+<p>主要难点在于分布式ID生成。鉴于短链一般没有严格递增的需求，可以使用预先分发一个号段，然后生成的方式。</p>
+<p>看了下新浪微博的短链接，8位，理论上可以保存超过200万亿对关系，具体怎么存储的还有待研究。</p>
+<h2 id="红包系统"><a href="#红包系统" class="headerlink" title="红包系统"></a>红包系统</h2><p>红包系统其实很像秒杀系统，只不过同一个秒杀的总量不大，但是全局的并发量非常大，比如春晚可能几百万人同时抢红包。</p>
+<p>主要技术难点也类似，主要在数据库，减库存的时候会抢锁。另外由于业务需求不同，没办法异步，也不能超卖，事务更加严格。</p>
+<p>不能采用的方式：</p>
+<ul>
+<li>乐观锁：手慢会失败，DB 面临更大压力，所以不能采用。</li>
+<li>直接用缓存顶，涉及到钱，一旦缓存挂掉就完了。</li>
+</ul>
+<p>建议的方式：</p>
+<ul>
+<li>接入层垂直切分，根据红包ID，发红包、抢红包、拆红包、查详情详情等等都在同一台机器上处理，互不影响，分而治之。</li>
+<li>请求进行排队，到数据库的时候是串行的，就不涉及抢锁的问题了。</li>
+<li>为了防止队列太长过载导致队列被降级，直接打到数据库上，所以数据库前面再加上一个缓存，用CAS自增控制并发，太高的并发直接返回失败。</li>
+<li>红包冷热数据分离，按时间分表。</li>
+</ul>
+<h2 id="分布式ID"><a href="#分布式ID" class="headerlink" title="分布式ID"></a>分布式ID</h2><p>分布式ID生成大概也算老生常谈的问题了，主要关键在于是否需要严格递增，严格递增的话效率必然大降。</p>
+<p>不需要递增的话比较简单:</p>
+<ul>
+<li><p>一种方式是预先分片，比如十台机器，每台先分一千个ID，一号机从0开始，二号从1000开始等等。缺点是大致上可以被人看出来业务量。</p>
+</li>
+<li><p>另一种方式是类似雪花算法，每个机器有个id，然后基于时间算一个id，再加上一个递增id。比如如下美团的方案。缺点是机器的时间戳不能回拨，回拨的话会出现问题。</p>
+<p><img src="http://nas.beritra.com:18081/blog/202005/721ceeff.png" alt="image"></p>
+</li>
+</ul>
+<p>如果要求严格递增，我没找到现成的很好的方案，大概只能单机生成，不能分布式了，然后都去单机上取号。效率的话，类似Redis的数据库大概能到每秒十几二十几万的速度。</p>
+<h2 id="分布式限流"><a href="#分布式限流" class="headerlink" title="分布式限流"></a>分布式限流</h2><p>常见的限流方法：</p>
+<ul>
+<li>固定窗口计数器：按照时间段划分窗口，有一次请求就+1，最为简单的算法，但这个算法有时会让通过请求量允许为限制的两倍。</li>
+<li>滑动窗口计数器：通过将窗口再细分，并且按照时间“滑动”来解决突破限制的问题，但是时间区间的精度越高，算法所需的空间容量就越大。</li>
+<li>漏桶：请求类似水滴，先放到桶里，服务的提供方则按照固定的速率从桶里面取出请求并执行。缺陷也很明显，当短时间内有大量的突发请求时，即便此时服务器没有任何负载，每个请求也都得在队列中等待一段时间才能被响应。</li>
+<li>令牌桶：往桶里面发放令牌，每个请求过来之后拿走一个令牌，然后只处理有令牌的请求。令牌桶满了则多余的令牌会直接丢弃。令牌桶算法既能够将所有的请求平均分布到时间区间内，又能接受服务器能够承受范围内的突发请求，因此是目前使用较为广泛的一种限流算法。</li>
+</ul>
+<p>Google 的开源项目 guava 提供了 RateLimiter 类，实现了单点的令牌桶限流。</p>
+<p>分布式环境下，可以考虑用 Redis+Lua 脚本实现令牌桶。</p>
+<p>如果请求量太大了，Redis 也撑不住怎么办？我觉得可以类似于分布式 ID 的处理方式，Redis 前面在增加预处理，比如每台及其预先申请一部分令牌，只有令牌用完之后才去 Redis。如果还是太大，是否可以垂直切分？按照流量的来源，比如地理位置、IP 之类的再拆开。</p>
+<h2 id="分布式定时任务"><a href="#分布式定时任务" class="headerlink" title="分布式定时任务"></a>分布式定时任务</h2><p>任务轮询或任务轮询+抢占排队方案</p>
+<ul>
+<li>每个服务器首次启动时加入队列；</li>
+<li>每次任务运行首先判断自己是否是当前可运行任务，如果是便运行；</li>
+<li>如果不是当前运行的任务，检查自己是否在队列中，如果在，便退出，如果不在队列中，进入队列。</li>
+</ul>
+<h2 id="微博推送"><a href="#微博推送" class="headerlink" title="微博推送"></a>微博推送</h2><p>主要难点：关系复杂，数据量大。一个人可以关注非常多的用户，一个大 V 也有可能有几千万的粉丝。</p>
+<p>先介绍最基本的方案：</p>
+<ol>
+<li>推模式：推模式就是，用户A关注了用户 B，用户 B 每发送一个动态，后台遍历用户B的粉丝，往他们粉丝的 feed 里面推送一条动态。</li>
+<li>拉模式：推模式相反，拉模式则是，用户每次刷新 feed 第一页，都去遍历关注的人，把最新的动态拉取回来。</li>
+</ol>
+<p>一般采用推拉结合的方式，用户发送状态之后，先推送给粉丝里面在线的用户，然后不在线的那部分等到上线的时候再来拉取。</p>
+<p>另外冷热数据分离，用户关系在缓存里面可以设置一个过期时间，比如七天。七天没上线的可能就很少用这个 APP。</p>
+<h2 id="大文件排序"><a href="#大文件排序" class="headerlink" title="大文件排序"></a>大文件排序</h2><p>对于远高于内存的文件排序。</p>
+<p>外归并排序：</p>
+<ul>
+<li>对文件分割，然后分别排序</li>
+<li>排好序的文件依次读取一个缓冲区的大小，然后进行排序，输出到输出缓冲区，然后保存到结果文件。</li>
+</ul>
+<p>如果是数字，可以用位图排序，但是要求比较苛刻：</p>
+<ul>
+<li>数字不重复</li>
+<li>知道最大值</li>
+<li>相对密集，因为没出现的数字也会占用空间</li>
+</ul>
+<p>比较适合电话号之类的。</p>
+<h2 id="总结和方法论"><a href="#总结和方法论" class="headerlink" title="总结和方法论"></a>总结和方法论</h2><p>架构设计题目远不止这些，我觉得主要从以下几个方面准备：</p>
+<ul>
+<li><p>先了解常用算法，针对解决各种问题能用哪些算法，比如大文件排序用外排序，大量数据中的命中判断用位图/布隆过滤器等等。</p>
+</li>
+<li><p>注意扩展性、多考虑极端情况，多问自己几个为什么。比如说起单机的限流算法想想分布式的怎么做。</p>
+</li>
+<li><p>实在不知道怎么弄的叙述自己的思考过程，着重展示自己考虑周全、思维缜密。</p>
+<p>比如之前一个同事面阿里被问整个机房网络挂了/断电了之类的极端问题，相信很多人不可能真的遇到这种情况，而且可用性一般也到不了这个级别。如果是我的话，我会着重考虑数据一致性、数据恢复、脏数据处理之类的问题，是否有其他机房提供服务，如果有的话涉及到网络分区，是不是可以引申谈谈 zab、raft 算法，另外原本两个或者三个机房提供服务，现在瞬间少了一个，其他机房的负载瞬间上升，怎么做削峰、降级，这就有回到我们会的问题上了。另外等到网络恢复了，怎么恢复服务？之前处理到一半的数据怎么处理？这些引申开来都有太多可以聊。</p>
+</li>
+</ul>
+<p>另外有其他人总结的经验如下：</p>
+<p><a href="https://www.zhihu.com/question/26312148/answer/32627282" target="_blank" rel="noopener">如何答好面试中的系统设计题？@董飞</a></p>
+<blockquote>
+<ul>
+<li><p>Cache：缓存，万金油，哪里不行优先考虑</p>
+</li>
+<li><p>Queue：消息队列，常见使用Linkedin的kafka</p>
+</li>
+<li><p>Asynchronized：批处理＋异步，减少系统IO瓶颈</p>
+</li>
+<li><p>Load Balance: 负载均衡，可以使用一致性hash技术做到尽量少的数据迁移</p>
+</li>
+<li><p>Parallelization：并行计算，比如MapReduce</p>
+</li>
+<li><p>Replication：提高可靠性，如HDFS，基于位置感知的多块拷贝</p>
+</li>
+<li><p>Partition：数据库sharding，通过hash取摸</p>
+</li>
+</ul>
+</blockquote>
+<p><a href="https://www.zhihu.com/question/26312148/answer/32627282" target="_blank" rel="noopener">如何答好面试中的系统设计题？@罗辑</a></p>
+<blockquote>
+<p>交流沟通和理解能力 - 跟面试官充分交流理解所设计系统的目标，方便做设计中的tradeoff，在厂里干过的就知道日常工作中这个非常重要</p>
+<p>设计和架构能力 - 很多我见过的面试者都只注重在这块而忽略了其他，很可惜</p>
+<p>扩展性，容错性，延迟要求 - 跟Opeartion相关的要求，如今Dev和Ops不分家，希望面试者了解系统今后能如何扩展，易于maintain。</p>
+<p>资源需求 - 对于我们所要求的QPS和latency，需要多少台机器，其中CPU, 内存，硬盘等资源都是如何配置</p>
+</blockquote>
+<p><a href="https://jiajunhuang.com/articles/2019_04_29-system_design.md.html" target="_blank" rel="noopener">如何解决系统设计题</a></p>
+<blockquote>
+<h2 id="注意陷阱⚠️"><a href="#注意陷阱⚠️" class="headerlink" title="注意陷阱⚠️"></a>注意陷阱⚠️</h2><p><strong>千万不要张口就来</strong> 。我们上面的分析已经表明，遇到问题，我们必须先明确问题，然后才能给出有效的解决方案，系统设计题也是如此。 而往往面试官会在这里面挖坑，就是，给出一个条件相当模糊的系统设计题。例如：请设计一个短链接系统、请设计一个压测工具。</p>
+<p>如果我们张口就来，那么就中了面试官的套路。在工作中也是如此，如果你碰到了一个产品经理，产品经理还没有想清楚，就叫你写代码， 那么后面一定是反复修改需求，作为工程师的你一定是痛不欲生。因此，我们需要做的第一步就是 <strong>明确问题，不要张口就来</strong>。</p>
+<p><strong>千万不要自己一个人闷头想，记得一边想一边把你的思路说出来</strong> 由于别人是不知道你咋想什么的，如果你一个人皱着眉头思考，面试官 也很着急，他也不知道你是想不出还是怎么的。所以，一边把你的思路描述出来一边想，这是最好的方式。</p>
+<h2 id="明确问题"><a href="#明确问题" class="headerlink" title="明确问题"></a>明确问题</h2><p>拿到了问题之后，我们只有一个大概的方向，即我们要做一个什么。但是并不清楚具体条件，而不同的的业务场景所需要的架构也是不一样的。 例如，每天只有10000次访问的短链接系统和每秒钟有10000次访问的短链接系统在技术要求上是不一样的。</p>
+<p>因此，第一个我们需要问面试官的问题：</p>
+<ul>
+<li>这个系统一天的请求量是多少？面试官回答，一天2万。</li>
+</ul>
+<p>虽然现在我们有了更加明确的条件，但是还是不够具体，我们需要进一步确定：</p>
+<ul>
+<li>这个短链接系统的峰值是多少？面试官回答：峰值1万/s。</li>
+</ul>
+<p>此刻，我们得到的条件已经清晰很多，我们知道，QPS位10k，相对来说，已经算是高并发了，但是我们还需要继续确定。</p>
+<ul>
+<li>这个短链系统的短链接是永久保存的吗？面试官回答：是。</li>
+<li>生成的锻炼字符长度有要求吗？越短越好。</li>
+<li>录入的长链接大概是多少个字符呢？有长有短。</li>
+<li>那么，平均是多少个字符呢？假设是50个字节。</li>
+</ul>
+<p>通过这些我们可以了解到，我们需要对短链接进行持久化。而到目前为止，我们可以得出一些计算：</p>
+<ul>
+<li>峰值QPS为10k</li>
+<li>一天的请求量为20k，因此，我们的系统需要为并发考虑，所以我们很可能需要用到缓存</li>
+<li>一天为20k，那么一年就是 <code>20k * 365 = 7300k</code></li>
+<li>如果短链接生成的链接长度为 6个字符，那么一年下来，需要的磁盘大小至少是：<code>7300k * (6 + 50) / 1024 = 399.21875M</code></li>
+</ul>
+<p>然后我们需要了解一些常见的性能指标，这是我们需要记在脑子里的：</p>
+<ul>
+<li>Nginx：能轻松的处理c100k问题，内存越大，能处理的并发量越高</li>
+<li>Redis: <a href="https://redis.io/topics/benchmarks" target="_blank" rel="noopener">https://redis.io/topics/benchmarks</a> 表明，对于GET/SET来说，QPS 10-100k没啥大问题</li>
+<li>MySQL: <a href="https://www.mysql.com/why-mysql/benchmarks/" target="_blank" rel="noopener">https://www.mysql.com/why-mysql/benchmarks/</a> 表明，对于只读，QPS 几百k没啥问题，对于写，MySQL 5.7 QPS 100k 几乎是上限</li>
+<li>PG: <a href="https://www.percona.com/blog/2017/01/06/millions-queries-per-second-postgresql-and-mysql-peaceful-battle-at-modern-demanding-workloads/" target="_blank" rel="noopener">https://www.percona.com/blog/2017/01/06/millions-queries-per-second-postgresql-and-mysql-peaceful-battle-at-modern-demanding-workloads/</a> 也是差不多</li>
+</ul>
+<p>这些数据是不准确的，因为：</p>
+<ul>
+<li>和怎么用关系很大</li>
+<li>和硬件配置关系很大</li>
+</ul>
+<p>但是我们心里还是要有个大概印象。</p>
+<p>现在我们就可以知道了，这个短链系统，并发是10k/s，但是我们还漏掉了一个问题，就是没有明确是读的QPS是10k还是写，还是读+写。 这个时候我们仍然可以向面试官提问。但是，不论读还是写，QPS为10k，只要硬件配置过得去，不加缓存也ok。但是通常来说，我们还是会 选择加上，原因很简单：此刻都有QPS都有10k，保不准半年之后更高了。</p>
+<p>到此为止，我们已经知晓了解决系统设计题的一个大概思路流程，但是这远远不够，因为系统设计题对知识的广度要求也很高，因此这里 我还会提供一些常见的知识，希望能够对大家有所帮助。</p>
+<h2 id="常见知识"><a href="#常见知识" class="headerlink" title="常见知识"></a>常见知识</h2><ul>
+<li>最简单粗暴也是实践中最常用的应对方案就是：升级机器、加机器(所以架构的时候要考虑好水平扩展)</li>
+<li>大多数应用都是读大于写，解决方案很简单：加缓存+读写分离</li>
+<li>对于写大于读的方案，见 <a href="https://jiajunhuang.com/articles/2018_01_08-db_optimizations.md.html" target="_blank" rel="noopener">(关系型)数据库优化总结</a></li>
+<li>Nginx：能轻松的处理c100k问题，内存越大，能处理的并发量越高</li>
+<li>Redis: <a href="https://redis.io/topics/benchmarks" target="_blank" rel="noopener">https://redis.io/topics/benchmarks</a> 表明，对于GET/SET来说，QPS 10-100k没啥大问题</li>
+<li>MySQL: <a href="https://www.mysql.com/why-mysql/benchmarks/" target="_blank" rel="noopener">https://www.mysql.com/why-mysql/benchmarks/</a> 表明，对于只读，QPS 几百k没啥问题，对于写，MySQL 5.7 QPS 100k 几乎是上限</li>
+<li>PG: <a href="https://www.percona.com/blog/2017/01/06/millions-queries-per-second-postgresql-and-mysql-peaceful-battle-at-modern-demanding-workloads/" target="_blank" rel="noopener">https://www.percona.com/blog/2017/01/06/millions-queries-per-second-postgresql-and-mysql-peaceful-battle-at-modern-demanding-workloads/</a> 也是差不多</li>
+<li>B, M, G, T, PB之间的关系换算要清楚</li>
+<li>需要长时间处理的任务或者是强依赖网络(而网络不确定性大的问题)，妥妥的用队列，例如消息推送</li>
+<li>性能优化套路：加机器 - 加缓存 - 优化数据库索引 - 垂直拆数据库表 - 水平拆数据库表 - 垂直分库 - 水平分库</li>
+</ul>
+</blockquote>
+<p>参考资料</p>
+<p><a href="https://www.javazhiyin.com/46581.html" target="_blank" rel="noopener">这一次，彻底弄懂“秒杀系统”</a></p>
+<p><a href="https://juejin.im/post/5bb05d786fb9a05d1d2e1e68" target="_blank" rel="noopener">淘宝大秒杀系统设计详解</a></p>
+<p><a href="https://www.infoq.cn/article/2017hongbao-weixin" target="_blank" rel="noopener">百亿级微信红包的高并发资金交易系统设计方案</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/54238270" target="_blank" rel="noopener">全面解密QQ红包技术方案：架构、技术实现、移动端优化、创新玩法等</a></p>
+<p><a href="https://tech.meituan.com/2017/04/21/mt-leaf.html" target="_blank" rel="noopener">Leaf——美团点评分布式ID生成系统</a></p>
+<p><a href="https://www.infoq.cn/article/wechat-serial-number-generator-architecture/" target="_blank" rel="noopener">微信序列号生成器架构设计及演变</a></p>
+<p><a href="https://www.jianshu.com/p/e0e7e8494d96" target="_blank" rel="noopener">分布式定时任务（一）</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/12/%E7%BC%93%E5%AD%98%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/" rel="prev" title="缓存系统常见问题总结">
+      <i class="fa fa-chevron-left"></i> 缓存系统常见问题总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AEPaxos%E3%80%81Raft%E5%92%8CZAB/" rel="next" title="分布式协议Paxos、Raft和ZAB">
+      分布式协议Paxos、Raft和ZAB <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#秒杀系统"><span class="nav-number">1.</span> <span class="nav-text">秒杀系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#短链接生成"><span class="nav-number">2.</span> <span class="nav-text">短链接生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#红包系统"><span class="nav-number">3.</span> <span class="nav-text">红包系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式ID"><span class="nav-number">4.</span> <span class="nav-text">分布式ID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式限流"><span class="nav-number">5.</span> <span class="nav-text">分布式限流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式定时任务"><span class="nav-number">6.</span> <span class="nav-text">分布式定时任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#微博推送"><span class="nav-number">7.</span> <span class="nav-text">微博推送</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大文件排序"><span class="nav-number">8.</span> <span class="nav-text">大文件排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结和方法论"><span class="nav-number">9.</span> <span class="nav-text">总结和方法论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意陷阱⚠️"><span class="nav-number">10.</span> <span class="nav-text">注意陷阱⚠️</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#明确问题"><span class="nav-number">11.</span> <span class="nav-text">明确问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见知识"><span class="nav-number">12.</span> <span class="nav-text">常见知识</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">375k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">10:25</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

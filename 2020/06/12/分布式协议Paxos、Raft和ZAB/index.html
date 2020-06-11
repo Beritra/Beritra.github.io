@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="首先得放在开头，分布式系统的一致性协议一直是分布式系统的难题，本人没有阅读过 Lamport 老人家的论文原文（估计直接读也未必读的懂），以下所有内容来自网络博文、书籍和网站的整理，加上自己的理解润色。水平有限不敢说全都正确，仅供参考。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式协议Paxos、Raft和ZAB">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;06&#x2F;12&#x2F;%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AEPaxos%E3%80%81Raft%E5%92%8CZAB&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="首先得放在开头，分布式系统的一致性协议一直是分布式系统的难题，本人没有阅读过 Lamport 老人家的论文原文（估计直接读也未必读的懂），以下所有内容来自网络博文、书籍和网站的整理，加上自己的理解润色。水平有限不敢说全都正确，仅供参考。">
+<meta property="article:published_time" content="2020-06-11T16:22:20.000Z">
+<meta property="article:modified_time" content="2020-06-11T16:24:20.428Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="分布式系统">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://beritra.github.com/2020/06/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AEPaxos%E3%80%81Raft%E5%92%8CZAB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>分布式协议Paxos、Raft和ZAB | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/06/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%AE%AEPaxos%E3%80%81Raft%E5%92%8CZAB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式协议Paxos、Raft和ZAB
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-12 00:22:20 / 修改时间：00:24:20" itemprop="dateCreated datePublished" datetime="2020-06-12T00:22:20+08:00">2020-06-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>首先得放在开头，分布式系统的一致性协议一直是分布式系统的难题，本人没有阅读过 Lamport 老人家的论文原文（估计直接读也未必读的懂），以下所有内容来自网络博文、书籍和网站的整理，加上自己的理解润色。水平有限不敢说全都正确，仅供参考。</p>
+<a id="more"></a>
+
+<h2 id="Paxos"><a href="#Paxos" class="headerlink" title="Paxos"></a>Paxos</h2><p>说到分布式一致性协议，Paxos 肯定是绕不开的，关于它和其作者 Lamport 的传奇故事也是有很多，这里就不啰嗦了，感兴趣的可以自行搜索。作为几种常见协议的基础，Paxos 提供了“选举” 的思想，Lamport 为了简化 Paxos，也为了讲述这个算法，假想了一个叫做 Paxos 的希腊城邦进行选举的情景，这个算法也是因此而得名。</p>
+<p>Paxos 算法的步骤是这样：</p>
+<ol>
+<li>首先有两种角色，一个是“提议者”，一个是“接受者”。提议者可以向接受者提出提议，然后接受者表达意见。</li>
+<li>因为存在多个提议者，如果同时表达意见会出现意见不一致的情况，所以首先需要尽快选出一个领导者，让意见统一。</li>
+<li>然后领导者会给接受者发出提议，如果一个提议被大多数接受者接纳，这个提议就通过了。</li>
+</ol>
+<p>大致的流程是这样，再完善一下细节：</p>
+<ol>
+<li><p>如何明确领导者？这里会有两个阶段：</p>
+<ul>
+<li>第一阶段是先达成一致，协商出领导者，具体方法就是通过编号，提议者会先报告一个编号，谁的编号最大谁就是领导（Lamport 巧妙的比喻为“贿选”，谁出的钱多就选谁）。</li>
+<li>然后第二阶段就是上一轮胜出的领导提出提议，发送给各个接受者。</li>
+</ul>
+</li>
+<li><p>跟常识不太一样的是，每个提议者不会执着于当领导，而是谋求尽快达成共识，所以如果在一个提议者提议的时候，如果发现接受者已经接受了其他领导者的提议，也会默默的把自己的提议改为前面领导者的提议。</p>
+</li>
+<li><p>编号不能太小，很小的话前两个阶段都会直接失败，接受者拒绝接受你的提议。</p>
+</li>
+<li><p>在步骤 2 中，还有可能出现冲突：比如如果一个提议者在对接受者 A 提议的时候，发现 A 接受了领导者 L1 的提议，然后又去接受者 B 那里提议，发现 B 接受了领导者 L2 的提议，已知这个提议者肯定会跟随前面已经存在的提议，那么他会把自己的提议改为上面两个的哪个呐？答案是数值更大的那个。</p>
+</li>
+<li><p>在达成共识之前，这整个阶段，哪个提议者先来，哪个后来，接受者什么时候收到提议者的信息，都是不可控的。所以有可能产生这样一种情况：一个提议者已经晋升为领导者，但是还没发起提议，这时候另外一个“土豪”提议者过来，疯狂“贿选”，还是存在机会让自己胜出的。<strong>这时就形成了一种博弈：</strong></p>
+<ul>
+<li>上一个领导者要赶在土豪提议者贿赂到接受者前，赶到接受者面前让他接受自己的提议，否则会因为自己的之前贿赂的钱比土豪少而被拒绝。</li>
+<li>土豪“提议者”要赶在上一个领导者将提议传达给接受者前，贿赂到接受者，否则土豪提议者即便贿赂成功，也要默默的将自己的提议改为前任意见领袖的提议。</li>
+</ul>
+<p>这整个博弈的过程，最终就看这两个提议者谁的进展快了。但最终一定会有一个领导者，先得到多数接受者的认可，那他的提议就胜出了。</p>
+</li>
+</ol>
+<p>总结来看，Paxos 包括以下几个原则：</p>
+<ol>
+<li>Paxos 算法包括两个阶段：第一个阶段主要是贿选，还没有提出提议；第二个阶段主要根据第一阶段的结果，明确接受谁的提议，并明确提议的内容是什么（这个提议可能是贿选胜出提议者自己的提议，也可能是前任意见领袖的提议，具体是哪个提议，往下看，见下面第 3 点的内容）。</li>
+<li>编号（贿赂金额）很重要，无论在哪个阶段，编号（贿赂金额）小的，都会被拒绝。</li>
+<li>在第一阶段中，一旦接受者已经接受了之前领导者的提议，那后面再来找这个接受者的提议者，即便在贿赂中胜出，也要被洗脑，默默将自己的提议改为前任意见领袖的提议，然后他会在第二阶段提出该提议（也就是之前意见领袖的提议，以力争让大家的意见趋同）。如果接受者之前没有接受过任何提议，那贿选胜出的提议者就可以提出自己的提议了。</li>
+</ol>
+<p>以上，我们说的 Paxos 其实又叫 Basic Paxos，只具备理论基础，实际上实现起来很麻烦而且效率低。因为每次同步一个信息，就要进行上述繁杂的达成共识阶段，无异会产生巨大的开销。</p>
+<p>于是后来又有了进阶版的 Multi Paxos 协议。只要 Leader 是相对稳定不变的，第 1 阶段就变得不必要。 这样，系统可以在接下来的 Paxos 算法实例中，跳过的第 1 阶段，直接使用同样的 Leader。</p>
+<p>Multi Paxos 本身对一些边缘情况没有定义，所以大多数实际应用是基于 Multi Paxos 进行补充，或者使用它的变种 Raft。</p>
+<p>从网上查询得知，工业界中三种协议的应用情况基本如下：</p>
+<ul>
+<li>微信背后的高可用存储系统 PaxosStore 是基于  Multi Paxos 开发的</li>
+<li>广为人知的高可靠的 kv 存储系统 etcd 用的 Raft</li>
+<li>阿里的高性能存储 PolarFS 用到的 Raft 变种 ParallelRaft 协议</li>
+<li>TiDB 用的 Raft</li>
+<li>ZAB 的名字就叫 ZooKeeper Atomic Broadcast，自然是 ZooKeeper 在用，没找到其他在用的，但是考虑到动物管理员恐怖的占有率，ZAB 协议也不容轻视</li>
+</ul>
+<h2 id="Raft-协议"><a href="#Raft-协议" class="headerlink" title="Raft 协议"></a>Raft 协议</h2><p>Raft 感觉是最容易理解的一个了，也很有意思。先说它的逻辑：</p>
+<p>Raft 协议的每个副本都会处于三种状态之一：Leader、Follower、Candidate。</p>
+<p><strong>Leader</strong>：所有请求的处理者，Leader 副本接受 client 的更新请求，本地处理后再同步至多个其他副本<br><strong>Follower</strong>：请求的被动更新者，从 Leader 接受更新请求，然后写入本地日志文件<br><strong>Candidate</strong>：如果 Follower 副本在一段时间内没有收到 Leader 副本的心跳，则判断 Leader 可能已经故障，此时启动选主过程，此时副本会变成 Candidate 状态，直到选主结束。</p>
+<p>可以看出，跟 Paxos 的基本理念一样，首先最基本的 Flollow（接受者），如果 Follower 接收不到 Leader 的心跳，就会全部转化为Candidate（提议者），然后提议者开始“贿选”，直到选出 Leader 之后，所有没选上的 Candidate 退回到 Follower 状态，统一接收 Leader 领导。</p>
+<p>就是说只要 Leader 不挂掉，只要选举一次就行了，后面大家默认信任选出来的 Leader。</p>
+<p>另外，每一个副本都会维护一个 term，类似于一个逻辑时钟，每发生一个动作就会递增，通过比较每个提议的 term，副本会默认使用最新的 term，防止发生冲突。如果一个 Leader 或者 Candidate 发现自己的 term 不是最新的了，就会自动降级到 Follower，而如果一个 Follower 接收到低于自己当前 term 的提议，就会直接抛弃。</p>
+<p>基本原则了解之后，我们完善一下细节。</p>
+<p>在强 Leader 的帮助下，Raft 将一致性问题分解为了三个子问题：</p>
+<ol>
+<li>Leader 选举：当已有的 Leader 故障时必须选出一个新的 Leader。</li>
+<li>日志复制：Leader 接受来自客户端的命令，记录为日志，并复制给集群中的其他服务器，并强制其他节点的日志与 Leader 保持一致。</li>
+<li>安全 safety 措施：通过一些措施确保系统的安全性，如确保所有状态机按照相同顺序执行相同命令的措施。</li>
+</ol>
+<p>另外丢两个非常清晰的 Raft 全流程动画演示，看完之后很容易理解：</p>
+<p><a href="http://thesecretlivesofdata.com/raft/" target="_blank" rel="noopener">http://thesecretlivesofdata.com/raft/</a></p>
+<p><a href="https://raft.github.io/" target="_blank" rel="noopener">https://raft.github.io/</a> </p>
+<h3 id="选举过程"><a href="#选举过程" class="headerlink" title="选举过程"></a>选举过程</h3><p>我们从最初始的状态来模拟，假设一个集群有三个副本，刚启动的时候，大家都是 Follower。然后每个 Follower 会有一个倒计时（election timeout），在倒计时结束之前，如果没有收到任何 Leader 的心跳，或者其他 Candidate 的投票请求，就会转化为 Candidate，开始选举。</p>
+<p>变成 Candidate 之后，会先投自己一票，同时开启一个倒计时，然后向所有其他节点发起投票请求。如果在倒计时完成之前，没有成为 Leader 或者接收到其他 Leader 的消息，就会发起新一轮选举。</p>
+<p>当一个副本处于 Candidate 状态时，如果收到来自 Leader 的心跳消息，就会立即变身为 Follower。如果发出去的投票请求得到了半数节点的成功回应，就会立即变身为 Leader，并周期性地向其它节点广播心跳消息，以尽可能长期维持自己的统治地位。</p>
+<p>关于选举的更多细节：</p>
+<ul>
+<li>election timeout 会是一个一定范围内的随机值，因为如果所有节点的倒计时时间都一样，大家就会同时变成 Candidate，然后同时互相投票选举，加大了达成共识的难度，所以倒计时会稍微错开，就很容易率先选出来一个 Leader。</li>
+<li>成功选举 Leader 之后，Leader 会向所有节点发送心跳，然后心跳会重置每个节点的 election timeout 倒计时时间。</li>
+<li>即便错开了倒计时，仍然有可能出现多个 Candidate 同时竞争，如果两个 Candidate 获得的票数不一致还好说，其中一个必然是多数，变成了 Leader。但是如果恰巧节点总数是偶数，就有可能出现票数一样僵持的情况。这时候就会重新选举。（这里我觉得每个 Candidate 发一个随机数过去，谁更大听谁的也行…，当然即便这样也有可能一样大）</li>
+</ul>
+<h3 id="数据同步"><a href="#数据同步" class="headerlink" title="数据同步"></a>数据同步</h3><p>节点选出来了，下面就应该进行数据同步了。当一个数据修改的请求过来，会直接找到 Leader 节点，所有的增删改查都由 Leader 受理。然后同步给各个 Follower。</p>
+<p>每次数据同步操作同时也是一个心跳，会更新 Follower 的 election timeout。另外只有当多数节点返回同步成功之后，Leader 才会给客户端返回操作成功。</p>
+<h3 id="分区容错"><a href="#分区容错" class="headerlink" title="分区容错"></a>分区容错</h3><p>然后是最麻烦的部分，如果出现了网络分区怎么办？比如原本五个节点的集群，被分成了双节点和三节点的两个集群。</p>
+<p>假设原本的 Leader 在双节点的集群里面，那么这个集群会照常运作。而新出现的三个节点的集群，由于没有收到心跳，会开始选举，然后选出新的 Leader。这时候，如果有客户端发起请求，有可能发送到两个不同的 Leader 上面，如果发送到原来的那个 Leader 上，即双节点的集群中，Leader 把操作同步给 Follower，会发现收不到足够多的 Follower 响应（因为这个 Follower 还以为自己的集群是五个节点），然后就没办法同步数据。而三节点的新集群，就可以顺利更新数据。</p>
+<p>如果这时候网络恢复了，各个节点又可以正常通信，三节点集群中的 Leader 和 双节点集群中的 Leader 会互相通信，然后会发现三节点的 Leader 由于一直正常运行，term 值会不断增大，所以大家会采信他的数据。于是双节点的两台机器会回滚，然后全部接受新 Leader 的数据同步。</p>
+<h2 id="ZAB-协议"><a href="#ZAB-协议" class="headerlink" title="ZAB 协议"></a>ZAB 协议</h2><p>了解了上面两种协议之后， ZAB 协议学习起来也不复杂。ZAB　协议定义了选举（election）、发现（discovery）、同步（sync）、广播（Broadcast）四个阶段。</p>
+<p>选举（election）是选出哪台为主机；</p>
+<p>发现（discovery）、同步（sync）当主选出后，要做的恢复数据的阶段；</p>
+<p>广播（Broadcast）当主机和从选出并同步好数据后，正常的主写同步从写数据的阶段。</p>
+<p>跟其他协议类似，集群副本有三种状态：</p>
+<ul>
+<li>Leader 也就是领导者</li>
+<li>Follower 也就是接受提议的跟随者</li>
+<li>Observer 可以认为是领导者的的 Copy，不参与投票，在这可以忽略</li>
+</ul>
+<p>与之对应的，一个 ZK 集群中的某个节点也有三种状态：</p>
+<ul>
+<li>Looking：选举状态，当前群龙无首</li>
+<li>Leading：Leader 节点才有的状态</li>
+<li>Following：Follower 节点才有的状态</li>
+<li>Observing：观察者状态。表明当前服务器角色是 Observer，与 Folower 唯一的不同在于不参与选举，也不参与集群写操作时的投票。</li>
+</ul>
+<p>每次写成功的消息，都有一个全局唯一的标识，叫 zxid。是 64 bit 的正整数，高 32 为叫 epoch 表示选举纪元，低 32 位是自增的 id，每写一次加一。一个博主巧妙地比喻为为中国古代的年号，非常形象，例如万历十五年，万历是 epoch，十五年是 id。</p>
+<p>ZK 集群一般都是奇数个机器（2n+1）,只有一个领导者 Leader，其余都是跟随者 Follower。选主还是写数据，要有大于等于 n+1 台选举相同，才能执行选举的操作。所有的写操作必须要通过 Leader 完成再由 Leader 将写操作广播给其它服务器。</p>
+<h3 id="选举"><a href="#选举" class="headerlink" title="选举"></a>选举</h3><p>当集群新建，或者主机死机，或者主机与一半或以上的从机失去联系后，都会触发选择新的主机操作。</p>
+<p>选举有多种算法，到<code>3.4.10</code>版本为止，可选项有：</p>
+<ul>
+<li>0 基于UDP的LeaderElection</li>
+<li>1 基于UDP的FastLeaderElection</li>
+<li>2 基于UDP和认证的FastLeaderElection</li>
+<li>3 基于TCP的FastLeaderElection </li>
+</ul>
+<p>在<code>3.4.10</code>版本中，默认值为 3，也即基于 TCP 的 FastLeaderElection。另外三种算法已经被弃用，并且有计划在之后的版本中将它们彻底删除而不再支持。</p>
+<h4 id="FastLeaderElection"><a href="#FastLeaderElection" class="headerlink" title="FastLeaderElection"></a>FastLeaderElection</h4><p>这是 ZAB 默认采用的算法。</p>
+<p>每次选举都要把选举轮数加一，类似于 zxid 里的 epoch 字段，防止不同轮次的选举互相干扰。</p>
+<p>每个进入 Looking 状态的节点，会先把投票箱清空，然后通过广播投票给自己，再把投票消息发给其它机器，同时也在接受其他节点的投票。投票信息包括：轮数、被投票节点的 zxid，被投票节点的编号等等。</p>
+<p>其他 Looking 状态的节点收到后：</p>
+<ol>
+<li><p>首先判断票是否有效。是否有效的方法为看票的投票轮数和本地记载的投票轮数是否相等：</p>
+</li>
+<li><ol>
+<li>如果比本地投票轮数的小，丢弃。</li>
+<li>如果比本地投票轮数的大，证明自己投票过期了，清空本地投票信息，更新投票轮数和结果为收到的内容。通知其他所有节点新的投票方案。</li>
+<li>如果和本地投票轮数相等，按照投票的优先级比较收到的选票和自己投出去的选票：<ul>
+<li>如果收到的优先级大，则更新自己的投票为对方发过来投票方案，把投票发出去。</li>
+<li>如果收到的优先级小，则忽略该投票。</li>
+<li>如果收到的优先级相等，则更新对应节点的投票。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>每收集到一个投票后，查看已经收到的投票结果记录列表，看是否有节点能够达到一半以上的投票数。如果有达到，则终止投票，宣布选举结束，更新自身状态。然后进行发现和同步阶段。否则继续收集投票。</p>
+</li>
+</ol>
+<p>投票终止后，服务器开始更新自身状态。若过半的票投给了自己，则将自己的服务器状态更新为 Leading，否则将自己的状态更新为 Following。</p>
+<h3 id="广播——主从同步"><a href="#广播——主从同步" class="headerlink" title="广播——主从同步"></a>广播——主从同步</h3><p>主从同步数据比较简单，当有写操作时，如果是从机接收，会转到主机，保证写都是在主机上进行。Leader 会先提议事务，收到过半回复后，再发提交。</p>
+<ol>
+<li>当 Leader 收到写操作时，先本地生成事务为事务生成 zxid，然后发给所有 Follower 节点。</li>
+<li>当 Follower 收到事务时，先把提议事务的日志写到本地磁盘，成功后返回给 Leader。</li>
+<li>Leader 收到过半反馈后对事务提交。再通知所有的 Follower 提交事务， Follower 收到后也提交事务，提交后就可以对客户端进行分发了。</li>
+</ol>
+<h2 id="Raft-ZAB共同点和区别"><a href="#Raft-ZAB共同点和区别" class="headerlink" title="Raft\ZAB共同点和区别"></a>Raft\ZAB共同点和区别</h2><p>首先，二者都是通过选举一个 Leader 来简化复杂度，后续的工作都是由 Leader 来做。</p>
+<p>投票的时候，二者都需要定义一个轮次</p>
+<ul>
+<li>Raft 定义了 term 来表示选举轮次</li>
+<li>ZooKeeper 定义了 electionEpoch 来表示</li>
+</ul>
+<p>同步数据的时候，都希望选举出来的 Leader 至少包含之前全部已提交的日志。</p>
+<p>那如何能包含之前的全部日志？我们可以通过判断 Leader 节点中日志的逻辑时间序列，包含越新、越多日志的节点，越有可能包含之前全部的已提交日志。对于两种协议：</p>
+<ul>
+<li>Raft：term 大的优先，然后 entry 的 index 大的优先</li>
+<li>ZooKeeper：peerEpoch 大的优先，然后 zxid 大的优先</li>
+</ul>
+<p>ZooKeeper 有 2 个轮次，一个是选举轮次 electionEpoch，另一个是日志的轮次 peerEpoch（即表示这个日志是哪个轮次产生的）。而 Raft 则是只有一个轮次，相当于日志轮次和选举轮次共用了。</p>
+<p>但是有一个问题，日志越新越大的比较方式能满足我们“Leader 至少包含之前全部已提交的日志”的愿望吗？</p>
+<p>对于 Raft 协议，特殊情况下不能。对于 Raft 协议，通过两个约束来保证一致性：</p>
+<blockquote>
+<p>当前 term 的 Leader 不能“直接”提交之前 term 的 entries。</p>
+<p>必须要等到当前 term 有 entry 过半了，才顺便一起将之前 term 的 entries 进行提交。</p>
+</blockquote>
+<p>至于为什么必须这样，在什么特殊情况下会出问题，这篇文章中给了详细说明：<a href="https://my.oschina.net/pingpangkuangmo/blog/776714" target="_blank" rel="noopener">Raft算法赏析</a>建议直接看里面的例子，有点长我就不抄过来了。</p>
+<p>但是对于 ZooKeeper 是不会出现这种情况的，因为 ZooKeeper 在每次 Leader 选举完成之后，都会进行数据之间的同步纠正，所以每一个轮次，大家都日志内容都是统一的。</p>
+<p>继续对比，二者的选举效率也不同：</p>
+<ul>
+<li>Raft 中的每个节点在某个 term 轮次内只能投一次票，哪个 Candidate 先请求投票谁就可能先获得投票，这样就可能造成分区，即各个 Candidate 都没有收到过半的投票，Raft 通过 Candidate 设置不同的超时时间，来快速解决这个问题，使得先超时的Candidate（在其他人还未超时时）优先请求来获得过半投票。</li>
+<li>ZooKeeper 中的每个节点，在某个 electionEpoch 轮次内，可以投多次票，只要遇到更大的票就更新，然后分发新的投票给所有人。这种情况下不存在分区现象，同时有利于选出含有更新更多的日志的 Server，但是选举时间理论上相对 Raft 要花费的多。</li>
+</ul>
+<p>在一个节点启动后，如何加入一个集群（这里是说本来就在集群配置内的一个节点）：</p>
+<ul>
+<li>Raft：比较简单，该节点启动后，会收到 Leader 的 AppendEntries RPC，在这个 RPC 里面包含 Leader 信息，可以直接识别。</li>
+<li>ZooKeeper：启动后，会向所有的其他节点发送投票通知，然后收到其他节点的投票。该节点只需要判断上述投票是否过半，过半则可以确认 Leader。</li>
+</ul>
+<p>关于 Leader 选举的触发：</p>
+<p>首先集群启动的时候，二者肯定都要先进行选举。</p>
+<p>如果选举完成后，发生了超时：</p>
+<ul>
+<li>Raft：目前只是 Follower 在检测。如过 Follower 在倒计时时间内未收到 Leader 的心跳信息，则 Follower 转变成 Candidate，自增 term 发起新一轮的投票。</li>
+<li>ZooKeeper：Leader 和 Follower 都有各自的检测超时方式，Leader 是检测是否过半 Follower 心跳回复了，Follower 检测 Leader 是否发送心跳了。一旦 Leader 检测失败，则 Leader 进入 Looking 状态，其他 Follower 过一段时间因收不到 Leader 心跳也会进入 Looking 状态，从而出发新的 Leader 选举。一旦 Follower 检测失败了，则该 Follower 进入 Looking 状态，此时 Leader 和其他 Follower 仍然保持良好，则该 Follower 仍然是去学习上述 Leader 的投票，而不是触发新一轮的 Leader 选举。</li>
+</ul>
+<p>关于上一轮次 Leader 残存的数据怎么处理：</p>
+<p>包括两种数据：</p>
+<ul>
+<li><p>已过半复制的日志</p>
+</li>
+<li><p>未过半复制的日志</p>
+</li>
+<li><p>Raft：对于之前 term 的过半或未过半复制的日志采取的是保守的策略，全部判定为未提交，只有当前 term 的日志过半了，才会顺便将之前 term 的日志进行提交</p>
+</li>
+<li><p>ZooKeeper：采取激进的策略，对于所有过半还是未过半的日志都判定为提交，都将其应用到状态机中</p>
+</li>
+</ul>
+<p>Raft 的保守策略更多是因为 Raft 在 Leader 选举完成之后，没有同步更新过程来保持和 Leader 一致（在可以对外处理请求之前的这一同步过程）。而 ZooKeeper 是有该过程的。</p>
+<p>在对正常请求的处理方式上，二者都是基本相同的，大致过程都是过半复制。</p>
+<p>对于正常请求的消息顺序保证：</p>
+<ul>
+<li>Raft：对请求先转换成 entry，复制时，也是按照 Leader 中 log 的顺序复制给 Follower 的，对 entry 的提交是按 index 进行顺序提交的，是可以保证顺序的</li>
+<li>ZooKeeper：在提交议案的时候也是按顺序写入各个 Follower 对应在 Leader 中的队列，然后 Follower 必然是按照顺序来接收到议案的，对于议案的过半提交也都是一个个来进行的</li>
+</ul>
+<p>如果是 Leader 挂了之后，重新选举出 Leader，会不会有乱序的问题？</p>
+<ul>
+<li>Raft：Raft 对于之前 term 的 entry 被过半复制暂不提交，只有当本 term 的数据提交了才能将之前 term 的数据一起提交，也是能保证顺序的</li>
+<li>ZooKeeper：ZooKeepe r每次 Leader 选举之后都会进行数据同步，不会有乱序问题</li>
+</ul>
+<p>在出现网络分区情况下的应对措施，二者都是相同的：</p>
+<p>目前 ZooKeeper 和 Raft 都是过半即可，所以对于分区是容忍的。如5台机器，分区发生后分成 2 部分，一部分 3 台，另一部分 2 台，这 2 部分之间无法相互通信。</p>
+<p>其中，含有 3 台的那部分，仍然可以凑成一个过半，仍然可以对外提供服务，但是它不允许有节点再挂了，一旦再挂一台则就全部不可用了。</p>
+<p>含有 2 台的那部分，则无法提供服务，即只要连接的是这 2 台机器，都无法执行相关请求。</p>
+<p>所以 ZooKeeper 和 Raft 在一旦分区发生的情况下是是牺牲了高可用来保证一致性，即 CAP 理论中的 CP，二者都是 CP 系统。</p>
+<p>必须需要重申，无论上面哪一种协议，都只是概念模型，还有很多细节需要补充完善，比如具体的数据存储方式，日志处理，具体的节点通信方式等等，距离实现一个工业可用的框架还有一段距离，想了解具体细节可以参考各个大厂开源的产品，或者自己尝试实现一下。</p>
+<p>参考文章:</p>
+<p><a href="https://zhuanlan.zhihu.com/p/21895686" target="_blank" rel="noopener">浅显易懂地解读Paxos算法</a></p>
+<p><a href="https://my.oschina.net/pingpangkuangmo/blog/782702" target="_blank" rel="noopener">Raft对比ZAB协议</a></p>
+<p><a href="https://tech.youzan.com/cap-coherence-protocol-and-application-analysis/" target="_blank" rel="noopener">CAP一致性协议及应用解析</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/91288179" target="_blank" rel="noopener">Raft协议原理详解</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/44207241" target="_blank" rel="noopener">十分钟了解ZAB协议</a></p>
+<p><a href="https://dbaplus.cn/news-141-1875-1.html" target="_blank" rel="noopener">实例详解ZooKeeper ZAB协议、分布式锁与领导选举</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" rel="tag"># 分布式系统</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/12/%E5%B8%B8%E8%A7%81%E7%9A%84%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="常见的架构设计面试题">
+      <i class="fa fa-chevron-left"></i> 常见的架构设计面试题
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos"><span class="nav-number">1.</span> <span class="nav-text">Paxos</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Raft-协议"><span class="nav-number">2.</span> <span class="nav-text">Raft 协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#选举过程"><span class="nav-number">2.1.</span> <span class="nav-text">选举过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据同步"><span class="nav-number">2.2.</span> <span class="nav-text">数据同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分区容错"><span class="nav-number">2.3.</span> <span class="nav-text">分区容错</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZAB-协议"><span class="nav-number">3.</span> <span class="nav-text">ZAB 协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#选举"><span class="nav-number">3.1.</span> <span class="nav-text">选举</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#FastLeaderElection"><span class="nav-number">3.1.1.</span> <span class="nav-text">FastLeaderElection</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#广播——主从同步"><span class="nav-number">3.2.</span> <span class="nav-text">广播——主从同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Raft-ZAB共同点和区别"><span class="nav-number">4.</span> <span class="nav-text">Raft\ZAB共同点和区别</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">375k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">10:25</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

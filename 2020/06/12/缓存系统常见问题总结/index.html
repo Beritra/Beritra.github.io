@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.jpg">
+  <link rel="mask-icon" href="/images/icon.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://Beritra.github.com').hostname,
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="关于缓存的知识太多了，先整理一点，慢慢补充吧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="缓存系统常见问题总结">
+<meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2020&#x2F;06&#x2F;12&#x2F;%E7%BC%93%E5%AD%98%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93&#x2F;index.html">
+<meta property="og:site_name" content="Beritra">
+<meta property="og:description" content="关于缓存的知识太多了，先整理一点，慢慢补充吧。">
+<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202006&#x2F;6680e5ceaafa11ea830eacde48001122.png">
+<meta property="article:published_time" content="2020-06-11T16:21:48.000Z">
+<meta property="article:modified_time" content="2020-06-11T16:25:31.309Z">
+<meta property="article:author" content="Beritra">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="缓存">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202006&#x2F;6680e5ceaafa11ea830eacde48001122.png">
+
+<link rel="canonical" href="http://beritra.github.com/2020/06/12/%E7%BC%93%E5%AD%98%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>缓存系统常见问题总结 | Beritra</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Beritra</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Blogs</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://beritra.github.com/2020/06/12/%E7%BC%93%E5%AD%98%E7%B3%BB%E7%BB%9F%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avator.jpg">
+      <meta itemprop="name" content="Beritra">
+      <meta itemprop="description" content="Beritra's Blogs">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Beritra">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          缓存系统常见问题总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-12 00:21:48 / 修改时间：00:25:31" itemprop="dateCreated datePublished" datetime="2020-06-12T00:21:48+08:00">2020-06-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index">
+                    <span itemprop="name">架构</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>关于缓存的知识太多了，先整理一点，慢慢补充吧。</p>
+<a id="more"></a>
+
+<h2 id="缓存同步策略"><a href="#缓存同步策略" class="headerlink" title="缓存同步策略"></a>缓存同步策略</h2><p>首先需要明确，除了把整个缓存和持久化存储都做串行化，或者操作一个的时候直接锁死另一个，不然必然会有产生数据不一致的可能。选择哪种缓存策略是根据自己的业务场景进行取舍。</p>
+<p>经常见到的一种方式，是写更新缓存数据代码时，先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中。</p>
+<p>但是这种方式也有问题，假如两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。</p>
+<p>典型的缓存模式，一般有如下几种：</p>
+<ul>
+<li><strong>Cache Aside</strong></li>
+<li><strong>Read/Write Through</strong></li>
+<li><strong>Write Around</strong></li>
+<li><strong>Write Behind</strong></li>
+</ul>
+<h3 id="Cache-Aside"><a href="#Cache-Aside" class="headerlink" title="Cache Aside"></a>Cache Aside</h3><p>经常用到的一种策略模式。这种模式主要流程如下：</p>
+<ul>
+<li><p><strong>失效</strong>：应用程序先从 Cache 取数据，没有得到，则从数据库中取数据，成功后，放到缓存中。</p>
+</li>
+<li><p><strong>命中</strong>：应用程序从 Cache 中取数据，取到后返回。</p>
+</li>
+<li><p><strong>更新</strong>：先把数据存到数据库中，成功后，再让缓存失效。</p>
+</li>
+</ul>
+<p>这种缓存策略会在如下情况出现脏数据：</p>
+<ul>
+<li>线程 A 查询一个数据，在缓存中没有找到，于是去数据库查，拿到数据之后还没放到缓存中。</li>
+<li>这时候线程 B 过来更新这一条数据，先更新数据库之后准备令缓存失效，由于缓存还没放进来所以不需要失效。</li>
+<li>线程 A 把数据放到了缓存中。但是这个数据其实已经是脏数据了，跟数据库中不同步。</li>
+</ul>
+<p>这种情况发生概率要稍微低，因为需要在数据库的查询操作和缓存的更新操作之间，插入一个数据库的修改和缓存的修改操作，一般情况下，后者需要的时间是要远高于前者的。当然也不能忽视这种情况确实存在。</p>
+<h3 id="Read-Write-Through"><a href="#Read-Write-Through" class="headerlink" title="Read/Write Through"></a>Read/Write Through</h3><p>Read/Write Through 套路是把更新数据库（Repository）的操作由缓存自己代理了，对应用层来说是透明的，应用不再需要关心数据同步问题。</p>
+<h4 id="Read-Through"><a href="#Read-Through" class="headerlink" title="Read Through"></a>Read Through</h4><p>Read Through 就是在查询操作中更新缓存，也就是说，当缓存失效的时候（过期或 LRU 换出），Cache Aside 是由调用方负责把数据加载入缓存，而 Read Through 则用缓存服务自己来加载，从而对应用方是透明的。</p>
+<h4 id="Write-Through"><a href="#Write-Through" class="headerlink" title="Write Through"></a>Write Through</h4><p>Write Through 套路和 Read Through 相仿，不过是在更新数据时发生。当有数据更新的时候，如果没有命中缓存，直接更新数据库，然后返回。如果命中了缓存，则更新缓存，然后再由 Cache 自己更新数据库（这是一个同步操作）。</p>
+<p><img src="http://nas.beritra.com:18081/blog/202006/6680e5ceaafa11ea830eacde48001122.png" alt="Write-through_with_no-write-allocation"></p>
+<p>这种方式的风险也显而易见，如果追求落库之后再返回成功，效率必然降低很多，缓存的意义就不大了。如果追求落到缓存上就算成功，那问题又抛给了缓存的丢失风险上。</p>
+<h3 id="Write-Around"><a href="#Write-Around" class="headerlink" title="Write Around"></a>Write Around</h3><p>这种策略下，数据直接写入数据库，只有读取的数据才能进入缓存。Write Around 可以与 Read Through 结合使用，并在数据只写一次、读取次数较少或从不读的情况下提供良好的性能。例如，实时日志或聊天室消息。同样，这个模式也可以与 Cache Aside 组合使用。</p>
+<h3 id="Write-Behind"><a href="#Write-Behind" class="headerlink" title="Write Behind"></a>Write Behind</h3><p>Write Behind 又叫 Write Back。就是 Linux 文件系统的 Page Cache 的算法。</p>
+<p>Write Back 套路，一句说就是，在更新数据的时候，只更新缓存，不更新数据库，而我们的缓存会异步地批量更新数据库。这个设计的好处就是让数据的 I/O 操作飞快无比（因为直接操作内存嘛 ），因为异步，Write Back 还可以合并对同一个数据的多次操作，所以性能的提高是相当可观的。</p>
+<p>性能很强悍，问题也很明显，数据不是强一致性的，而且可能会丢失。另外 Write Behind 实际上的逻辑还比较复杂，因为需要追踪定位哪些数据需要做持久化。</p>
+<h2 id="常见面试题"><a href="#常见面试题" class="headerlink" title="常见面试题"></a>常见面试题</h2><p>下面是几个老生常谈面经常见问题了，该背的还是得背啊…</p>
+<h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><p>缓存穿透的意思：请求去查询一条压根儿数据库中根本就不存在的数据，也就是缓存和数据库都查询不到这条数据，但是请求每次都会打到数据库上面去。</p>
+<p>可能引发的问题：请求全落在数据库上，数据库压力过大，直接崩了。</p>
+<p>解决办法：</p>
+<ul>
+<li>缓存空值，之所以会发生穿透，就是因为缓存中没有存储这些空数据的key。从而导致每次查询都到数据库去了。所以我们把空值也给缓存了，下次请求就会走数据库了。要记得设定过期时间。</li>
+<li>布隆过滤器，定义不解释了，就是可以用来判断超大数据量中单个数据的存在性问题。但是存在误差，如果布隆过滤器判断不存在，那肯定不存在，但是如果判断存在，也有一定的可能误判。另外基础的布隆过滤器没办法删除元素，需要另外的逻辑辅助处理，或者依靠其他变种。</li>
+</ul>
+<h3 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h3><p>缓存雪崩是指在我们设置缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到数据库，数据库瞬时压力过重雪崩。</p>
+<p>可能引发的问题：跟上面一样，数据库压力过大崩了。</p>
+<p>一个简单方案就是将缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值。</p>
+<h3 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h3><p>对于一些设置了过期时间的 key，如果这些 key 可能会在某些时间点被超高并发地访问，是一种非常“热点”的数据。这个时候，需要考虑一个问题：缓存被“击穿”的问题，这个和缓存雪崩的区别在于这里针对某一 key 缓存，雪崩则是很多 key。</p>
+<p>可能引发的问题：单个 key 过期的瞬间大量请求过来，导致数据库压力过大崩了。</p>
+<p>解决办法：</p>
+<ul>
+<li>加锁，单个请求去更新缓存就行了，别的排队等着。</li>
+<li>双层的超时值，保存一个用于更新缓存的超时值，到达这个值之后去延长一下真是的超时时间。</li>
+</ul>
+<h3 id="热点-Key-问题"><a href="#热点-Key-问题" class="headerlink" title="热点 Key 问题"></a>热点 Key 问题</h3><p>缓存中的某些 Key（可能对应用与某个促销商品）对应的 value 存储在集群中一台机器，使得所有流量涌向同一机器，成为系统的瓶颈。</p>
+<p>解决办法：</p>
+<ul>
+<li>客户端缓存（多级缓存），将热点 key 对应 value 并缓存在客户端本地，并且设置一个失效时间。</li>
+<li>将单个热点分散为多个子 key，时期请求的时候 hash 到不同的机器上处理。</li>
+</ul>
+<h3 id="热点集中失效"><a href="#热点集中失效" class="headerlink" title="热点集中失效"></a>热点集中失效</h3><p>不解释了，跟缓存雪崩一个样，就是说热点数据全都到期，然后全落到数据库上。</p>
+<p>解决办法是过期时间加随机值，或者加互斥锁排队。</p>
+<p>参考资料</p>
+<p><a href="https://coolshell.cn/articles/17416.html" target="_blank" rel="noopener">缓存更新的套路</a></p>
+<p><a href="https://blog.csdn.net/zeb_perfect/article/details/54135506" target="_blank" rel="noopener">缓存穿透，缓存击穿，缓存雪崩解决方案分析</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E7%BC%93%E5%AD%98/" rel="tag"># 缓存</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/10/Java%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%EF%BC%9A%E6%B3%9B%E5%9E%8B%E3%80%81%E5%8F%8D%E5%B0%84%E3%80%81%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%92%8C%E6%B3%A8%E8%A7%A3/" rel="prev" title="Java高级特性：泛型、反射、动态代理和注解">
+      <i class="fa fa-chevron-left"></i> Java高级特性：泛型、反射、动态代理和注解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/12/%E5%B8%B8%E8%A7%81%E7%9A%84%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="next" title="常见的架构设计面试题">
+      常见的架构设计面试题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存同步策略"><span class="nav-number">1.</span> <span class="nav-text">缓存同步策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cache-Aside"><span class="nav-number">1.1.</span> <span class="nav-text">Cache Aside</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Read-Write-Through"><span class="nav-number">1.2.</span> <span class="nav-text">Read&#x2F;Write Through</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-Through"><span class="nav-number">1.2.1.</span> <span class="nav-text">Read Through</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Write-Through"><span class="nav-number">1.2.2.</span> <span class="nav-text">Write Through</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Write-Around"><span class="nav-number">1.3.</span> <span class="nav-text">Write Around</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Write-Behind"><span class="nav-number">1.4.</span> <span class="nav-text">Write Behind</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见面试题"><span class="nav-number">2.</span> <span class="nav-text">常见面试题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存穿透"><span class="nav-number">2.1.</span> <span class="nav-text">缓存穿透</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存雪崩"><span class="nav-number">2.2.</span> <span class="nav-text">缓存雪崩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存击穿"><span class="nav-number">2.3.</span> <span class="nav-text">缓存击穿</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#热点-Key-问题"><span class="nav-number">2.4.</span> <span class="nav-text">热点 Key 问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#热点集中失效"><span class="nav-number">2.5.</span> <span class="nav-text">热点集中失效</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Beritra"
+      src="/images/avator.jpg">
+  <p class="site-author-name" itemprop="name">Beritra</p>
+  <div class="site-description" itemprop="description">Beritra's Blogs</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/beritra" title="Github → https:&#x2F;&#x2F;github.com&#x2F;beritra" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>Github</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://weibo.com/u/3315421093" title="Weibo → http:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;3315421093" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备16042931号-3 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Beritra</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">375k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">10:25</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

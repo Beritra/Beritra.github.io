@@ -4,6 +4,8 @@
     <title>Vertx和响应式编程</title>
     <url>/2021/08/09/Vertx%E5%92%8C%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B/</url>
     <content><![CDATA[<p>今天了解下听说了好久，但是没怎么用过的东西。</p>
+<a id="more"></a>
+
 <h2 id="响应式介绍"><a href="#响应式介绍" class="headerlink" title="响应式介绍"></a>响应式介绍</h2><p>可能有的同学对 Vertx 和响应式还不熟悉，按照惯例，先上定义。</p>
 <blockquote>
 <p>响应式编程（Reactive Programming）：</p>

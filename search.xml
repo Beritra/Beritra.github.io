@@ -38,9 +38,9 @@
 <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>相信任何一个程序猿，对”高性能“的追求永远都不会停歇。Vertx 既然自称高性能，那么有多高的性能？参见下面这个 Benchmark。</p>
 <p><a href="https://www.techempower.com/benchmarks/#section=data-r20&hw=ph&test=db" target="_blank" rel="noopener">Web Framework Benchmarks</a></p>
 <p>这个测试非常全，基本覆盖了常见语言的常见框架，并且分为多种场景，每隔半年左右重新测试一遍更新数据。可以看到 Vertx 在 JVM 语言里面性能排名还是非常靠前的。但是前几名还是还是 C++、Rust 的天下。</p>
-<p>![image-20210602092204587](/Users/zhuzheng/Library/Application Support/typora-user-images/image-20210602092204587.png)</p>
+<p><img src="http://static.beritra.com/blog/202108/0a39f750fa6e11eba337acde48001122.png" alt="image-20210602092204587"></p>
 <p>作为对比，Spring 大概在这个位置：</p>
-<p>![image-20210602094525978](/Users/zhuzheng/Library/Application Support/typora-user-images/image-20210602094525978.png)</p>
+<p><img src="http://static.beritra.com/blog/202108/107192e0fa6e11eba792acde48001122.png" alt="image-20210602094525978"></p>
 <p>当然，Vertx 不是一个大而全的框架，和 Spring 的定位不一样也不好直接对比。</p>
 <p>Vertx 有如下几个特性:</p>
 <ul>
@@ -62,16 +62,16 @@
 <p>现代内核有非常好的调度器，但你不能指望它们像处理 5000 个线程那样容易。另外，线程并不便宜：创建一个线程需要几毫秒，一个新的线程会吃掉大约 1MB 的内存。</p>
 <h4 id="使用异步来增加扩展性和效率"><a href="#使用异步来增加扩展性和效率" class="headerlink" title="使用异步来增加扩展性和效率"></a>使用异步来增加扩展性和效率</h4><p>当你使用异步 I/O 时，用更少的线程处理更多的并发连接是可能的。当一个 I/O 操作发生时，我们不是阻塞一个线程，而是转到另一个准备好的任务上，并在以后准备好时恢复最初的任务。</p>
 <p>Vertx 使用事件循环来复用并发的工作负载。</p>
-<p><img src="https://vertx.io/_next/static/images/event-loop-741b82e088447ba4062168b2ff60c7b3.svg" alt="Event loop"></p>
+<p><img src="http://static.beritra.com/blog/202108/938fae78fa6e11ebb3b5acde48001122.svg" alt="Event loop"></p>
 <p>在事件循环上运行的代码不应该执行阻塞的 I/O 或冗长的处理。但如果你有这样的代码，也不用担心。Vertx 有工人线程和 API，可以在事件循环上处理回事件。</p>
 <h4 id="自行挑选最好的异步编程模型"><a href="#自行挑选最好的异步编程模型" class="headerlink" title="自行挑选最好的异步编程模型"></a>自行挑选最好的异步编程模型</h4><p>想要玩好异步编程需要更多的努力。在 Vertx 的核心模块，支持回调和 promises/futures，后者是一种简单而优雅的异步操作链模型。</p>
 <p>使用 RxJava 可以实现高级的反应式编程，如果你喜欢更接近于传统的命令式编程，Vertx 还可以提供一流的 Kotlin coroutines 支持。</p>
-<p><img src="https://vertx.io/_next/static/images/async-f15f5a50778c4a3a4872777d5554e388.svg" alt="Asynchronous programming"></p>
+<p><img src="http://static.beritra.com/blog/202108/9f2ffec2fa6e11eba128acde48001122.svg" alt="Asynchronous programming"></p>
 <p>Vertx 支持许多异步编程模型：方便为每个问题选择最有效的方法。</p>
 <h3 id="Vertx-组件"><a href="#Vertx-组件" class="headerlink" title="Vertx 组件"></a>Vertx 组件</h3><p>上面只是对 Vertx 的设计和理念的简单介绍。想要了解 Vertx 我们可能还得熟悉他的几个基本概念和组。</p>
 <h4 id="Event-Loop"><a href="#Event-Loop" class="headerlink" title="Event Loop"></a>Event Loop</h4><p>Event Loop 顾名思义，就是事件循环的。在 Vertx 的生命周期内，会不断的轮询查询事件。</p>
 <p>刚才也介绍了，传统的多线程编程模型，每个请求就 fork 一个新的线程对请求进行处理。这样的编程模型有实现起来比较简单，一个连接对应一个线程。但是如果有大量的请求需要处理，就需要 fork 出大量的线程进行处理，对于操作系统来说调度大量线程造成系统负载升高。</p>
-<p><img src="http://nas.beritra.com:18081/blog/202108/v2-c82beca9046448eadacd301be25958b3_1440w.jpg" alt="img"></p>
+<p><img src="http://static.beritra.com/blog/202108/1f2d1a66fa6e11eb8eb2acde48001122.jpg" alt="img"></p>
 <p>Event Loop 不断的轮训，获取事件然后安排上不同的 Handler 处理对应的 Event。</p>
 <p>这里要注意的是为了保证程序的正常运行，event 必须是非阻塞的。否则就会造成 Event Loop 的阻塞，影响 Vertx 的表现。但是现实中的程序肯定不能保证都是非阻塞的，Vertx 也提供了相应的处理阻塞的方法的机制。</p>
 <h4 id="Verticle"><a href="#Verticle" class="headerlink" title="Verticle"></a>Verticle</h4><p>Verticle 是由 Vertx 部署和运行的代码块。默认情况一个 Vertx 实例维护了 N（默认情况下 N = CPU核数 x 2）个 Event Loop 线程。Verticle 实例可使用任意 Vertx 支持的编程语言编写，而且一个简单的应用程序也可以包含多种语言编写的 Verticle。</p>
@@ -79,7 +79,7 @@
 <blockquote>
 <p>不了解 Actor 模型的同学可以参考 Golang 社区的一句话：不要通过共享内存来通信，而应该通过通信来共享内存。Actor 模型也是类似的理念，互相之间通过传递消息来共享数据，并且数据处理是单线程的，就不涉及到锁和竞争。</p>
 </blockquote>
-<p><img src="https://xilidou.com/images/verticle-threading-config.png" alt="verticle"></p>
+<p><img src="http://static.beritra.com/blog/202108/231be292fa6e11eb87ecacde48001122.png" alt="verticle"></p>
 <p>Verticle 其实可以分为几种：</p>
 <ul>
 <li>Stardand Verticle 是最常用的一类 Verticle —— 它们永远运行在 Event Loop 线程上。</li>
@@ -93,7 +93,7 @@
 <p>如果你不想使用工作线程来运行阻塞代码，你也可以在 Event Loop 中直接运行内联阻塞代码。</p>
 <p>Vertx 不会由一个以上的线程同时执行 Worker Verticle 实例，但可以由不同的线程在不同时间执行。</p>
 <h4 id="Event-bus"><a href="#Event-bus" class="headerlink" title="Event bus"></a>Event bus</h4><p>上面说了 Vertical 互相之间需要通过消息来贡献数据，而 Event bus 就是承载消息的消息总线。可能类比后端常用的 MQ 就更加容易理解了。</p>
-<p><img src="https://xilidou.com/images/event-bus.png" alt="Event bus"></p>
+<p><img src="http://static.beritra.com/blog/202108/2723a9cefa6e11eb8ecaacde48001122.png" alt="Event bus"></p>
 <h3 id="Vertx-的使用原则"><a href="#Vertx-的使用原则" class="headerlink" title="Vertx 的使用原则"></a>Vertx 的使用原则</h3><p>使用 Vertx 的时候要遵循基本原则：</p>
 <h4 id="Don’t-call-us-we’ll-call-you"><a href="#Don’t-call-us-we’ll-call-you" class="headerlink" title="Don’t call us, we’ll call you."></a>Don’t call us, we’ll call you.</h4><p>Vertx 的 API 基本都是事件驱动的，这意味着当 Vertx 中发生你感兴趣的事情时，Vertx 会通过向你发送事件来调用你。</p>
 <p>事件有可能是：</p>
@@ -181,7 +181,7 @@
 <p><a href="https://zh.wikipedia.org/wiki/%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B" target="_blank" rel="noopener">响应式编程Wiki定义</a></p>
 <p><a href="https://blog.csdn.net/lonelymanontheway/article/details/88657609" target="_blank" rel="noopener">编程范式：函数式编程&amp;防御式编程&amp;响应式编程&amp;契约式编程&amp;流式编程</a></p>
 <p><a href="https://www.jianshu.com/p/295e3122b466" target="_blank" rel="noopener">Vertx-介绍及快速入门</a></p>
-<p><a href="https://gengteng.gitbooks.io/my-vertx-guide/content/chapter3/section5.html" target="_blank" rel="noopener">回调地狱与 Future 对象</a></p>
+<p><a href="https://gengteng.gitbooks.io/my-vertx-guide/content/chapter3/section5.html" target="_blank" rel="noopener">回调地狱与 Future 对象</a><a href="https://gengteng.gitbooks.io/my-vertx-guide/content/chapter3/section5.html" target="_blank" rel="noopener">https://gengteng.gitbooks.io/my-vertx-guide/content/chapter3/section5.html</a>)</p>
 ]]></content>
       <categories>
         <category>vertx</category>

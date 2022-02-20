@@ -52,20 +52,20 @@
 <meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;11&#x2F;24&#x2F;InnoDB%E8%A1%A8%E7%BB%93%E6%9E%84&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
 <meta property="og:description" content="本文大部分内容摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，小部分来源于自己理解和网络博客，由于书比较旧，网络博客也未必准确，我尽量对文中内容进行验证和对比 MySQL 官网文档，但仍然有可能有疏漏。">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;6083671fe7d547fd2a8fd496b5bb0904.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;blog&#x2F;202005&#x2F;c87e9baa9a9111ea99b000d861792df0.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;090c385542dcfeb6fdabc2520ffaafd0.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;78f4e0e0dc3bd05909f06abf44a56f4b.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;b5b0d29d8328223c1873f43074172c39.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;97aa2daf41d886ac93e40b1dfd88cca5.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;6083671fe7d547fd2a8fd496b5bb0904.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;blog&#x2F;202005&#x2F;c87e9baa9a9111ea99b000d861792df0.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;090c385542dcfeb6fdabc2520ffaafd0.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;78f4e0e0dc3bd05909f06abf44a56f4b.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;b5b0d29d8328223c1873f43074172c39.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;97aa2daf41d886ac93e40b1dfd88cca5.png">
 <meta property="article:published_time" content="2019-11-24T04:12:12.000Z">
-<meta property="article:modified_time" content="2020-05-20T12:51:46.974Z">
+<meta property="article:modified_time" content="2022-02-20T11:27:13.892Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="InnoDB">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;6083671fe7d547fd2a8fd496b5bb0904.png">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;6083671fe7d547fd2a8fd496b5bb0904.png">
 
 <link rel="canonical" href="http://beritra.github.com/2019/11/24/InnoDB%E8%A1%A8%E7%BB%93%E6%9E%84/">
 
@@ -249,7 +249,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-20 20:51:46" itemprop="dateModified" datetime="2020-05-20T20:51:46+08:00">2020-05-20</time>
+                <time title="修改时间：2022-02-20 19:27:13" itemprop="dateModified" datetime="2022-02-20T19:27:13+08:00">2022-02-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -300,7 +300,7 @@
 <p> 当表中有多个非空唯一索引的时候，InnoDB 存储引擎将选择建表的时候第一个定义的非空唯一索引作为主键。注意这里是定义索引的顺序，而不是建表的时候列的顺序。</p>
 </blockquote>
 <h2 id="InnoDB-逻辑存储结构"><a href="#InnoDB-逻辑存储结构" class="headerlink" title="InnoDB 逻辑存储结构"></a>InnoDB 逻辑存储结构</h2><p>从 InnoDB 存储应引擎的存储结构来看，所有的数据都被逻辑的存放在一个空间中，成为表空间（tablespace）。表空间又由段（segment）、区（extent）、页（page）组成。页在一些文档中也成为块（block），InnoDB存储引擎的逻辑存储结构大致如图：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/6083671fe7d547fd2a8fd496b5bb0904.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/6083671fe7d547fd2a8fd496b5bb0904.png" alt=""></p>
 <h3 id="表空间"><a href="#表空间" class="headerlink" title="表空间"></a>表空间</h3><p>表空间可以看做是 InnoDB 存储引擎逻辑结构的最高层，所有的数据都存放在表空间中。默认情况下 InnoDB 存储引擎有一个共享表空间 ibdata1，所有的数据都存放在这个表空间中。如果用户开启了参数<code>innodb_fiule_per_table</code>，则每张表内的数据可以单独放在一个表空间中。</p>
 <blockquote>
 <p>即使启用了<code>innodb_fiule_per_table</code>，每张表的表空间内从存放的也只是数据、索引和插入缓冲Bitmap页，其他类型的数据比如回滚（undo）、插入缓冲索引页、系统事务信息、二次写缓冲（Double write buffer）等还是存放在原有共享表空间。</p>
@@ -323,16 +323,16 @@
 </ul>
 <h3 id="行"><a href="#行" class="headerlink" title="行"></a>行</h3><p>InnoDB 存储引擎是面向列的（row-oriented），也就是说数据是按行进行存放的。每个页存放的行记录也是有硬性规定的，最多允许存放16KB/2-200行记录，即7992行。</p>
 <h2 id="InnoDB-行记录格式"><a href="#InnoDB-行记录格式" class="headerlink" title="InnoDB 行记录格式"></a>InnoDB 行记录格式</h2><p>InnoDB 引擎和大多数数据库一样，记录以行的形式存储。这意味这页中保存着表中一行行的数据。在 InnoDB 1.0.x 版本之前，InnoDB 存储引擎提供了 Compact 和 Redundant 两种格式来存放行记录数据，这也是目前使用最多的一种格式。Redundant 格式是为了兼容之前版本而保留的，MySQL 5.1 之后的版本默认为 Compact 行格式。可以使用命令<code>SHOW TABLE STATUS LIKE &#39;table_name&#39;</code>来查看当前表使用的行格式。（由于书比较旧，我在 MySQL 官网上看到其实不止这两种格式，而默认的格式为 DYNAMIC，具体如下：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/c87e9baa9a9111ea99b000d861792df0.png" alt=""></p>
+<p><img src="http://static.beritra.com/blog/202005/c87e9baa9a9111ea99b000d861792df0.png" alt=""></p>
 <h3 id="Compact-行记录格式"><a href="#Compact-行记录格式" class="headerlink" title="Compact 行记录格式"></a>Compact 行记录格式</h3><p>Compact 行记录格式的设计目标是高效的存储数据，简单来说就是一个页中存放的行数据越多，性能就越高。下图是详细的存储格式：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/090c385542dcfeb6fdabc2520ffaafd0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/090c385542dcfeb6fdabc2520ffaafd0.png" alt=""></p>
 <p>可以看到，Compact 行记录的格式首部是一个非 NULL 变长字段长度列表，并且是按照列的顺序逆序放置的，长度为：</p>
 <ul>
 <li>若列的长度小于 255 字节，则用 1 字节表示；</li>
 <li>若大于 255 个字节，用 2 字节表示。</li>
 </ul>
 <p>变长字段的长度不可以超过两个字节，因为 VARCHAR 类型的最大长度限制为 65535。变长字段之后的第二个部分是 NULL 标志位，该位指示了该位数据中是否有 NULL 值，有则用 1 表示。接下来的部分是记录头信息（record header），固定占用 5 字节（40位），每位的含义如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/78f4e0e0dc3bd05909f06abf44a56f4b.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/78f4e0e0dc3bd05909f06abf44a56f4b.png" alt=""></p>
 <p>最后的部分就是实际存储每个列的数据。需要特别注意的是，NULL 不占用该部分任何空间，即 NULL 除了占用 NULL 标志位之外，实际存储不占用空间。另外，每行数据除了用户定义的之外，还有两个隐藏列，事务ID列和回归指针列，分别是6和7字节大小。如果 InnoDB 表没有定义主键，还会增加一个6字节的 rowid 列。</p>
 <h3 id="行溢出数据"><a href="#行溢出数据" class="headerlink" title="行溢出数据"></a>行溢出数据</h3><p>InnoDB 存储引擎可以将一条记录中的某些数据存储在真正的数据页面之外。一般认为 BLOB 、 LOB 这类的大对象列类型的存储会把数据放在数据页面之外。但是不是这样的，BLOB 可以不放在溢出页面，而且即便 VARCHAR 这种类型也可能被存放为行溢出数据。</p>
 <p>MySQL 数据库的 VARCHAR 类型理论上可以存放 65535 字节，实际上创建一个 65535 长度的列的时候，会得到错误信息：</p>
@@ -343,7 +343,7 @@
 <p>此外，还要注意，MySQL 官方手册中定义的65535长度是指所有 VARCHAR 列的长度综合，如果综合超过了这个长度，依然无法创建，同样是上面那个错误提示。</p>
 <p>即便能够存储65535个字节，但是，InnoDB 引擎的页为 16KB，即16384字节，怎么能存放65535个字节呐？因此，在一般情况下，InnoDB引擎存储的数据都是放在页类型为B-tree node中。但是当发生行溢出的时候，数据存放在页类型为 Uncompress BLOB 页中。</p>
 <p>通过工具可以看到，数据也只保存 VARCHAR 的前768的前缀（prefix）数据，之后都是偏移量，指向行溢出页，也就是 Uncompressed BLOB Page。因此，对于行溢出数据，存放采用下图的方式：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b5b0d29d8328223c1873f43074172c39.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b5b0d29d8328223c1873f43074172c39.png" alt=""></p>
 <p>那么新的问题又来了，多长的 VARCHAR 是保存在单个数据页中的，多长开始会保存在 BLOB 中？</p>
 <p>InnoDB存储引擎表是索引组织的，即 B+Tree 结构，这样每个页中至少应该有两条记录（不然就退化成链表了）。因此，如果页中只能存下一条记录，那么 InnoDB 引擎就会自动将行数据放到溢出页中。</p>
 <p>经过测试，这个数字是 8098 ，如果少于这个长度，一个页中就可以放入至少两行数据，VARCHAR 类型的行数据就不会被放到 BLOB 页中去。</p>
@@ -360,7 +360,7 @@
 <li>File Trailer（文件结尾信息）</li>
 </ul>
 <p>其中 File Header、Page Header、File Trailer 的大小是固定的，分别为 38、56、8 字节，这些空间用来标记也得一些信息，如  Checksum，数据页所以在的 B+ 树索引的层数等。User Records、Free Space、Page Dirctory 这些部分为实际的行记录存储空间，因此大小是动态的。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/97aa2daf41d886ac93e40b1dfd88cca5.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/97aa2daf41d886ac93e40b1dfd88cca5.png" alt=""></p>
 <h2 id="约束"><a href="#约束" class="headerlink" title="约束"></a>约束</h2><h3 id="约束完整性"><a href="#约束完整性" class="headerlink" title="约束完整性"></a>约束完整性</h3><p>关系型数据库和文件系统的一个不同点是，关系数据库本身能够保证存储数据的完整性，不需要应用程序的控制，而文件系统一般都需要在程序端进行控制。当前几乎所有的关系型数据库都提供了约束（constraint）机制，来保证数据的完整性。</p>
 <p>对 InnoDB 存储引擎本身而言，提供了以下几种约束：</p>
 <ul>
@@ -623,7 +623,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

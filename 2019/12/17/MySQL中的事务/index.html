@@ -52,25 +52,25 @@
 <meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;17&#x2F;MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
 <meta property="og:description" content="本文主要摘抄自《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;980e4507ab99e2a1f4a78fe7b4c954e8.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;dca2709fdeb84932ccae92cf405fbbe0.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;c90bcbd6ddbdd7f6b3571df115408746.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;aa0edf09310f5553bca987baea782926.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;bb67629bf4784eaf753a252db39807c0.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;d088781618cfc6c54fee66d97f5e098a.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;376ba5d7b0a884ae37b62f1149ff7bea.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;400aead4e7edcec4690b9e6f5f1c296f.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;af386a3f56b941605de52eb437e33c32.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;60caac0b4782048229a8c172ec18b2d7.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;adac784b49794e6d6b386295158a4c02.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;980e4507ab99e2a1f4a78fe7b4c954e8.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;medium&#x2F;dca2709fdeb84932ccae92cf405fbbe0.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;c90bcbd6ddbdd7f6b3571df115408746.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;aa0edf09310f5553bca987baea782926.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;bb67629bf4784eaf753a252db39807c0.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;d088781618cfc6c54fee66d97f5e098a.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;376ba5d7b0a884ae37b62f1149ff7bea.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;400aead4e7edcec4690b9e6f5f1c296f.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;af386a3f56b941605de52eb437e33c32.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;60caac0b4782048229a8c172ec18b2d7.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;adac784b49794e6d6b386295158a4c02.png">
 <meta property="article:published_time" content="2019-12-17T10:11:12.000Z">
-<meta property="article:modified_time" content="2020-05-27T16:09:21.126Z">
+<meta property="article:modified_time" content="2022-02-20T11:27:13.888Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="事务">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;980e4507ab99e2a1f4a78fe7b4c954e8.png">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;980e4507ab99e2a1f4a78fe7b4c954e8.png">
 
 <link rel="canonical" href="http://beritra.github.com/2019/12/17/MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1/">
 
@@ -254,7 +254,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-28 00:09:21" itemprop="dateModified" datetime="2020-05-28T00:09:21+08:00">2020-05-28</time>
+                <time title="修改时间：2022-02-20 19:27:13" itemprop="dateModified" datetime="2022-02-20T19:27:13+08:00">2022-02-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -332,23 +332,23 @@
 </ul>
 <p><strong>扁平事务（Flat Transaction）</strong>是事务类型中最简单的一种，但在实际生产环境中，可能是最频繁的事务。在扁平事务中，所有操作都处于同一层次，其由<code>BEGIN WORK</code>开始，由<code>COMMIT WORK</code>或<code>ROLLBACK WORK</code>结束，其间的操作是原子的，要么都执行，要么都回滚。因此扁平事务是应用程序成为原子操作的基本组成模块。</p>
 <p> 下图显示了扁平事务的三种不同结果：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/980e4507ab99e2a1f4a78fe7b4c954e8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/980e4507ab99e2a1f4a78fe7b4c954e8.png" alt=""></p>
 <p>扁平事务的主要限制是不能提交或者回滚事务中的某一部分，或者分步骤提交。下面给出了一个扁平事务不足以支持的例子。例如用户在旅行网站上进行自己的旅行度假计划。用户摄像从杭州道意大利的佛罗伦萨，这两个城市之间没有直达的班级，需要用户预定并转乘航班，或者需要搭火车等待。用户旅行度假的事务为：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">BEGIN WROK</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">S1：预定杭州到上海的高铁</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">S2：上海浦东国际机场坐飞机，预定区米兰的航班</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">S3：在米兰坐火车前往佛罗伦萨，预定去佛罗伦萨的火车</span></pre></td></tr></table></figure>
 
 <p>但是当用户执行到 S3 的时候，发现由于飞机到达米兰的时间台湾，已经没有当天的火车。这时用户希望在米兰当地住一晚，第二天出发去佛罗伦萨。这时如果事务为扁平事务，则需要回滚之前 S1、S2、S3 的三个操作，这个代价就显得有点大。因为当再次进行该事务的时候，S1、S2 的执行计划是不变的。也就是说，如果有支持计划的回滚操作，那么就不需要终止整个事务。因此就出现了带有保存点的扁平事务。</p>
 <p><strong>带有保存点的扁平事务（Flat Transaction with Savepoint）</strong>，除了支持扁平事务支持的操作外，允许在事务执行过程中回滚到同一事务中较早的一个状态。这是因为某霞事务可能在执行过程中出现的错误并不会导致所有的操作都无效，放弃整个事务不合乎要求，开销页太大。<strong>保存点（Savepoint）</strong>用来通知系统应该记住事务当前的状态，以便当以后发生错误时，事务能回到保存点当时的状态。对于扁平的事务来说，其隐式的设置了一个保存点。而在整个事务中，只有一个保存点，因此，回滚只能回滚到事务开始时的状态。保存点用<code>SAVE WORK</code>函数来建立，通知系统记录当前的处理状态。当出现问题的时候，保存点能用作内部的重启动点，根据应用逻辑，决定是回到最近一个保存点还是其他更早的保存点。下图显示了在事务中使用了保存点：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/dca2709fdeb84932ccae92cf405fbbe0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/dca2709fdeb84932ccae92cf405fbbe0.png" alt=""></p>
 <p>上图显示了如何在事务中使用保存点。灰色背景部分的操作表示由<code>ROLLBACK WORK</code>而导致的部分回滚，实际并没有执行的操作。当用 BEGIN WORK 开启一个事务时，隐式地包含一个保存点，当事务通过<code>ROLLBACK WORK：2</code> 发出部分回滚命令的时候，事务回滚到保存点 2，接着一次执行，并再次执行到<code>ROLLBACK WORK：7</code>，知道最后的<code>COMMIT WORK</code>操作，这时表示事务结束，除灰色阴影部分的操作外，其他的操作都已经执行，并且提交。</p>
 <p>另一点需要注意的是，保存点在事务内部是递增的，这从上图中也可以看出。有人可能会想，返回保存点 2 之后，下一个保存点可以是 3，因为之前的动作都终止了。然而新的保存点编号为 5，这意味着<code>ROLLBACK</code>不影响保存点的计数，并且单调递增的编号能保持事务执行的整个历史过程，包括在执行过程中想法的改变。</p>
 <p>此外，当事务通过<code>ROLLBACK WORK</code>：2 命令部分回滚命令时，要记住事务并没有完全被回滚，只是回滚到了保存点 2 而已。这代表当前事务还是活跃的，如果想要完全回滚事务，还需要再执行命令<code>ROLLBACK WORK</code>。</p>
 <p><strong>链事务（Chained Transaction）</strong>可以视为是保存点模式的一种变种。带有保存点的扁平事务，当事务发生崩溃的时候，所有保存点都将消失，因为其保存点是易失的（volatile），而非持久的（persistent）。这意味着当进行恢复时，事务需要从开始处重新执行，而不能从最近的一个保存点继续执行。</p>
 <p>链事务的思想是：在提交一个事务时，释放不需要的数据对象，将必要的数据处理上下文隐式地传给下一个要开始的事务。注意，提交事务操作和开始下一个事务操作将合并为一个原子操作。这意味着下一个事务将看到上一个事务的结果，就好像在一个事务中进行的一样。下图显示了链事务的工作方式：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/c90bcbd6ddbdd7f6b3571df115408746.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/c90bcbd6ddbdd7f6b3571df115408746.png" alt=""></p>
 <p>链事务与带有保存点的扁平事务不同的是，带有保存点的扁平事务能回滚到任意正确的保存点。而链事务中的回滚仅限于当前事务，即只能恢复到最近的一个保存点。对于锁的处理，两者也不相同。链事务在执行<code>COMMIT</code>后即释放了当前事务所持有的锁，</p>
 <p>而带有保存点的扁平事务不影响迄今为止所持有的锁。</p>
 <p><strong>嵌套事务（Nested Transaction）</strong>是一个层次结构框架。由一个顶层事务（top-level transaction）控制着各个层次的事务。顶层事务之下嵌套的事务被称为子事务（subtransaction），其控制着每一个局部的变量。嵌套事务的层次结构如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/aa0edf09310f5553bca987baea782926.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/aa0edf09310f5553bca987baea782926.png" alt=""></p>
 <p>下面是 Moss 对嵌套事务的定义：</p>
 <ol>
 <li>嵌套事务是由若干事务组成的一颗树，子树既可以是嵌套事务，也可以是扁平事务。</li>
@@ -358,7 +358,7 @@
 <li>树中任何一个事务的回滚都会引起它所有的子事务一同回滚，故子事务仅保留 A、C、I 特性，不具有 D 的特性。</li>
 </ol>
 <p>根据 Moss 的理论，实际的工作是交由叶子节点来完成的，即只有叶子节点的事务才能访问数据库、发送消息、获取其他类型的资源。而高层的事务仅负责逻辑控制，决定何时调用相关的子事务。即使一个系统不支持嵌套事务，用户也可以通过保存点技术来模拟嵌套事务，如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/bb67629bf4784eaf753a252db39807c0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/bb67629bf4784eaf753a252db39807c0.png" alt=""></p>
 <p>从图中也可以发现，在恢复时采用保存点技术比嵌套查询有更大的灵活性。例如在完成 Tk3 这个事务的时候，可以回滚到保存点 S2 的状态。而在嵌套查询的层次结构中，这是不被允许的。</p>
 <p>但是用保存点技术来模拟嵌套事务在锁的持有方面还是与嵌套查询有些区别。当通过保存点技术来模拟嵌套事务时，用户无法选择哪些锁需要被子事务继承，哪些需要被父事务保留。就是说：无论有多少个保存点，所有被锁住的对象都可以被得到和访问。而在查询嵌套中，不同的子事务在数据库对象上持有的锁是不同的。 例如有一个父事务 P1，其持有对象 X 和 Y 的排它锁，现在要开始调用子事务 p11，那么父事务 P1 可以不传递锁，也可以传递所有的锁，也可以只传递一个排他锁。如果子事务 P11 中还有持有对象 X、Y、Z 的排他锁。如果这时又再次调用了一个子事务 P12，那么它可以传递那里已经持有的锁。</p>
 <p>然而，如果系统支持在嵌套事务中并行地执行各个事务，在这种情况下，采用保存点的扁平事务来模拟嵌套事务就不切实际了。者从另一个方面反映出，想要实现事务键的并行性，需要真正支持的嵌套事务<strong>。</strong></p>
@@ -380,7 +380,7 @@
 <p>InnoDB 存储引擎允许用户手动设置非持久性的情况发生，因此提高数据库的性能。当事务提交的时候，日志不写入重做日志文件，而是等待一个时间周期后再执行<code>fsync</code>操作。由于并非强制在事务提交的时候进行一次<code>fync</code>操作，显然可以提高数据库性能。但是在数据库发生宕机的时候，由于部分日志未发刷新到磁盘，因此会丢失最后一段时间的事务。</p>
 <p>参数<code>inndob_flush_log_at_trx_commit</code>用来控制重做日志刷新到磁盘的策略，默认值是 1，表示每次都会调用<code>fsync</code>操作。这个参数还可以设置为 0 或者 2。0 表示事务提交时不进行写入重做日志操作，这个操作仅在 master thread 中完成，而在 master thread 中每一秒会进行一次<code>fsync</code>操作。2 表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。在这个设置下，当 MySQL 数据库发生宕机而操作系统不发生宕机时，并不会导致事务的丢失。但是当操作系统宕机时，重启数据库后会丢失未从文件系统缓存刷新到重做日志文件那部分事务。</p>
 <p>下图是模拟插入 50 万行数据，参数为 1 是每插入一条就显式执行一次 COMMIT 操作，跟其他参数设置之间的数据库效率对比：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/d088781618cfc6c54fee66d97f5e098a.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/d088781618cfc6c54fee66d97f5e098a.png" alt=""></p>
 <p>虽然用户可以通过设置参数<code>innodb_flush_log_at_trx_commit</code>为 0 或 2 来提高事务提交的性能，但是需要牢记的事，这种设置方法丧失了事务的 ACID 特性。而针对上述存储过程，为了提高事务的提交性能，应该在将 50 万行数据插入表后进行一次 COMMIT 操作，而不是在每插入一条记录之后进行一次 COMMIT 操作。</p>
 <p>在 MySQL 数据库中还有一种二进制日志（binlog），其用来进行 POINT-TIME（PIT）的恢复及主从复制（Replication）环境的建立。从表面上看其和重做日志非常相似，都是记录了对于数据库操作的日志。然而，从本质上来看，二者有着非常大的不同。</p>
 <p>首先，重做日志是在 InnoDB 存储引擎层产生，而二进制日志是在 MySQL 数据库的上层产生的，并且二进制日志不仅仅对于 InnoDB 引擎，MySQL 数据库中的任何存储引擎对于数据库的更改都会产生二进制日志。</p>
@@ -462,18 +462,18 @@
 <li>应用程序：定义事务的边界，指定全局事务中的操作。</li>
 </ul>
 <p>在 MySQL 数据库的分布式事务中，资源管理器就是 MySQL 数据库，事务管理器为连接 MySQL 服务器的客户端。下图显示了一个分布式事务的模型：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/376ba5d7b0a884ae37b62f1149ff7bea.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/376ba5d7b0a884ae37b62f1149ff7bea.png" alt=""></p>
 <p>分布式事务使用两段式提交（two-phase commit）的方式。在第一阶段，所有参与全局事务的节点都开始准备（PREPARE），告诉事务管理器他们准备号提交了。在第二阶段，事务管理器告诉资源管理器执行<code>ROLLBACK</code>还是<code>COMMIT</code>。如果任何一个节点显示不能提交，则所有的节点都被告知需要回滚。可见与本地事务不同的是，分布式事务需要多一次 PREPARE 的操作，待收到所有节点的同意信息后，再进行<code>COMMIT</code>或是<code>ROLLBACK</code>操作。</p>
 <h3 id="内部-XA-事务"><a href="#内部-XA-事务" class="headerlink" title="内部 XA 事务"></a>内部 XA 事务</h3><p>之前讨论的分布式事务是外部事务，即资源管理器是 MySQL 本身。在 MySQL 数据库中还存在另一种分布式事务，其在存储引擎与插件之间，又或者在存储引擎与存储引擎之间，称之为内部 XA 事务。】</p>
 <p>最常见的内部 XA 事务存在于 binlog 与 InnoDB 存储引擎之间。由于复制的需要，因此目前绝大多数的数据库都开启了 binlog 功能。在事务提交时，先写二进制日志，再写 InnoDB 存储引擎的重做日志。对上述两个操作的要求也是原子的。即二进制日志和重做日志必须同时写入。若 二进制日志先写了，而在写入 InnoDB 存储引擎时发生了宕机，那么 slave 可能会接收到 master 传过去的二进制日志并执行，最终导致了主从不一致的情况。</p>
 <p>为了解决这个问题，MySQL 数据库在 binlog 与 InnoDB 存储引擎之间采用 XA 事务。当事务提交的时候，InnoDB 存储引擎回西安做一个 PREPARE 操作，将事务的 xid 写入，接着二进制日志写入，入股偶在 InnoDB 存储引擎提交前，MySQL 数据库宕机了，那么 MySQL 数据库在重启后会先检查准备的 UXID 事务是否已经提交，若没有，则在存储引擎层再进行一次提交操作。如下图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/400aead4e7edcec4690b9e6f5f1c296f.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/400aead4e7edcec4690b9e6f5f1c296f.png" alt=""></p>
 <h2 id="不好的事务习惯"><a href="#不好的事务习惯" class="headerlink" title="不好的事务习惯"></a>不好的事务习惯</h2><h3 id="在循环中提交"><a href="#在循环中提交" class="headerlink" title="在循环中提交"></a>在循环中提交</h3><p>有的开发人员习惯再循环中进行事务的提交，比如可能常写的一个存储过程：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/af386a3f56b941605de52eb437e33c32.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/af386a3f56b941605de52eb437e33c32.png" alt=""></p>
 <p>这个里面的<code>COMMIT</code>命令其实并不关键。因为 InnoDB 存储引擎默认自动提交，这也是经常被开发人员忽视的问题：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/60caac0b4782048229a8c172ec18b2d7.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/60caac0b4782048229a8c172ec18b2d7.png" alt=""></p>
 <p>其实无论上面哪个存储过程都存在一个问题，当发生错误的时候，数据库会停留在一个位置的位置。例如，用户需要插入 10000 条记录，但是当插入 5000 条时，发生了错误，这时前 5000 条记录都已经存放在数据库中，那应该怎么处理呐？另外一个问题性能问题，上面两个存储过程都不会比下面的存储过程更快，因为下面的存储过程将所有的<code>INSERT</code>都放在了一个事务中：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/adac784b49794e6d6b386295158a4c02.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/adac784b49794e6d6b386295158a4c02.png" alt=""></p>
 <p>第三种方法要快的多！这是因为每次提交都要写一次重做日志，存储过程 load1 和 load2 实际上写了 10000 次重做日志文件，而对存储过程 load3 来说，实际上只写了 1 次。</p>
 <p>所以无论从何种角度出发，都不应该在一个循环中反复进行提交操作，无论是显式还是隐式的提交。</p>
 <h3 id="使用自动提交"><a href="#使用自动提交" class="headerlink" title="使用自动提交"></a>使用自动提交</h3><p>使用自动提交不是一个好习惯，因为这会使初级 DBA 容易犯错，另外还可能是一些开发人员产生错误的理解。在编写程序开发时，最好把事务的控制权限交给开发人员，即在程序端进行事务的开始和结束。同时，开发人员必须了解是自动提交可能带来的问题。</p>
@@ -650,7 +650,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

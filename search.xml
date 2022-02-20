@@ -684,7 +684,7 @@
 <li><p>一种方式是预先分片，比如十台机器，每台先分一千个ID，一号机从0开始，二号从1000开始等等。缺点是大致上可以被人看出来业务量。</p>
 </li>
 <li><p>另一种方式是类似雪花算法，每个机器有个id，然后基于时间算一个id，再加上一个递增id。比如如下美团的方案。缺点是机器的时间戳不能回拨，回拨的话会出现问题。</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/721ceeff.png" alt="image"></p>
+<p><img src="http://static.beritra.com/blog/202005/721ceeff.png" alt="image"></p>
 </li>
 </ul>
 <p>如果要求严格递增，我没找到现成的很好的方案，大概只能单机生成，不能分布式了，然后都去单机上取号。效率的话，类似Redis的数据库大概能到每秒十几二十几万的速度。</p>
@@ -870,7 +870,7 @@
 <h3 id="Read-Write-Through"><a href="#Read-Write-Through" class="headerlink" title="Read/Write Through"></a>Read/Write Through</h3><p>Read/Write Through 套路是把更新数据库（Repository）的操作由缓存自己代理了，对应用层来说是透明的，应用不再需要关心数据同步问题。</p>
 <h4 id="Read-Through"><a href="#Read-Through" class="headerlink" title="Read Through"></a>Read Through</h4><p>Read Through 就是在查询操作中更新缓存，也就是说，当缓存失效的时候（过期或 LRU 换出），Cache Aside 是由调用方负责把数据加载入缓存，而 Read Through 则用缓存服务自己来加载，从而对应用方是透明的。</p>
 <h4 id="Write-Through"><a href="#Write-Through" class="headerlink" title="Write Through"></a>Write Through</h4><p>Write Through 套路和 Read Through 相仿，不过是在更新数据时发生。当有数据更新的时候，如果没有命中缓存，直接更新数据库，然后返回。如果命中了缓存，则更新缓存，然后再由 Cache 自己更新数据库（这是一个同步操作）。</p>
-<p><img src="http://nas.beritra.com:18081/blog/202006/6680e5ceaafa11ea830eacde48001122.png" alt="Write-through_with_no-write-allocation"></p>
+<p><img src="http://static.beritra.com/blog/202006/6680e5ceaafa11ea830eacde48001122.png" alt="Write-through_with_no-write-allocation"></p>
 <p>这种方式的风险也显而易见，如果追求落库之后再返回成功，效率必然降低很多，缓存的意义就不大了。如果追求落到缓存上就算成功，那问题又抛给了缓存的丢失风险上。</p>
 <h3 id="Write-Around"><a href="#Write-Around" class="headerlink" title="Write Around"></a>Write Around</h3><p>这种策略下，数据直接写入数据库，只有读取的数据才能进入缓存。Write Around 可以与 Read Through 结合使用，并在数据只写一次、读取次数较少或从不读的情况下提供良好的性能。例如，实时日志或聊天室消息。同样，这个模式也可以与 Cache Aside 组合使用。</p>
 <h3 id="Write-Behind"><a href="#Write-Behind" class="headerlink" title="Write Behind"></a>Write Behind</h3><p>Write Behind 又叫 Write Back。就是 Linux 文件系统的 Page Cache 的算法。</p>
@@ -1071,10 +1071,10 @@
 
 <p>看起来很简单吧，那么实际上 JVM 是怎么做的呐？</p>
 <p>首先来看一下Method对象是如何生成的：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/D17809940E1D4099BD319D343A262BDB.png" alt=""></p>
+<p><img src="http://static.beritra.com/blog/202005/D17809940E1D4099BD319D343A262BDB.png" alt=""></p>
 <p>上面的 Class 对象是在加载类时由 JVM 构造的，JVM 为每个类管理一个独一无二的 Class 对象，这份 Class 对象里维护着该类的所有 Method，Field，Constructor 的 cache，这份 cache 也可以被称作根对象。每次<code>getMethod</code>获取到的 Method 对象都持有对根对象的引用，因为一些重量级的 Method 的成员变量（主要是 MethodAccessor ），我们不希望每次创建 Method 对象都要重新初始化，于是所有代表同一个方法的 Method 对象都共享着根对象的 MethodAccessor，每一次创建都会调用根对象的 copy 方法复制一份。</p>
 <p>获取到Method对象之后，调用invoke方法的流程如下：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/6828367BCC244C008F124B2A086B5B66.png" alt="img"></p>
+<p><img src="http://static.beritra.com/blog/202005/6828367BCC244C008F124B2A086B5B66.png" alt="img"></p>
 <p>可以看到，调用<code>Method.invoke</code>之后，会直接去调<code>MethodAccessor.invoke</code>。MethodAccessor 就是上面提到的所有同名 method 共享的一个实例，由<code>ReflectionFactory</code>创建。创建机制采用了一种名为 inflation 的方式（JDK 1.4 之后）：如果该方法的累计调用次数&lt;=15，会创建出<code>NativeMethodAccessorImpl</code>，它的实现就是直接调用 native 方法实现反射；如果该方法的累计调用次数&gt;15，会由 Java 代码创建出字节码组装而成的<code>MethodAccessorImpl</code>。（是否采用 inflation 和 15 这个数字都可以在 JVM 参数中调整）。</p>
 <p>更加细致的过程R大有一篇博文：<a href="https://www.iteye.com/blog/rednaxelafx-548536" target="_blank" rel="noopener">关于反射调用方法的一个log</a></p>
 <h2 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h2><p>说道动态代理，就必须得回顾下代理模式这种设计模式了：</p>
@@ -1155,7 +1155,7 @@
 <li>而 LogHandler 的 invoke 方法接收到 method、args 等参数后，进行一些处理，然后通过反射让被代理的对象 target 执行方法</li>
 </ul>
 <p>流程如下：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/22c9b11092b511ea971c00d861792df0.png" alt="img"></p>
+<p><img src="http://static.beritra.com/blog/202005/22c9b11092b511ea971c00d861792df0.png" alt="img"></p>
 <h4 id="CGLib-动态代理"><a href="#CGLib-动态代理" class="headerlink" title="CGLib 动态代理"></a>CGLib 动态代理</h4><p>在 maven 依赖中加入 CGLib 的库：</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/CGLib/CGLib --&gt;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>CGLib<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>CGLib<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.3.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span></pre></td></tr></table></figure>
 
@@ -1325,7 +1325,7 @@
 
 <p>我是把博客图片都放到了 blog 这个桶，然后按照月份创建文件夹，每个月的都放在同一个文件夹，文件名是用的 uuid。具体的逻辑想要修改的话自己改上面的脚本吧。</p>
 <p>搞定之后在 Typora 里面填上脚本，然后点击测试，就可以看看结果了，测试通过就万事大吉了，写个博客插入图片看看吧！</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/705793b8gy1g5ruls77t2g208c08ct97.gif" alt="汤圆手势OK _斗图表情包"></p>
+<p><img src="http://static.beritra.com/blog/202005/705793b8gy1g5ruls77t2g208c08ct97.gif" alt="汤圆手势OK _斗图表情包"></p>
 ]]></content>
       <categories>
         <category>Blog</category>
@@ -1374,12 +1374,12 @@
 </li>
 </ul>
 <p>然后就是事务的隔离级别，MySQL 中的隔离级别和 SpringBoot 是一样的（或者应该反过来说），为了解决以上三种问题，有四种不同的隔离级别，具体作用如图：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/598e93545f0cc1539b063849dfd379c1.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/598e93545f0cc1539b063849dfd379c1.png" alt=""></p>
 <h2 id="Transactional-注解"><a href="#Transactional-注解" class="headerlink" title="Transactional 注解"></a>Transactional 注解</h2><p>Spring 事务最简单方便的使用方式是使用<code>Transactional</code>注解，可以被应用于接口定义和接口方法、类定义和类的 public 方法上。但是不推荐用在接口上面，因为一旦标注在 Interface 上并且配置了Spring AOP 使用 CGLib 动态代理，将会导致<code>Transactional</code>注解失效。</p>
 <p>Transactional 注解的原理是这样：</p>
 <p>在应用系统调用声明<code>@Transactional</code>的目标方法时，Spring Framework 默认使用 AOP 代理，在代码运行时生成一个代理对象，根据<code>@Transactional</code>的属性配置信息，这个代理对象决定该声明<code>@Transactional</code>的目标方法是否由拦截器 <code>TransactionInterceptor</code>来使用拦截，在<code>TransactionInterceptor</code>拦截时，会在在目标方法开始执行之前创建并加入事务，并执行目标方法的逻辑, 最后根据执行情况是否出现异常，利用抽象事务管理器<code>AbstractPlatformTransactionManager</code>操作数据源 DataSource 提交或回滚事务。</p>
 <p>注解的所有属性如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/e899c8713bc69fd99236c0d39160b083.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/e899c8713bc69fd99236c0d39160b083.png" alt=""></p>
 <p>第一个属性<code>value</code>的作用是：当在配置文件中有多个<code>TransactionManager</code>，可以用该属性指定选择哪个事务管理器。</p>
 <p>事务的传播和隔离级别下面详细叙述。</p>
 <p><code>readOnly</code>和<code>timeout</code>都很好理解。</p>
@@ -1398,7 +1398,7 @@
 </li>
 </ol>
 <p>好，原理看完了，开始实验。SpringBoot 的项目搭建就不赘述了，我们先准备一个表：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/64a7d9fb9aa45b62140b89f23453af5e.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/64a7d9fb9aa45b62140b89f23453af5e.png" alt=""></p>
 <p>图省事只有三个字段，自增主键<code>id</code>和姓名年龄。</p>
 <p>我们先看默认的情况，添加一个开启事务的插入操作：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>()</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testInsert</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    TestTable data = <span class="keyword">new</span> TestTable();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    data.setName(<span class="string">"张三"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    data.setAge(<span class="number">20</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> result = testTableMapper.insert(data);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (result == <span class="number">1</span>)</span></pre></td></tr><tr><td class="code"><pre><span class="line">        logger.info(<span class="string">"添加数据&#123;&#125;成功"</span>, data);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"RuntimeException"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
@@ -1421,7 +1421,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transactional</span>(isolation = Isolation.READ_COMMITTED)</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testSelect</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    List&lt;TestTable&gt; list = testTableMapper.selectList(Wrappers.emptyWrapper());</span></pre></td></tr><tr><td class="code"><pre><span class="line">    logger.info(<span class="string">"读取数据：&#123;&#125;"</span>, list.toString());</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <p>然后我们插入一条张三的数据：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/11f36f795a39114e6b2c73789448cdc9.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/11f36f795a39114e6b2c73789448cdc9.png" alt=""></p>
 <p>写一个更新的方法，把张三改名为李四：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testUpdate</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> result = testTableMapper.update(<span class="keyword">null</span>, Wrappers.lambdaUpdate(TestTable<span class="class">.<span class="keyword">class</span>)</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">            .set(TestTable::getName,"李四").eq(TestTable::getName, "张三"));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (result == <span class="number">1</span>)</span></pre></td></tr><tr><td class="code"><pre><span class="line">        logger.info(<span class="string">"更新数据成功"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
@@ -1543,9 +1543,9 @@
 <a id="more"></a>
 
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>先从两个角度看下并发包的层次结构，一个是继承关系图：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/3f4c527e12222b42e865eadcef7c18e0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/3f4c527e12222b42e865eadcef7c18e0.png" alt=""></p>
 <p>一个是功能结构：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/f76128db96dba6b6481a81c63a9f87ba.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/f76128db96dba6b6481a81c63a9f87ba.png" alt=""></p>
 <p>并发包非常庞大，结构复杂，个人能力有限也不可能总结非常清楚，我们先从常见、常用的开始看起吧。</p>
 <h2 id="工具类"><a href="#工具类" class="headerlink" title="工具类"></a>工具类</h2><p>工具包内主要有这几个工具：计数器<code>CountDownLatch</code>、回环栅栏（光看名字估计一头雾水）<code>CyclicBarrier</code>、信号量<code>Semaphore</code>、创建线程池的<code>Executors</code>，最后一个交换数据的<code>Exchanger</code>。本章几个工具的原理都是基于 AQS，关于 AQS 和<code>ReentrantLock</code>，都有单独的文章解读，就不专门介绍了。</p>
 <h3 id="CountDownLatch"><a href="#CountDownLatch" class="headerlink" title="CountDownLatch"></a>CountDownLatch</h3><h4 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h4><p>一个计数器，常见这样一种场景：多个任务分发个不同的线程去执行，全部执行完毕后回到主线程。当然有不同的实现方式，用<code>CountDownLatch</code>实现起来就很简单：</p>
@@ -1570,7 +1570,7 @@
 
 <h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>在 J.U.C 包中，创建线程池有两种方式，一种是手动创建，一种是通过<code>Executors</code>工厂类创建预设的几种线程池。</p>
 <p>基础的线程有如下几个：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/6de5c2ec64cd89e92fa688a813301622.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/6de5c2ec64cd89e92fa688a813301622.png" alt=""></p>
 <p>而<code>Executors</code>默认提供了六种线程池，但是不推荐在生产环境中直接使用，因为默认的设置对数据量没有进行限制，有可能出现问题。</p>
 <h3 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h3><p><code>ThreadPoolExecutor</code>提供了四个构造方法：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,<span class="keyword">int</span> maximumPoolSize, <span class="keyword">long</span> keepAliveTime, TimeUnit unit, BlockingQueue&lt;Runnable&gt; workQueue)</span></span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,<span class="keyword">int</span> maximumPoolSize,<span class="keyword">long</span> keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue, RejectedExecutionHandler handler)</span></span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize, <span class="keyword">int</span> maximumPoolSize,<span class="keyword">long</span> keepAliveTime,TimeUnit unit, BlockingQueue&lt;Runnable&gt; workQueue,   ThreadFactory threadFactory)</span></span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,<span class="keyword">int</span> maximumPoolSize,<span class="keyword">long</span> keepAliveTime, TimeUnit unit, BlockingQueue&lt;Runnable&gt; workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)</span></span></span></pre></td></tr></table></figure>
@@ -1678,14 +1678,14 @@
 </li>
 </ul>
 <p>但是，虽然鼓励使用线程池而不是直接新建线程，但是在生产系统中不建议直接使用<code>Executors</code>创建的线程池，阿里巴巴Java手册中是这么解释的：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/55c4329c2c7069b9ad6ace96ee6a806e.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/55c4329c2c7069b9ad6ace96ee6a806e.png" alt=""></p>
 <h2 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h2><h3 id="Map-系列"><a href="#Map-系列" class="headerlink" title="Map 系列"></a>Map 系列</h3><p>最知名也最常用<code>ConcurrentHashMap</code>本文就先不讲了，已经单独分析过，请参考那篇文章。</p>
 <h3 id="ConcurrentSkipListMap"><a href="#ConcurrentSkipListMap" class="headerlink" title="ConcurrentSkipListMap"></a>ConcurrentSkipListMap</h3><p>Skip List（跳表）是一种可以代替平衡树的数据结构，默认是按照 Key 值升序的。Skip List 让已排序的数据分布在多层链表中，以 0-1 随机数决定一个数据的向上攀升与否，通过“空间来换取时间”的一个算法，在每个节点中增加了向前的指针，在插入、删除、查找时可以忽略一些不可能涉及到的结点，从而提高了效率。</p>
 <p>简单介绍跳表的原理，这里盗用了博客<a href="https://juejin.im/post/5d9beab85188251d805f3f6c" target="_blank" rel="noopener">J.U.C 之 ConcurrentSkipListMap</a>上的解释：</p>
 <p>我们先看一个简单的链表，如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/a34fe5c2c3cf419385068fc264deac54.jpeg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/a34fe5c2c3cf419385068fc264deac54.jpeg" alt=""></p>
 <p>如果我们需要查询9、21、30，则需要比较次数为3 + 6 + 8 = 17 次，那么有没有优化方案呢？有！我们将该链表中的某些元素提炼出来作为一个比较“索引”，如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/3c7d5a05c382cf73cae257e990813670.jpeg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/3c7d5a05c382cf73cae257e990813670.jpeg" alt=""></p>
 <p>我们先与这些索引进行比较来决定下一个元素是往右还是下走，由于存在“索引”的缘故，导致在检索的时候会大大减少比较的次数。当然元素不是很多，很难体现出优势，当元素足够多的时候，这种索引结构就会大显身手。</p>
 <p>当然，实际上 Skip List 的原理要更复杂，就不在这详细叙述了。</p>
 <p>总之，跟<code>ConcurrentHashMap</code>相比，<code>ConcurrentSkipListMap</code>的key是有序的。有的文章提到<code>ConcurrentSkipListMap</code>支持更高的并发，线程越多性能越强，但是经过我实际测试，从 10 个线程到 100 个线程，无论<code>put</code>还是<code>get</code>，都没有快于<code>ConcurrentHashMap</code>，只有超过三百个线程之后，<code>put</code>操作会略微快一点点。</p>
@@ -1712,7 +1712,7 @@
 <p>跟线程不安全的队列比如<code>PriorityQueue</code>相比，由于数据存储是链表而不是数组，因此没有并发扩容的问题，但是入队出队是通过 CAS 实现的，大并发下有可能有效率问题，而且遍历的时候数据不是准确的。</p>
 <p>BlockingQueue</p>
 <p><code>BlockingQueue</code>是一个接口，定义了阻塞队列的基本方法，J.U.C 包中有多个该接口的实现类。定义的常用方法如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/36bf52c412ece67796ff2ab27c24bba5.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/36bf52c412ece67796ff2ab27c24bba5.png" alt=""></p>
 <p><code>BlockingQueue</code>的特点：</p>
 <ol>
 <li><code>BlockingQueue</code>可以是限定容量的。它在任意给定时间都可以有一个<code>remainingCapacity</code>，超出此容量，便无法无阻塞地<code>put</code>附加元素。没有任何内部容量约束的<code>BlockingQueue</code>总是报告<code>Integer.MAX_VALUE</code>的剩余容量。</li>
@@ -1721,7 +1721,7 @@
 <li><code>BlockingQueue</code>实质上不 支持使用任何一种“close”或“shutdown”操作来指示不再添加任何项。这种功能的需求和使用有依赖于实现的倾向。例如，一种常用的策略是：对于生产者，插入特殊的 end-of-stream 或 Poison 对象，并根据使用者获取这些对象的时间来对它们进行解释。</li>
 </ol>
 <p><code>BlockingQueue</code>的实现类：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/a73ab20cdf64b55d77e2cd7364602d54.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/a73ab20cdf64b55d77e2cd7364602d54.png" alt=""></p>
 <ol>
 <li>BlockingDeque：阻塞的双端队列，<code>LinkedBlockingDeque</code>是其基于链表的实现类，如果没有设置容量，那么容量将是Int的最大值。<code>LinkedBlockingQueue</code>可以同时有两个线程在两端执行操作，这点与<code>LinkedBlockingQeque</code>不同。</li>
 <li>TransferQueue：基于队列扩展的一种有趣的生产-消费者模型，其实现类是<code>BlockingTransferQueue</code>，能够实现元素在线程之间的传递。</li>
@@ -1997,7 +1997,7 @@
 <a id="more"></a>
 
 <h2 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h2><p><code>java.util</code>包中提供的常见Map类包括以下几种。这里乱入了个<code>ConcurrentHashMap</code>，放到下面和其他<code>concurrent</code>包的集合一起讲。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/745d97b3e18d919ffbb9ad3a7f61c61b.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/745d97b3e18d919ffbb9ad3a7f61c61b.png" alt=""></p>
 <h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><p> HashMap 是老生常谈的集合了，学习 HashMap 主要关注点是哈希算法、rehash、数据存储、扩容方式、性能区别和结合ConcurrentHashMap 了解为什么线程不安全，后者怎么解决线程安全问题。</p>
 <h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>先看一下JDK中 hashCode 的生成方式，JDK 1.8 以后都是如下方式：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> h;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
@@ -2015,7 +2015,7 @@
 
 <p>但这时候问题就来了，这样就算我的散列值分布再松散，要是只取最后几位的话，碰撞也会很严重。更要命的是如果散列本身做得不好，分布上成等差数列的漏洞，恰好使最后几个低位呈现规律性重复，就无比蛋疼。</p>
 <p>这时候“扰动函数”的价值就体现出来了，说到这里大家应该猜出来了。看下面这个图:</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/e2865f788f40d13b29e204649820a9bf.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/e2865f788f40d13b29e204649820a9bf.jpg" alt=""></p>
 <p>右位移 16 位，正好是 32bit 的一半，自己的高半区和低半区做异或，就是为了混合原始哈希码的高位和低位，以此来加大低位的随机性。而且混合后的低位掺杂了高位的部分特征，这样高位的信息也被变相保留下来。</p>
 <h4 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h4><p>HashMap 两个关键的初始化参数：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">4</span>; <span class="comment">// aka 16</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> DEFAULT_LOAD_FACTOR = <span class="number">0.75f</span>;</span></pre></td></tr></table></figure>
@@ -2063,8 +2063,8 @@
 <p>那么 ConcurrentHashMap 如何保证线程安全？这个在另一篇文章中单独叙述。</p>
 <h3 id="LinkedHashMap"><a href="#LinkedHashMap" class="headerlink" title="LinkedHashMap"></a>LinkedHashMap</h3><p>LinkedHashMap 是继承自 HashMap 的，跟 HashMap 最大的区别是，他是基于 Hash 表和链表的实现，并且依靠着双向链表保证了迭代顺序是插入的顺序。</p>
 <p>来看看 HashMap 和 LinkedHashMap 的结构图，是不是秒懂了。LinkedHashMap 其实就是可以看成 HashMap 的基础上，多了一个双向链表来维持顺序。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/61bd32fe80e6c936034c93389cc99c0a.jpg" alt=""></p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/f7855185a5577918835416203aa831ae.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/61bd32fe80e6c936034c93389cc99c0a.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/f7855185a5577918835416203aa831ae.jpg" alt=""></p>
 <p>可以用 LinkedHashMap 实现最近访问算法，即最近访问过的元素在最前面， LinkedHashMap 有这么一个构造方法。</p>
 <p><code>public LinkedHashMap(int initialCapacity, float loadFactor,boolean accessOrder)</code></p>
 <p><code>accessOrde</code>为<code>true</code>的时候按照元素最后访问时间排序（LRU算法：最近最久使用），为<code>false</code>则是按照插入顺序排序，默认为<code>false</code>.</p>
@@ -2106,7 +2106,7 @@
 <p>当弱引用指向的对象只能通过弱引用（没有强引用或弱引用）访问时，GC会清理掉该对象，之后，引用对象会被放到ReferenceQueue中。在 Entry 的构造函数中可以得知，通过<code>super(key, queue)</code>将 key 保存为弱引用，通过<code>this.value = value</code>将 value 保存为强引用。当 key 中的引用被 gc 掉之后，在下次访问 WeakHashMap（调用<code>expungeStaleEntries</code>函数）时相应的 entry 也会自动被移除。</p>
 <p>WeakHashMap 并不是你什么也不干它就能自动释放内部不用的对象的，而是在你访问它的内容的时候释放内部不用的对象。</p>
 <h2 id="List"><a href="#List" class="headerlink" title="List"></a>List</h2><p><code>java.util</code>包中提供的常见List类包括以下几种。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/11d786f3c58fa393e519eca19c63fa67.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/11d786f3c58fa393e519eca19c63fa67.png" alt=""></p>
 <p>从刚学 Java 的前几天起，大概就会见到这个问题：LinkedList 和 ArrayList 有什么共同点和区别？</p>
 <p>共同点：</p>
 <ol>
@@ -2129,13 +2129,13 @@
 <h4 id="Stack"><a href="#Stack" class="headerlink" title="Stack"></a>Stack</h4><p>Stack 栈是 Vector 的一个子类，它实现了一个标准的后进先出的栈。</p>
 <p>他的方法很简单，只有<code>empty()</code>、<code>peek()</code>、<code>pop()</code>、<code>push(Object element)</code>、<code>search(object element)</code>这几个。其中 peek 和 pop 的返回值都是堆栈顶部的对象，但是前者只是查看，后者是移除。</p>
 <h2 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h2><p><code>java.util</code>包中提供的常见Set类包括以下几种。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/06530f14f76b79769887d3f1e8eebc27.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/06530f14f76b79769887d3f1e8eebc27.png" alt=""></p>
 <p>HashSet 没什么好说的，其实就是把 HashMap 封装了一层，从 HashSet 的构造方法可以看出，就是维护了一个 HashMap，数据的增删改查也是调用的 HashMap 的方法。</p>
 <p>TreeSet 也是一样，其实就是 TreeMap 套了个皮。</p>
 <p>EnumSet 就不一样了，跟 EnumMap 其实没有什么关系。EnumSet 是一个 Set 集合的抽象类，其有两个实现类 JumboEnumSet 和 RegularEnumSet，在使用的时候放入的必须是枚举类型，<strong>其特点是速度非常快。</strong></p>
 <p>EnumSet 的默认子类 RegularEnumSet 和 JumboEnumSet 实现原理都是基于位运算向量，位运算向量的原理就是用一个位表示一个元素的状态（元素的状态只有两种），用一组位表示一个集合的状态，每个位对应一个元素，譬如一个枚举类 DemoEnum 有6个枚举值，则 EnumSet<DemoEnum> 集合就可以通过一个 byte 字节从右到左（二进制低到高位）来表示，不用的位上用 0 填充，用的位上每个 bit 位代表一个枚举值，1 表示包含该枚举值，0 表示不含该枚举值。因此位向量能表示的枚举值个数与向量长度有关，上面例子中一个 byte 类型最多能表示 8 个枚举值，所以 EnumSet 抽象类的两个实现类 RegularEnumSet 和 JumboEnumSet 分别定义了不同的向量长度。RegularEnumSet 使用 64 位的 long 类型变量作为位向量，而 JumboEnumSet 使用一个 long 类型数组作为向量（数组内存连续），故当我们通过 EnumSet 的工厂方法创建 EnumSet 集合时 EnumSet 会通过判断枚举类的枚举值数量决定使用两个子类的哪一个，如果枚举值个数小于等于 64 就用 RegularEnumSet，大于 64 就用 JumboEnumSet。</p>
 <p>简单来说 EnumSet 就是一个高效的枚举类集合。</p>
-<h2 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h2><p><img src="http://nas.beritra.com:18081/uploads/big/8fd5bf86f968ababd2e78669517c5c08.png" alt=""></p>
+<h2 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h2><p><img src="http://static.beritra.com/uploads/big/8fd5bf86f968ababd2e78669517c5c08.png" alt=""></p>
 <p>队列(Queue)可以当做一种特殊的线性表，遵循先进先出原则。而双向队列(Deque)，是 Queue 的一个子接口，双向队列是指该队列两端的元素既能入队(offer)也能出队(poll),如果将 Deque 限制为只能从一端入队和出队，则可实现栈的数据结构。</p>
 <p>PriorityQueue 有一种特殊的队列，叫做优先队列。优先队列的作用是能保证每次取出的元素都是队列中权值最小的（Java的优先队列每次取最小元素，C++的优先队列每次取最大元素）。这里牵涉到了大小关系，元素大小的评判可以通过元素本身的自然顺序（natural ordering），也可以通过构造时传入的比较器（Comparator，类似于C++的仿函数）。</p>
 <p>Java 中 PriorityQueue 实现了 Queue 接口，不允许放入<code>null</code>元素；其通过堆实现，具体说是通过完全二叉树（complete binary tree）实现的小顶堆（任意一个非叶子节点的权值，都不大于其左右子节点的权值），也就意味着可以通过数组来作为 PriorityQueue 的底层实现。</p>
@@ -2163,7 +2163,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">add</span><span class="params">(E e)</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        Object[] es = getArray();</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">int</span> len = es.length;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        es = Arrays.copyOf(es, len + <span class="number">1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        es[len] = e;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        setArray(es);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">set</span><span class="params">(<span class="keyword">int</span> index, E element)</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        Object[] es = getArray();</span></pre></td></tr><tr><td class="code"><pre><span class="line">        E oldValue = elementAt(es, index);</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">if</span> (oldValue != element) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            es = es.clone();</span></pre></td></tr><tr><td class="code"><pre><span class="line">            es[index] = element;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            setArray(es);</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> oldValue;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <p>CopyOnWriteArrayList 的实现也不复杂，对有并发风险的操作加了锁。注意这里的内部数组是<code>volatile</code>修饰的，写线程对数组引用的修改对读线程是可见的。由于在写数据的时候，是在新的数组中插入数据的，从而保证读写实在两个不同的数据容器中进行操作。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/9151c7a0b015e54bdc06bebfaec18be7.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/9151c7a0b015e54bdc06bebfaec18be7.jpg" alt=""></p>
 <p>参考资料：</p>
 <p><a href="https://www.zhihu.com/question/20733617" target="_blank" rel="noopener">JDK 源码中 HashMap 的 hash 方法原理是什么？</a></p>
 <p><a href="https://juejin.im/post/5c1c79b16fb9a049a711c97c" target="_blank" rel="noopener">HashMap底层实现原理</a></p>
@@ -3191,8 +3191,8 @@
 <li>没找到，也不一定说明证书是假的，因为数字证书是一条信任链，A 信任 B，B 信任 C，就算内置了 A ，也不能直接用 A 验证 C。所幸 C 的证书内容里会包含 B 的名称和地址，浏览器会自动去找 B 的证书，然后再看看 B 是否可信，直到达到了根节点。或者到了根节点仍然不可信，整个信任链就没有建立，所有证书被浏览器判断为不可信。</li>
 </ol>
 <p>如此以来，数字证书的认证就完成了，有两个结果，浏览器信任证书和不信任证书。前者一般会有标示，比如 Chrome 浏览器会在地址栏有个小锁。后者就会提示连接有风险。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/2b9b90ea9f8dfdff2274335d198f04e5.png" alt="test"></p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/47374473deecb326870d3b993bc37707.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/2b9b90ea9f8dfdff2274335d198f04e5.png" alt="test"></p>
+<p><img src="http://static.beritra.com/uploads/big/47374473deecb326870d3b993bc37707.png" alt=""></p>
 <p>这一步完成之后，客户端只是拿到了一个准确、可信的服务端的公钥。而实际上的数据传输还没开始。</p>
 <p>客户端拿到公钥之后（或之前，我也不确定），也会把自己的公钥发送过去，双方会运行 Diffie Hellman 算法，简称 DH 算法。DH 算法的作用是这样：通过二者的公钥推导出一个个一样的密码出来。通俗地说：双方会协商一个master-key，这个master-key 不会在网络上传输、交换，它们独立计算出来的，其值是相同的，只有它们自己双方知道。</p>
 <p>然后以master-key 推导出 session-key，用于双方 SSL 数据流的加密/解密，采用对称加密，保证数据不被偷窥，加密算法一般用 AES。</p>
@@ -3207,8 +3207,8 @@
 <li>后续的请求内容都用会话密钥进行加密和解密。</li>
 </ol>
 <h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>截了个知乎的证书，可以看到是三级的信任链，知乎的证书签发机构是<code>GeoTrust RSA CA 2018</code>，而 GeoTrust 的签发机构是<code>DigiCert Global Root CA</code>，就到根证书了。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/843931a17deddf3b0e03f276578dab56.png" alt=""></p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/af5bb15f4644cff034f6c4627b0542b3.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/843931a17deddf3b0e03f276578dab56.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/af5bb15f4644cff034f6c4627b0542b3.png" alt=""></p>
 <p>另外注意风险：</p>
 <ol>
 <li>把公钥交给对方的时候要注意安全，公钥有可能被劫持。</li>
@@ -3600,7 +3600,7 @@
 <p><strong>线程和进程有何不同？</strong></p>
 </blockquote>
 <p>线程是进程划分成的更小的运行单位。线程和进程最大的不同在于基本上各进程是独立的，而各线程则不一定，因为同一进程中的线程极有可能会相互影响。从另一角度来说，进程属于操作系统的范畴，主要是同一段时间内，可以同时执行一个以上的程序，而线程则是在同一程序内几乎同时执行一个以上的程序段。</p>
-<h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p><img src="http://nas.beritra.com:18081/uploads/big/40a85729402b570ed355e8a8ba0791dd.png" alt=""></p>
+<h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p><img src="http://static.beritra.com/uploads/big/40a85729402b570ed355e8a8ba0791dd.png" alt=""></p>
 <p>一个线程有五个基本状态</p>
 <ul>
 <li>新建状态：当线程对象创建后，即进入新建状态，如：<code>Thread t = new MyThread();</code></li>
@@ -3679,7 +3679,7 @@
 <p>在许多场景中，同步资源的锁定时间很短，为了这一小段时间去切换线程，线程挂起和恢复现场的花费可能会让系统得不偿失。如果物理机器有多个处理器，能够让两个或以上的线程同时并行执行，我们就可以让后面那个请求锁的线程不放弃 CPU 的执行时间，看看持有锁的线程是否很快就会释放锁。</p>
 <p>而为了让当前线程“稍等一下”，我们需让当前线程进行自旋，如果在自旋完成后前面锁定同步资源的线程已经释放了锁，那么当前线程就可以不必阻塞而是直接获取同步资源，从而避免切换线程的开销。这就是自旋锁。</p>
 <p>借一张网图来总结：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/3d05b309bcf6993ae4a457f77af3e732.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/3d05b309bcf6993ae4a457f77af3e732.png" alt=""></p>
 <h2 id="基本使用方式"><a href="#基本使用方式" class="headerlink" title="基本使用方式"></a>基本使用方式</h2><h3 id="继承-Thread-类"><a href="#继承-Thread-类" class="headerlink" title="继承 Thread 类"></a>继承 Thread 类</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        System.out.println(<span class="string">"MyThread is running"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
 <h3 id="实现-Runnable-接口"><a href="#实现-Runnable-接口" class="headerlink" title="实现 Runnable 接口"></a>实现 Runnable 接口</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyRunnable</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="meta">@Override</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        System.out.println(<span class="string">"MyRunnable is running"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
@@ -3718,7 +3718,7 @@
 <li>能够中断任务；</li>
 <li>能够获取任务执行结果。</li>
 </ul>
-<h3 id="FutureTask"><a href="#FutureTask" class="headerlink" title="FutureTask"></a>FutureTask</h3><p><img src="http://nas.beritra.com:18081/uploads/big/c8b49e841c60320023da03cf16b912c8.png" alt=""></p>
+<h3 id="FutureTask"><a href="#FutureTask" class="headerlink" title="FutureTask"></a>FutureTask</h3><p><img src="http://static.beritra.com/uploads/big/c8b49e841c60320023da03cf16b912c8.png" alt=""></p>
 <p>FutureTask类实现了<code>RunnableFuture</code>接口，我们看一下<code>RunnableFuture</code>接口的实现：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">RunnableFuture</span> <span class="keyword">extends</span> <span class="title">Runnable</span>, <span class="title">Future</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
 
@@ -3758,9 +3758,9 @@
 <p>每个对象都拥有自己的监视器，当这个对象由同步块或者这个对象的同步方法调用时，执行方法的线程必须先获取该对象的监视器才能进入同步块和同步方法，如果没有获取到监视器的线程将会被阻塞在同步块和同步方法的入口处，进入到 BLOCKED 状态。</p>
 <p>对于同步方法：方法级同步没有通过字节码指令来控制，它实现在方法调用和返回操作之中。当方法调用时，调用指令会检查方法<code>ACC_SYNCHRONIZED</code>访问标志是否被设置，若设置了则执行线程需要持有监视器(Monitor)才能运行方法，当方法完成(无论是否出现异常)时释放监视器。</p>
 <p>对于同步代码块：<code>synchronized</code>关键字经过编译后，会在同步块的前后分别形成<code>monitorenter</code>和<code>monitorexit</code>两个字节码指令，每条<code>monitorenter</code>指令都必须执行其对应的<code>monitorexit</code>指令，为了保证方法异常完成时这两条指令依然能正确执行，编译器还会自动产生一个异常处理器，其目的就是用来执行<code>monitorexit</code>指令。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/2c499be0e7ef958becb573bbfa23c145.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/2c499be0e7ef958becb573bbfa23c145.png" alt=""></p>
 <p>Monitor是线程私有的数据结构，每个线程都有一个可用monitor record列表，同时 还有一个全局的可用列表。每一个被锁住的对象都会和一个monitor关联(对象头的MarkWord中的LockWord指向monitor的起始地址)，同时monitor中有一个owner字段存放拥有该锁的线程的唯一标识，表示该锁被这个线程占用。其结构如下:</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/94cfdf0ab387033027a6c53fb302d9cc.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/94cfdf0ab387033027a6c53fb302d9cc.png" alt=""></p>
 <p><strong>Owner</strong>：初始时为 NULL 表示当前没有任何线程拥有该<code>monitor record</code>，当线程成功拥有该锁后保存线程唯一标识，当锁被释放时又设置为 NULL<br> <strong>EntryQ</strong>：关联一个系统互斥锁（semaphore），阻塞所有试图锁住<code>monitor record</code>失败的线程<br> <strong>RcThis</strong>：表示<code>blocked</code>或<code>waiting</code>在该<code>monitor record</code>上的所有线程的个数<br> <strong>Nest</strong>：用来实现重入锁的计数<br> <strong>HashCode</strong>：保存从对象头拷贝过来的<code>HashCode</code>值（可能还包含GC age）<br> <strong>Candidate</strong>：用来避免不必要的阻塞或等待线程唤醒，因为每一次只有一个线程能够成功拥有锁，如果每次前一个释放锁的线程唤醒所有正在阻塞或等待的线程，会引起不必要的上下文切换（从阻塞到就绪然后因为竞争锁失败又被阻塞）从而导致性能严重下降。Candidate只有两种可能的值 0 表示没有需要唤醒的线程 1 表示要唤醒一个继任线程来竞争锁。</p>
 <h3 id="Lock-实现原理"><a href="#Lock-实现原理" class="headerlink" title="Lock 实现原理"></a>Lock 实现原理</h3><h4 id="加锁过程"><a href="#加锁过程" class="headerlink" title="加锁过程"></a>加锁过程</h4><p>以<code>ReentrantLock</code>为例，我们看看他都做了些什么：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    sync = <span class="keyword">new</span> NonfairSync();</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
@@ -3769,10 +3769,10 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">NonfairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span></span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="class"><span class="title">static</span> <span class="title">final</span> <span class="title">class</span> <span class="title">FairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span></span></span></pre></td></tr></table></figure>
 
 <p>而<code>Sync</code>由继承自<code>AbstractQueuedSynchronizer</code>，这么长一坨是个什么东西？从名字里可以看出是个抽象的队列同步器。而他由继承自<code>AbstractOwnableSynchronizer(AOS)</code>，整个继承关系如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/32373d5fa230fd7c9bb7dd9fff530c9c.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/32373d5fa230fd7c9bb7dd9fff530c9c.png" alt=""></p>
 <p><code>FairSync</code>与<code>NonfairSync</code>的区别在于，是不是保证获取锁的公平性，因为默认是<code>NonfairSync</code>，我们就先看这个。</p>
 <p>点进<code>AbstractQueuedSynchronizer</code>代码里面，可以看到内部维护了一个双向链表，锁的存储结构归根结底就是两个东西：双向链表+<code>int</code>类型的状态。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/13e2a62fe8578a0cd53d2cfeca9748fc.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/13e2a62fe8578a0cd53d2cfeca9748fc.png" alt=""></p>
 <p>可以看到，都是用<code>volatile</code>关键字修饰的，链表的头尾还有<code>transient</code>关键字。</p>
 <p>获取锁的时候，又做了什么？我们查看<code>ReentrantLock</code>的<code>lock()</code>方法：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    sync.acquire(<span class="number">1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
@@ -3860,7 +3860,7 @@
 </li>
 </ul>
 <p>在阿里巴巴Java开发手册中也明确指出，是『不允许』使用<code>Executors</code>创建线程池。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/e9544748c3bd8f51bca9eaa2de977fa1.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/e9544748c3bd8f51bca9eaa2de977fa1.jpg" alt=""></p>
 <p>避免使用 Executors 创建线程池，主要是避免使用其中的默认实现，那么我们可以自己直接调用<code>ThreadPoolExecutor</code>的构造函数来自己创建线程池。在创建的同时，给<code>BlockQueue</code>指定容量就可以了。</p>
 <h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><h3 id="java-util-concurrent包"><a href="#java-util-concurrent包" class="headerlink" title="java.util.concurrent包"></a>java.util.concurrent包</h3><ul>
 <li>数据结构：ConcurrentHashMap, BlockingQueue 系列</li>
@@ -3938,7 +3938,7 @@
     <content><![CDATA[<p><code>ConcurrentHashMap</code>是在 JDK 1.5 时，J.U.C 引入的一个同步集合工具类，顾名思义，这是一个线程安全的 HashMap。不同版本的 ConcurrentHashMap，内部实现机制千差万别，本节所有的讨论基于 JDK 1.8。</p>
 <a id="more"></a>
 
-<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p><img src="http://nas.beritra.com:18081/uploads/big/dd9c8949bded2a52e865cdb1cdc668e0.png" alt=""></p>
+<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p><img src="http://static.beritra.com/uploads/big/dd9c8949bded2a52e865cdb1cdc668e0.png" alt=""></p>
 <p><strong>ConcurrentHashMap</strong>内部维护了一个<code>Node</code>类型的数组，也就是<strong>table</strong>：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">transient volatile Node[] table;</span></pre></td></tr></table></figure>
 
@@ -4089,23 +4089,23 @@
 </ul>
 <p><strong>扁平事务（Flat Transaction）</strong>是事务类型中最简单的一种，但在实际生产环境中，可能是最频繁的事务。在扁平事务中，所有操作都处于同一层次，其由<code>BEGIN WORK</code>开始，由<code>COMMIT WORK</code>或<code>ROLLBACK WORK</code>结束，其间的操作是原子的，要么都执行，要么都回滚。因此扁平事务是应用程序成为原子操作的基本组成模块。</p>
 <p> 下图显示了扁平事务的三种不同结果：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/980e4507ab99e2a1f4a78fe7b4c954e8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/980e4507ab99e2a1f4a78fe7b4c954e8.png" alt=""></p>
 <p>扁平事务的主要限制是不能提交或者回滚事务中的某一部分，或者分步骤提交。下面给出了一个扁平事务不足以支持的例子。例如用户在旅行网站上进行自己的旅行度假计划。用户摄像从杭州道意大利的佛罗伦萨，这两个城市之间没有直达的班级，需要用户预定并转乘航班，或者需要搭火车等待。用户旅行度假的事务为：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">BEGIN WROK</span></pre></td></tr><tr><td class="code"><pre><span class="line">S1：预定杭州到上海的高铁</span></pre></td></tr><tr><td class="code"><pre><span class="line">S2：上海浦东国际机场坐飞机，预定区米兰的航班</span></pre></td></tr><tr><td class="code"><pre><span class="line">S3：在米兰坐火车前往佛罗伦萨，预定去佛罗伦萨的火车</span></pre></td></tr></table></figure>
 
 <p>但是当用户执行到 S3 的时候，发现由于飞机到达米兰的时间台湾，已经没有当天的火车。这时用户希望在米兰当地住一晚，第二天出发去佛罗伦萨。这时如果事务为扁平事务，则需要回滚之前 S1、S2、S3 的三个操作，这个代价就显得有点大。因为当再次进行该事务的时候，S1、S2 的执行计划是不变的。也就是说，如果有支持计划的回滚操作，那么就不需要终止整个事务。因此就出现了带有保存点的扁平事务。</p>
 <p><strong>带有保存点的扁平事务（Flat Transaction with Savepoint）</strong>，除了支持扁平事务支持的操作外，允许在事务执行过程中回滚到同一事务中较早的一个状态。这是因为某霞事务可能在执行过程中出现的错误并不会导致所有的操作都无效，放弃整个事务不合乎要求，开销页太大。<strong>保存点（Savepoint）</strong>用来通知系统应该记住事务当前的状态，以便当以后发生错误时，事务能回到保存点当时的状态。对于扁平的事务来说，其隐式的设置了一个保存点。而在整个事务中，只有一个保存点，因此，回滚只能回滚到事务开始时的状态。保存点用<code>SAVE WORK</code>函数来建立，通知系统记录当前的处理状态。当出现问题的时候，保存点能用作内部的重启动点，根据应用逻辑，决定是回到最近一个保存点还是其他更早的保存点。下图显示了在事务中使用了保存点：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/dca2709fdeb84932ccae92cf405fbbe0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/dca2709fdeb84932ccae92cf405fbbe0.png" alt=""></p>
 <p>上图显示了如何在事务中使用保存点。灰色背景部分的操作表示由<code>ROLLBACK WORK</code>而导致的部分回滚，实际并没有执行的操作。当用 BEGIN WORK 开启一个事务时，隐式地包含一个保存点，当事务通过<code>ROLLBACK WORK：2</code> 发出部分回滚命令的时候，事务回滚到保存点 2，接着一次执行，并再次执行到<code>ROLLBACK WORK：7</code>，知道最后的<code>COMMIT WORK</code>操作，这时表示事务结束，除灰色阴影部分的操作外，其他的操作都已经执行，并且提交。</p>
 <p>另一点需要注意的是，保存点在事务内部是递增的，这从上图中也可以看出。有人可能会想，返回保存点 2 之后，下一个保存点可以是 3，因为之前的动作都终止了。然而新的保存点编号为 5，这意味着<code>ROLLBACK</code>不影响保存点的计数，并且单调递增的编号能保持事务执行的整个历史过程，包括在执行过程中想法的改变。</p>
 <p>此外，当事务通过<code>ROLLBACK WORK</code>：2 命令部分回滚命令时，要记住事务并没有完全被回滚，只是回滚到了保存点 2 而已。这代表当前事务还是活跃的，如果想要完全回滚事务，还需要再执行命令<code>ROLLBACK WORK</code>。</p>
 <p><strong>链事务（Chained Transaction）</strong>可以视为是保存点模式的一种变种。带有保存点的扁平事务，当事务发生崩溃的时候，所有保存点都将消失，因为其保存点是易失的（volatile），而非持久的（persistent）。这意味着当进行恢复时，事务需要从开始处重新执行，而不能从最近的一个保存点继续执行。</p>
 <p>链事务的思想是：在提交一个事务时，释放不需要的数据对象，将必要的数据处理上下文隐式地传给下一个要开始的事务。注意，提交事务操作和开始下一个事务操作将合并为一个原子操作。这意味着下一个事务将看到上一个事务的结果，就好像在一个事务中进行的一样。下图显示了链事务的工作方式：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/c90bcbd6ddbdd7f6b3571df115408746.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/c90bcbd6ddbdd7f6b3571df115408746.png" alt=""></p>
 <p>链事务与带有保存点的扁平事务不同的是，带有保存点的扁平事务能回滚到任意正确的保存点。而链事务中的回滚仅限于当前事务，即只能恢复到最近的一个保存点。对于锁的处理，两者也不相同。链事务在执行<code>COMMIT</code>后即释放了当前事务所持有的锁，</p>
 <p>而带有保存点的扁平事务不影响迄今为止所持有的锁。</p>
 <p><strong>嵌套事务（Nested Transaction）</strong>是一个层次结构框架。由一个顶层事务（top-level transaction）控制着各个层次的事务。顶层事务之下嵌套的事务被称为子事务（subtransaction），其控制着每一个局部的变量。嵌套事务的层次结构如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/aa0edf09310f5553bca987baea782926.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/aa0edf09310f5553bca987baea782926.png" alt=""></p>
 <p>下面是 Moss 对嵌套事务的定义：</p>
 <ol>
 <li>嵌套事务是由若干事务组成的一颗树，子树既可以是嵌套事务，也可以是扁平事务。</li>
@@ -4115,7 +4115,7 @@
 <li>树中任何一个事务的回滚都会引起它所有的子事务一同回滚，故子事务仅保留 A、C、I 特性，不具有 D 的特性。</li>
 </ol>
 <p>根据 Moss 的理论，实际的工作是交由叶子节点来完成的，即只有叶子节点的事务才能访问数据库、发送消息、获取其他类型的资源。而高层的事务仅负责逻辑控制，决定何时调用相关的子事务。即使一个系统不支持嵌套事务，用户也可以通过保存点技术来模拟嵌套事务，如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/bb67629bf4784eaf753a252db39807c0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/bb67629bf4784eaf753a252db39807c0.png" alt=""></p>
 <p>从图中也可以发现，在恢复时采用保存点技术比嵌套查询有更大的灵活性。例如在完成 Tk3 这个事务的时候，可以回滚到保存点 S2 的状态。而在嵌套查询的层次结构中，这是不被允许的。</p>
 <p>但是用保存点技术来模拟嵌套事务在锁的持有方面还是与嵌套查询有些区别。当通过保存点技术来模拟嵌套事务时，用户无法选择哪些锁需要被子事务继承，哪些需要被父事务保留。就是说：无论有多少个保存点，所有被锁住的对象都可以被得到和访问。而在查询嵌套中，不同的子事务在数据库对象上持有的锁是不同的。 例如有一个父事务 P1，其持有对象 X 和 Y 的排它锁，现在要开始调用子事务 p11，那么父事务 P1 可以不传递锁，也可以传递所有的锁，也可以只传递一个排他锁。如果子事务 P11 中还有持有对象 X、Y、Z 的排他锁。如果这时又再次调用了一个子事务 P12，那么它可以传递那里已经持有的锁。</p>
 <p>然而，如果系统支持在嵌套事务中并行地执行各个事务，在这种情况下，采用保存点的扁平事务来模拟嵌套事务就不切实际了。者从另一个方面反映出，想要实现事务键的并行性，需要真正支持的嵌套事务<strong>。</strong></p>
@@ -4137,7 +4137,7 @@
 <p>InnoDB 存储引擎允许用户手动设置非持久性的情况发生，因此提高数据库的性能。当事务提交的时候，日志不写入重做日志文件，而是等待一个时间周期后再执行<code>fsync</code>操作。由于并非强制在事务提交的时候进行一次<code>fync</code>操作，显然可以提高数据库性能。但是在数据库发生宕机的时候，由于部分日志未发刷新到磁盘，因此会丢失最后一段时间的事务。</p>
 <p>参数<code>inndob_flush_log_at_trx_commit</code>用来控制重做日志刷新到磁盘的策略，默认值是 1，表示每次都会调用<code>fsync</code>操作。这个参数还可以设置为 0 或者 2。0 表示事务提交时不进行写入重做日志操作，这个操作仅在 master thread 中完成，而在 master thread 中每一秒会进行一次<code>fsync</code>操作。2 表示事务提交时将重做日志写入重做日志文件，但仅写入文件系统的缓存中，不进行 fsync 操作。在这个设置下，当 MySQL 数据库发生宕机而操作系统不发生宕机时，并不会导致事务的丢失。但是当操作系统宕机时，重启数据库后会丢失未从文件系统缓存刷新到重做日志文件那部分事务。</p>
 <p>下图是模拟插入 50 万行数据，参数为 1 是每插入一条就显式执行一次 COMMIT 操作，跟其他参数设置之间的数据库效率对比：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/d088781618cfc6c54fee66d97f5e098a.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/d088781618cfc6c54fee66d97f5e098a.png" alt=""></p>
 <p>虽然用户可以通过设置参数<code>innodb_flush_log_at_trx_commit</code>为 0 或 2 来提高事务提交的性能，但是需要牢记的事，这种设置方法丧失了事务的 ACID 特性。而针对上述存储过程，为了提高事务的提交性能，应该在将 50 万行数据插入表后进行一次 COMMIT 操作，而不是在每插入一条记录之后进行一次 COMMIT 操作。</p>
 <p>在 MySQL 数据库中还有一种二进制日志（binlog），其用来进行 POINT-TIME（PIT）的恢复及主从复制（Replication）环境的建立。从表面上看其和重做日志非常相似，都是记录了对于数据库操作的日志。然而，从本质上来看，二者有着非常大的不同。</p>
 <p>首先，重做日志是在 InnoDB 存储引擎层产生，而二进制日志是在 MySQL 数据库的上层产生的，并且二进制日志不仅仅对于 InnoDB 引擎，MySQL 数据库中的任何存储引擎对于数据库的更改都会产生二进制日志。</p>
@@ -4219,18 +4219,18 @@
 <li>应用程序：定义事务的边界，指定全局事务中的操作。</li>
 </ul>
 <p>在 MySQL 数据库的分布式事务中，资源管理器就是 MySQL 数据库，事务管理器为连接 MySQL 服务器的客户端。下图显示了一个分布式事务的模型：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/376ba5d7b0a884ae37b62f1149ff7bea.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/376ba5d7b0a884ae37b62f1149ff7bea.png" alt=""></p>
 <p>分布式事务使用两段式提交（two-phase commit）的方式。在第一阶段，所有参与全局事务的节点都开始准备（PREPARE），告诉事务管理器他们准备号提交了。在第二阶段，事务管理器告诉资源管理器执行<code>ROLLBACK</code>还是<code>COMMIT</code>。如果任何一个节点显示不能提交，则所有的节点都被告知需要回滚。可见与本地事务不同的是，分布式事务需要多一次 PREPARE 的操作，待收到所有节点的同意信息后，再进行<code>COMMIT</code>或是<code>ROLLBACK</code>操作。</p>
 <h3 id="内部-XA-事务"><a href="#内部-XA-事务" class="headerlink" title="内部 XA 事务"></a>内部 XA 事务</h3><p>之前讨论的分布式事务是外部事务，即资源管理器是 MySQL 本身。在 MySQL 数据库中还存在另一种分布式事务，其在存储引擎与插件之间，又或者在存储引擎与存储引擎之间，称之为内部 XA 事务。】</p>
 <p>最常见的内部 XA 事务存在于 binlog 与 InnoDB 存储引擎之间。由于复制的需要，因此目前绝大多数的数据库都开启了 binlog 功能。在事务提交时，先写二进制日志，再写 InnoDB 存储引擎的重做日志。对上述两个操作的要求也是原子的。即二进制日志和重做日志必须同时写入。若 二进制日志先写了，而在写入 InnoDB 存储引擎时发生了宕机，那么 slave 可能会接收到 master 传过去的二进制日志并执行，最终导致了主从不一致的情况。</p>
 <p>为了解决这个问题，MySQL 数据库在 binlog 与 InnoDB 存储引擎之间采用 XA 事务。当事务提交的时候，InnoDB 存储引擎回西安做一个 PREPARE 操作，将事务的 xid 写入，接着二进制日志写入，入股偶在 InnoDB 存储引擎提交前，MySQL 数据库宕机了，那么 MySQL 数据库在重启后会先检查准备的 UXID 事务是否已经提交，若没有，则在存储引擎层再进行一次提交操作。如下图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/400aead4e7edcec4690b9e6f5f1c296f.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/400aead4e7edcec4690b9e6f5f1c296f.png" alt=""></p>
 <h2 id="不好的事务习惯"><a href="#不好的事务习惯" class="headerlink" title="不好的事务习惯"></a>不好的事务习惯</h2><h3 id="在循环中提交"><a href="#在循环中提交" class="headerlink" title="在循环中提交"></a>在循环中提交</h3><p>有的开发人员习惯再循环中进行事务的提交，比如可能常写的一个存储过程：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/af386a3f56b941605de52eb437e33c32.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/af386a3f56b941605de52eb437e33c32.png" alt=""></p>
 <p>这个里面的<code>COMMIT</code>命令其实并不关键。因为 InnoDB 存储引擎默认自动提交，这也是经常被开发人员忽视的问题：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/60caac0b4782048229a8c172ec18b2d7.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/60caac0b4782048229a8c172ec18b2d7.png" alt=""></p>
 <p>其实无论上面哪个存储过程都存在一个问题，当发生错误的时候，数据库会停留在一个位置的位置。例如，用户需要插入 10000 条记录，但是当插入 5000 条时，发生了错误，这时前 5000 条记录都已经存放在数据库中，那应该怎么处理呐？另外一个问题性能问题，上面两个存储过程都不会比下面的存储过程更快，因为下面的存储过程将所有的<code>INSERT</code>都放在了一个事务中：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/adac784b49794e6d6b386295158a4c02.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/adac784b49794e6d6b386295158a4c02.png" alt=""></p>
 <p>第三种方法要快的多！这是因为每次提交都要写一次重做日志，存储过程 load1 和 load2 实际上写了 10000 次重做日志文件，而对存储过程 load3 来说，实际上只写了 1 次。</p>
 <p>所以无论从何种角度出发，都不应该在一个循环中反复进行提交操作，无论是显式还是隐式的提交。</p>
 <h3 id="使用自动提交"><a href="#使用自动提交" class="headerlink" title="使用自动提交"></a>使用自动提交</h3><p>使用自动提交不是一个好习惯，因为这会使初级 DBA 容易犯错，另外还可能是一些开发人员产生错误的理解。在编写程序开发时，最好把事务的控制权限交给开发人员，即在程序端进行事务的开始和结束。同时，开发人员必须了解是自动提交可能带来的问题。</p>
@@ -4425,9 +4425,9 @@
 <h2 id="lock-与-latch"><a href="#lock-与-latch" class="headerlink" title="lock 与 latch"></a>lock 与 latch</h2><p>在数据库中，lock 与 latch 都可以被称为“锁”，但是两者有着截然不同的含义，本文主要关注的是lock。</p>
 <p>latch 一般称为闩锁（轻量级的锁），因为其要求锁定的时间必须非常短。若持续的时间长，则应用的性能会非常差。在 InnoDB 存储引擎中，latch 又可以分为 mutex（互斥锁）和 rwlock（读写锁）。其目的是用来保证并发线程操作临界资源的正确性，并且通常没有死锁检测的机制。</p>
 <p>lock 的对象是事务，用来锁定的是数据库中的对象，如表、页、行。并且一般 lock 的对象仅在事务 commit 或 rollback 后进行释放（不同事务隔离级别释放的时间可能不同）。此外，lock，正如在大多数数据库中一样，是有死锁机制的。下图显示了 lock 与 latch 的不同：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/bd688943194e21785253085c31ab3068.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/bd688943194e21785253085c31ab3068.png" alt=""></p>
 <p>对于 InnoDB 存储引擎中的 latch，可以通过命令<code>SHOW ENGINE INNODB MUTEX</code>来进行查看。具体的数据结果说明如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/60c089a6fc20004f8dfe2448bf718b79.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/60c089a6fc20004f8dfe2448bf718b79.png" alt=""></p>
 <p>上述信息是比较底层的，一般仅供开发人员参好。但是用户还是可以通过这些参数调优。</p>
 <p>相对于 latch 的查看，lock 的信息就显得直观多了。用户可以通过命令<code>SHOW ENGING INNODB STATUS</code>及<code>infomation_schema</code>架构下的表<code>INNODB_TRX</code>、<code>INNODB_LOCKS</code>、<code>INNODB_LOCK_WAITS</code>来观察锁的信息。</p>
 <h2 id="InnoDB-存储引擎中的锁"><a href="#InnoDB-存储引擎中的锁" class="headerlink" title="InnoDB 存储引擎中的锁"></a>InnoDB 存储引擎中的锁</h2><h3 id="锁的类型"><a href="#锁的类型" class="headerlink" title="锁的类型"></a>锁的类型</h3><p>InnoDB 存储引擎实现了如下两种标准的行级锁：</p>
@@ -4436,25 +4436,25 @@
 <li>排它锁（Exclusive Lock，X Lock），允许事务删除或更新一行数据。</li>
 </ul>
 <p>如果一个事务 T1 已经获得了行 r 的共享锁，那么另外的事务 T2 可以立即获得行 r 的共享锁，因为读取并没有改变行 r 的数据，称这种情况为锁兼容（Lock Compatible）。但若有其他事务 T3 想获得行 r 的排它锁，则其必须等待事务 T1、T2 释放行 r 上的共享锁——这种情况称为锁不兼容。下表显示了共享锁和排他锁的兼容性。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/2dee43dca39b6166f58fa2502037c082.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/2dee43dca39b6166f58fa2502037c082.png" alt=""></p>
 <p>可以看出，X 锁与任何所都不兼容，而 S 锁仅和 S 锁兼容。需要特别注意的是，S 和 X 锁都是行锁，兼容是指对同一记录（row）锁的兼容性情况。</p>
 <p>此外，InnoDB 存储引擎支持多粒度（granular）锁定，这种锁定允许事务在行级上的锁和表级上的锁同时存在。为了支持在不同粒度上进行加锁操作，InnoDB 存储引擎支持一种额外的锁方式，称之为意向锁（Intention Lock）。意向锁是将锁定的对象分为多个层次，意向锁意味着事务希望在更细粒度（fine granularity）上进行加锁。</p>
 <p>怼细粒度的对象上锁，那么首先需要对粗粒度的对象上锁。如图所示，如果要对页上的对象 r 上 X 锁，那么分别需要对数据库A、表、页上 IX 锁，最后对记录 r 上 X 锁。若其中任何一部分导致等待，那么操作都需要等粗粒度锁的完成。 </p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/d4f39c4487a879b52e864613bfae6a13.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/d4f39c4487a879b52e864613bfae6a13.png" alt=""></p>
 <p>InnoDB 引擎支持意向锁设计的比较简练，其意向锁即为表级别的锁。设计目的主要是为了在一个事务中揭示下一行将被请求的锁类型。其支持两种意向锁：</p>
 <ol>
 <li>意向共享锁（IS Lock），事务想要获得一张表中某几行的共享锁。</li>
 <li>意向排他锁（IX Lock），事务想要获得一张表中某几行的排它锁。</li>
 </ol>
 <p>由于 InnoDB 存储引擎支持的是行级别的锁，因此意向锁不会阻塞除全表扫描以外的任何请求。表级意向锁和行级锁的兼容性如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/459473d464483abf7120afe478c03ade.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/459473d464483abf7120afe478c03ade.png" alt=""></p>
 <p>用户可以通过命令<code>SHOW ENGINE INNODB STATUS</code>命令查看当前锁请求的信息</p>
 <p>从 InnoDB 1.0 开始，在<code>INFORMATION_SCHEMA</code>架构下添加了表<code>INNODB_TRX</code>、<code>INNODB_LOCKS</code>、<code>INNODB_LOCKS_WAITS</code>。通过这三张表，用户可以更简单地监控当前事务并分析可能存在的锁问题。<code>INNODB</code>的定义如下图所示，一共8个字段（我在MySQL 8.0 版本进行测试，发现已经扩充到了24个字段）：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/4cd48d8a91196d45f528b0ef2ee6c1f9.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/4cd48d8a91196d45f528b0ef2ee6c1f9.png" alt=""></p>
 <p>这个表可以显示当前运行的 InnoDB 事务，并不能判断锁的一些情况。如果需要查看锁，则还需要访问表<code>INNODB_LOCKS</code>，该表的字段如下所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/582c68591c786071eccc2fcf1878b367.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/582c68591c786071eccc2fcf1878b367.png" alt=""></p>
 <p>再通过表<code>INNODB_LOCKS</code>查看了每张表上锁的情况后，用户就可以判断由此引发的等待状况了。当事务较小时，用户就可以人为地、直观地进行判断了。但是当事务量非常大，其中锁和等待也时常发生，这个时候就不那么容易判断。但是通过表<code>INNODB_LOCK_WAIT</code>，可以很直观地反应当前事务的等待。表<code>INNODB_LOCK_WAITS</code>由四个字段组成，如下图所示。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/9941f4666dee54782b182f5eacdcf3a8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/9941f4666dee54782b182f5eacdcf3a8.png" alt=""></p>
 <blockquote>
 <p>注意：在 MySQL 8.0 版本中，INFORMATION_SCHEMA 下的 INNODB_LOCKS 和 INNODB_LOCK_WAITS 表已被删除。 用Performance Schema data_locks和 data_lock_waits 表替代。</p>
 </blockquote>
@@ -4484,7 +4484,7 @@
 <p>注意，MySQL 8.0 之前查询当前事务隔离级别的语句是<code>select @@tx_isolation</code>，之后是上面用的<code>select @@transaction_isolation</code></p>
 </blockquote>
 <p>下面将从时间的角度上展现上述演示的示例过程，如下表所示。需要特别注意的是，对于<code>READ COMMITTED</code>的事务隔离级别而言，从数据库理论的角度来看，其违反了事务 ACID 中的 I 的特性，即隔离性。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/d0ad4367ae0308988d67fafe16ab57d8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/d0ad4367ae0308988d67fafe16ab57d8.png" alt=""></p>
 <h3 id="一致性锁定锁"><a href="#一致性锁定锁" class="headerlink" title="一致性锁定锁"></a>一致性锁定锁</h3><p>在前一节讲到，默认配置下，事务隔离级别是<code>REPEATABLE READ</code>模式，InnoDB 存储引擎的<code>SELECT</code>操作使用一致性非锁定锁。但是在某些情况下，用户需要显式得堆数据库读取操作进行加锁以保证数据逻辑的一致性。InnoDB 存储引擎对于<code>SELECT</code>语句支持两种一致性的锁定读（locking read）操作：</p>
 <ul>
 <li>SELECT … FOR UPDATE</li>
@@ -4498,9 +4498,9 @@
 <p>插入操作会依据这个自增的计数器的值加 1 赋予自增长列。这个实现方式称作<code>AUTO-INC Locking</code>。这个锁其实是采用一种特殊的表锁机制，为了提高插入的性能，锁不是在一个事务完成后才释放，而是在完成对自增长值插入 SQL 语句后立即释放。</p>
 <p>虽然<code>AUTO-INC Locking</code>从一定程度上提高了并发插入的效率，但是还存在一定性能上的问题。首先对于自增长值得咧并发插入性能较差，事务必须等待前一个插入完成。其次，对于<code>INSERT ... SELECT</code>的大数据量插入会影响插入性能。因为另一个事务中的插入会被阻塞。</p>
 <p>从 MySQL 5.1.22 开始，InnoDB 存储引擎中提供了一种轻量级互斥锁的自增长实现机制，这种机制大大提高了自增值的插入性能。从该版本开始，InnoDB 存储引擎提供了一个参数<code>innodb_autoinc_lock_mode</code>来控制自增长的模式，该参数的默认值为 1 。我们对自增长的插入进行分类的话，如图所示。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/1aba09745c0c14391626b500f0bc1870.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/1aba09745c0c14391626b500f0bc1870.png" alt=""></p>
 <p>接着来分析参数<code>innodb_autoinc_lock_mode</code>以及各个设置下堆自增的印象，总共有三个有效值可供供设定，即0、1、2，具体说明如下表所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/301223cb3933201dd3f24ccfba86ebdb.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/301223cb3933201dd3f24ccfba86ebdb.png" alt=""></p>
 <p>在 InnoDB 存储引擎中，自增长的列必须是索引，同时必须是索引的第一个列。如果不是第一个列，则 MySQL 数据库会抛出异常。</p>
 <h3 id="外键和锁"><a href="#外键和锁" class="headerlink" title="外键和锁"></a>外键和锁</h3><p>在 InnoDB 存储引擎中，对于一个外键列，如果没有显式的对这个列加索引，InnoDB 引擎会自动加一个索引，因为这样可以避免表锁。对于外键的插入或更新，首先需要查询父表中的记录，即 SELECT 父表。单是对于父表的 SELECT 操作，不是使用一致性非锁定读的方式，因为这样会发生数据不一致的问题。因此这时使用的是<code>SELECT ... LOCK IN SHARE MODE</code>方式，即主动对父表加一个 S 锁。如果这时候父表已经加上了一个 X 锁，子表上的操作会被阻塞。</p>
 <h2 id="锁的算法"><a href="#锁的算法" class="headerlink" title="锁的算法"></a>锁的算法</h2><h3 id="行锁的-3-种算法"><a href="#行锁的-3-种算法" class="headerlink" title="行锁的 3 种算法"></a>行锁的 3 种算法</h3><p>InnoDB 存储引擎有三种行锁的算法，分别是：</p>
@@ -4537,7 +4537,7 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">create table t(a int primary key);</span></pre></td></tr><tr><td class="code"><pre><span class="line">insert into t select 1;</span></pre></td></tr><tr><td class="code"><pre><span class="line">insert into t select 2;</span></pre></td></tr><tr><td class="code"><pre><span class="line">insert into t select 5;</span></pre></td></tr></table></figure>
 
 <p>然后执行下列语句：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/526914fec4f38a48344b723dfe357d60.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/526914fec4f38a48344b723dfe357d60.png" alt=""></p>
 <p>表 t 一共只有1、2、5 三个值。在上面的例子中，会话 A 首先对 a=5 进行 X 素哟定。而由于 a 是主键且唯一，因此锁定的仅仅是 5 这个值，而不是（2,5）这个范围，这样在会话 B 中插入值 4 而不会阻塞，可以立即插入并返回。</p>
 <p>若是辅助索引，情况会完全不同。根据下列代码创建测试表 z：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql&gt; create table z(a int,b int, primary key(a),key(b));</span></pre></td></tr><tr><td class="code"><pre><span class="line">mysql&gt; insert into z select 1,1;</span></pre></td></tr><tr><td class="code"><pre><span class="line">mysql&gt; insert into z select 3,1;</span></pre></td></tr><tr><td class="code"><pre><span class="line">mysql&gt; insert into z select 5,3;</span></pre></td></tr><tr><td class="code"><pre><span class="line">mysql&gt; insert into z select 7,6;</span></pre></td></tr><tr><td class="code"><pre><span class="line">mysql&gt; insert into z select 10,8;</span></pre></td></tr></table></figure>
@@ -4578,13 +4578,13 @@
 <h2 id="锁问题"><a href="#锁问题" class="headerlink" title="锁问题"></a>锁问题</h2><p>通过锁定机制可以实现事务的隔离性要求，使得事务可以并发的工作。锁提高了并发，但是也有潜在的问题。不过好在事务隔离性的要求，锁只会带来以下三种问题。</p>
 <h3 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h3><p>在理解脏读（Dirty Read）之前，需要理解脏数据的概念。脏数据是指未提交的数据，如果读到了脏数据，即一个事务可以读到另外一个事务未提交的数据，则显然违反了数据的隔离性。</p>
 <p>下面的表格显示了一个脏读的例子：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/5fa1953169dcdbe8e205fe9446ab697e.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/5fa1953169dcdbe8e205fe9446ab697e.png" alt=""></p>
 <p>表 t 还是上面创建的那个，不过不同于上述例子，这里把事务隔离级别改成了<code>READ UNCOMMITTED</code>。因此在会话 A 未提交的前提下，事务 B 两次 SELECT 取得了不同结果，即产生了脏读。</p>
 <p>脏读现象在生产环境并不经常发生，由上面例子可以看出来，脏读需要隔离级别为<code>READ UNCOMMITTED</code>，实际上大多数数据库至少都是<code>READ COMMITTED</code>，而 InnoDB 默认的都是<code>READ REPEATABLE</code>。</p>
 <p>脏读隔离看似毫无用处，但是一些特殊的情况下还可以将事务的隔离级别放开到<code>READ UNCOMMITTED</code>。例如 replication 环境下的 slave 节点，并且在该 slave 节点上的查询并不需要特别精确的返回值。、</p>
 <h3 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h3><p>不可重复读是指在一个事务内多次读取同一个数据集合。在这个事务还没有结束时，另一个事务也访问该同一个数据集合，并做了一些 DML 操作。因此在第一个事务两次读数据之间，由于第二个事务的修改，那么第一个事务读到的数据可能是不一样的。这种情况成为不可重复读。</p>
 <p>不可重复读和脏读的区别：脏读读到的是未提交的数据，不可重复读读到的却是提交过的数据，但是其违反了数据库事务一致性的要求。下面的表格展示了一个例子：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/75e52cbf37518d1129ffec738ac3eba3.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/75e52cbf37518d1129ffec738ac3eba3.png" alt=""></p>
 <p>这个例子的前提是，两个事务的隔离级别都调整为<code>READ COMMITTED</code>。会话 B 的事务提交之后，事务 A 进行读取，读到的是 1 和 2 两条记录。</p>
 <p>一般情况下，不可重复读是可以接受的，因为读到的是已经提交的数据，本身不会带来太大的问题，因此很多数据库的默认级别设置为<code>READ COMMITTED</code>，允许不可重复读。</p>
 <p>在 InnoDB 存储引擎中，使用 Next-Key Lock 算法来避免不可重复读的问题。在 Next-Key Lock 算法下，对于索引的扫描，不仅是锁住了扫描到的索引，还锁着了索引覆盖的范围（gap）。因此在这个范围内的插入都是不被允许的。这样就避免了其他事务在这个范围内插入数据导致不可重复读的问题。</p>
@@ -4604,7 +4604,7 @@
 <li>User2 也修改了记录，更新数据库提交。</li>
 </ol>
 <p>显然，这个过程中 User1  的更新操作“丢失”了。为了避免这种问题，需要让事务操作串行化，而不是并行。即在操作步骤 1 中，对用户读取的记录加上一个排他锁 X 。同样，在步骤 2 中，同样需要加入排它锁 X 。通过这种方式，步骤 2 就必须等待步骤 1 和 3 完成。下面的表格演示了如何避免上述逻辑上丢失更新问题的产生。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/2e8c143f61edc551fced109b87191a03.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/2e8c143f61edc551fced109b87191a03.png" alt=""></p>
 <h2 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h2><p>由于不同锁之间的兼容关系，有时候一个事务中的锁需要等待另一个事务中的锁释放它占用的资源，这就是阻塞。</p>
 <p>在 InnoDB 存储引擎中，参数<code>innodb_lock_wait_timeout</code>控制等待时间，<code>innodb_rollback_on_timeout</code>用来设定是否在等待超时时堆进行中的事务进行回滚操作。参数<code>innodb_lock_wait_timeout</code>是动态的，可以在数据库运行时动态调整，而<code>innodb_rollback_on_timeout</code>是静态的，不能在运行中修改。</p>
 <h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><h3 id="死锁的概念"><a href="#死锁的概念" class="headerlink" title="死锁的概念"></a>死锁的概念</h3><p>死锁是指两个或两个以上事务在执行过程中，因争夺锁资源而造成的一种相互等待的现象。</p>
@@ -4616,7 +4616,7 @@
 </ul>
 <p>通过上述链表可以构造一张图，如果这张图中存在回路，就代表的存在死锁。 wait-for graph 是一种比较主动的死锁检测机制，InnoDB 一般会选择回滚 undo 量最小的事务。</p>
 <h3 id="死锁概率"><a href="#死锁概率" class="headerlink" title="死锁概率"></a>死锁概率</h3><p>死锁的概率推导过程就不抄了，直接截图放这里：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/c49c74ec349c32bcfba6252d150c04ad.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/c49c74ec349c32bcfba6252d150c04ad.png" alt=""></p>
 <p>可以看出死锁发生概率与以下几点有关：</p>
 <ul>
 <li>系统中事务数量（n），数量越多死锁概率越大。</li>
@@ -4624,13 +4624,13 @@
 <li>操作数据的集合（R），越小则死锁的概率越大。</li>
 </ul>
 <h3 id="死锁的示例"><a href="#死锁的示例" class="headerlink" title="死锁的示例"></a>死锁的示例</h3><p>下面的表演示了一个死锁的经典情况：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/beb5c1646f29da096ada91f25e50bcdb.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/beb5c1646f29da096ada91f25e50bcdb.png" alt=""></p>
 <p>上面的例子中，会话 B 抛出了 1213 这个错误提示，即表示事务发生了死锁。大多数死锁 InnoDB 引擎本身可以侦测到，不需要人为进行干预。</p>
 <p>还有另外一种情况，即当前事务持有了待插入记录的下一个记录的 X 锁，但是在等待队列中存在一个 S 锁的请求，则可能发生死锁。举个栗子，先创建一个表：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CREATE TABLE t( a INT PRIMARY KEY)ENGINE&#x3D;INNODB;</span></pre></td></tr><tr><td class="code"><pre><span class="line">INSERT INTO t VALUES (1),(2),(4),(5);</span></pre></td></tr></table></figure>
 
 <p>然后运行下表所示的查询：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/73be1410494a154abddd702b2fd31e59.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/73be1410494a154abddd702b2fd31e59.png" alt=""></p>
 <p>可以看到，会话 A 中已经对记录 4 持有了 X 锁，但是会话 A 中插入记录 3 时会导致死锁发生。这个问题的产生是由于会话 B 中请求记录 4 的 S 锁而发生等待，但之前请求的锁对于主键值记录 1、2 都已经成功，若在时间点 5 能插入记录，那么会话 B 在获得记录 4 持有的 S 锁之后，还需要向后获得记录 3 的记录，这样就显得不合理。因此 InnoDB 引擎在这里主动选择了死锁，而回滚的是 undo log 记录大的事务，这与 AB-BA 死锁的处理方式又有所不同。</p>
 <h2 id="锁升级"><a href="#锁升级" class="headerlink" title="锁升级"></a>锁升级</h2><p>锁升级（Lock Escalation）是指将当前锁的粒度降低。举例来说，数据库可以吗一个表的 1000 个行锁升级为一个页锁，或者页锁升级为一个表锁。如果数据库设计中认为锁是稀有资源，想要尽量避免锁的开销，就会频繁出现锁升级现象。</p>
 <p>InnoDB 存储引擎不存在锁升级的问题。因为其不是根据每个记录来产生行锁的，而是采用位图。不管一个事务锁住页中的一个记录还是多个记录，开销通常都是一致的。</p>
@@ -4752,7 +4752,7 @@
 <li>如果只是表示年份,可以用 YEAR 来表示,它比 DATE 占用更少的空间。YEAR 有 2 位或4 位格式的年。默认是 4 位格式。在 4 位格式中,允许的值是 1901<del>2155 和 0000。在2 位格式中,允许的值是 70</del>69,表示从 1970~2069 年。 MySQL 以 YYYY 格式显示 YEAR值。</li>
 </ul>
 <h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><p>MySQL 包括了 CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM 和 SET 等多种字符串类型。下面的表详细列出了这些字符类型的比较。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b64c2e300c0f200ee55c674e4d113886.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b64c2e300c0f200ee55c674e4d113886.png" alt=""></p>
 <h4 id="CHAR和VCHAR类型"><a href="#CHAR和VCHAR类型" class="headerlink" title="CHAR和VCHAR类型"></a>CHAR和VCHAR类型</h4><p>CHAR 和 VARCHAR 很类似,都用来保存 MySQL 中较短的字符串。二者的主要区别在于存储方式的不同：CHAR 列的长度固定为创建表时声明的长度，长度可以为从 0<del>255 的任何值；而 VARCHAR 列中的值为可变长字符串，长度可以指定为0</del>65535( 5.0.3以后)之间的值。在检索的时候，CHAR 列删除了尾部的空格，而 VARCHAR 则保留这些空格。</p>
 <h4 id="BINARY-和-VARBINARY-类型"><a href="#BINARY-和-VARBINARY-类型" class="headerlink" title="BINARY 和 VARBINARY 类型"></a>BINARY 和 VARBINARY 类型</h4><p>BINARY 和 VARBINARY 类似于 CHAR 和 VARCHAR,不同的是它们包含二进制字符串而不包含非二进制字符串。</p>
 <h4 id="ENUM-类型"><a href="#ENUM-类型" class="headerlink" title="ENUM 类型"></a>ENUM 类型</h4><p>ENUM 中文名称叫枚举类型，它的值范围需要在创建表时通过枚举方式显式指定，对 1<del>255 个成员的枚举需要 1 个字节存储；对于 255</del>65535 个成员，需要 2 个字节存储。最多允许有 65535 个成员。</p>
@@ -4815,7 +4815,7 @@
 <p> 当表中有多个非空唯一索引的时候，InnoDB 存储引擎将选择建表的时候第一个定义的非空唯一索引作为主键。注意这里是定义索引的顺序，而不是建表的时候列的顺序。</p>
 </blockquote>
 <h2 id="InnoDB-逻辑存储结构"><a href="#InnoDB-逻辑存储结构" class="headerlink" title="InnoDB 逻辑存储结构"></a>InnoDB 逻辑存储结构</h2><p>从 InnoDB 存储应引擎的存储结构来看，所有的数据都被逻辑的存放在一个空间中，成为表空间（tablespace）。表空间又由段（segment）、区（extent）、页（page）组成。页在一些文档中也成为块（block），InnoDB存储引擎的逻辑存储结构大致如图：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/6083671fe7d547fd2a8fd496b5bb0904.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/6083671fe7d547fd2a8fd496b5bb0904.png" alt=""></p>
 <h3 id="表空间"><a href="#表空间" class="headerlink" title="表空间"></a>表空间</h3><p>表空间可以看做是 InnoDB 存储引擎逻辑结构的最高层，所有的数据都存放在表空间中。默认情况下 InnoDB 存储引擎有一个共享表空间 ibdata1，所有的数据都存放在这个表空间中。如果用户开启了参数<code>innodb_fiule_per_table</code>，则每张表内的数据可以单独放在一个表空间中。</p>
 <blockquote>
 <p>即使启用了<code>innodb_fiule_per_table</code>，每张表的表空间内从存放的也只是数据、索引和插入缓冲Bitmap页，其他类型的数据比如回滚（undo）、插入缓冲索引页、系统事务信息、二次写缓冲（Double write buffer）等还是存放在原有共享表空间。</p>
@@ -4838,16 +4838,16 @@
 </ul>
 <h3 id="行"><a href="#行" class="headerlink" title="行"></a>行</h3><p>InnoDB 存储引擎是面向列的（row-oriented），也就是说数据是按行进行存放的。每个页存放的行记录也是有硬性规定的，最多允许存放16KB/2-200行记录，即7992行。</p>
 <h2 id="InnoDB-行记录格式"><a href="#InnoDB-行记录格式" class="headerlink" title="InnoDB 行记录格式"></a>InnoDB 行记录格式</h2><p>InnoDB 引擎和大多数数据库一样，记录以行的形式存储。这意味这页中保存着表中一行行的数据。在 InnoDB 1.0.x 版本之前，InnoDB 存储引擎提供了 Compact 和 Redundant 两种格式来存放行记录数据，这也是目前使用最多的一种格式。Redundant 格式是为了兼容之前版本而保留的，MySQL 5.1 之后的版本默认为 Compact 行格式。可以使用命令<code>SHOW TABLE STATUS LIKE &#39;table_name&#39;</code>来查看当前表使用的行格式。（由于书比较旧，我在 MySQL 官网上看到其实不止这两种格式，而默认的格式为 DYNAMIC，具体如下：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/c87e9baa9a9111ea99b000d861792df0.png" alt=""></p>
+<p><img src="http://static.beritra.com/blog/202005/c87e9baa9a9111ea99b000d861792df0.png" alt=""></p>
 <h3 id="Compact-行记录格式"><a href="#Compact-行记录格式" class="headerlink" title="Compact 行记录格式"></a>Compact 行记录格式</h3><p>Compact 行记录格式的设计目标是高效的存储数据，简单来说就是一个页中存放的行数据越多，性能就越高。下图是详细的存储格式：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/090c385542dcfeb6fdabc2520ffaafd0.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/090c385542dcfeb6fdabc2520ffaafd0.png" alt=""></p>
 <p>可以看到，Compact 行记录的格式首部是一个非 NULL 变长字段长度列表，并且是按照列的顺序逆序放置的，长度为：</p>
 <ul>
 <li>若列的长度小于 255 字节，则用 1 字节表示；</li>
 <li>若大于 255 个字节，用 2 字节表示。</li>
 </ul>
 <p>变长字段的长度不可以超过两个字节，因为 VARCHAR 类型的最大长度限制为 65535。变长字段之后的第二个部分是 NULL 标志位，该位指示了该位数据中是否有 NULL 值，有则用 1 表示。接下来的部分是记录头信息（record header），固定占用 5 字节（40位），每位的含义如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/78f4e0e0dc3bd05909f06abf44a56f4b.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/78f4e0e0dc3bd05909f06abf44a56f4b.png" alt=""></p>
 <p>最后的部分就是实际存储每个列的数据。需要特别注意的是，NULL 不占用该部分任何空间，即 NULL 除了占用 NULL 标志位之外，实际存储不占用空间。另外，每行数据除了用户定义的之外，还有两个隐藏列，事务ID列和回归指针列，分别是6和7字节大小。如果 InnoDB 表没有定义主键，还会增加一个6字节的 rowid 列。</p>
 <h3 id="行溢出数据"><a href="#行溢出数据" class="headerlink" title="行溢出数据"></a>行溢出数据</h3><p>InnoDB 存储引擎可以将一条记录中的某些数据存储在真正的数据页面之外。一般认为 BLOB 、 LOB 这类的大对象列类型的存储会把数据放在数据页面之外。但是不是这样的，BLOB 可以不放在溢出页面，而且即便 VARCHAR 这种类型也可能被存放为行溢出数据。</p>
 <p>MySQL 数据库的 VARCHAR 类型理论上可以存放 65535 字节，实际上创建一个 65535 长度的列的时候，会得到错误信息：</p>
@@ -4858,7 +4858,7 @@
 <p>此外，还要注意，MySQL 官方手册中定义的65535长度是指所有 VARCHAR 列的长度综合，如果综合超过了这个长度，依然无法创建，同样是上面那个错误提示。</p>
 <p>即便能够存储65535个字节，但是，InnoDB 引擎的页为 16KB，即16384字节，怎么能存放65535个字节呐？因此，在一般情况下，InnoDB引擎存储的数据都是放在页类型为B-tree node中。但是当发生行溢出的时候，数据存放在页类型为 Uncompress BLOB 页中。</p>
 <p>通过工具可以看到，数据也只保存 VARCHAR 的前768的前缀（prefix）数据，之后都是偏移量，指向行溢出页，也就是 Uncompressed BLOB Page。因此，对于行溢出数据，存放采用下图的方式：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b5b0d29d8328223c1873f43074172c39.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b5b0d29d8328223c1873f43074172c39.png" alt=""></p>
 <p>那么新的问题又来了，多长的 VARCHAR 是保存在单个数据页中的，多长开始会保存在 BLOB 中？</p>
 <p>InnoDB存储引擎表是索引组织的，即 B+Tree 结构，这样每个页中至少应该有两条记录（不然就退化成链表了）。因此，如果页中只能存下一条记录，那么 InnoDB 引擎就会自动将行数据放到溢出页中。</p>
 <p>经过测试，这个数字是 8098 ，如果少于这个长度，一个页中就可以放入至少两行数据，VARCHAR 类型的行数据就不会被放到 BLOB 页中去。</p>
@@ -4875,7 +4875,7 @@
 <li>File Trailer（文件结尾信息）</li>
 </ul>
 <p>其中 File Header、Page Header、File Trailer 的大小是固定的，分别为 38、56、8 字节，这些空间用来标记也得一些信息，如  Checksum，数据页所以在的 B+ 树索引的层数等。User Records、Free Space、Page Dirctory 这些部分为实际的行记录存储空间，因此大小是动态的。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/97aa2daf41d886ac93e40b1dfd88cca5.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/97aa2daf41d886ac93e40b1dfd88cca5.png" alt=""></p>
 <h2 id="约束"><a href="#约束" class="headerlink" title="约束"></a>约束</h2><h3 id="约束完整性"><a href="#约束完整性" class="headerlink" title="约束完整性"></a>约束完整性</h3><p>关系型数据库和文件系统的一个不同点是，关系数据库本身能够保证存储数据的完整性，不需要应用程序的控制，而文件系统一般都需要在程序端进行控制。当前几乎所有的关系型数据库都提供了约束（constraint）机制，来保证数据的完整性。</p>
 <p>对 InnoDB 存储引擎本身而言，提供了以下几种约束：</p>
 <ul>
@@ -5006,7 +5006,7 @@
 
 <h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><p>MySQL 5.0 支持的存储引擎包括 MyISAM、 InnoDB、 BDB、 MEMORY、 MERGE、 EXAMPLE、NDB Cluster、ARCHIVE、CSV、BLACKHOLE、FEDERATED 等，其中 InnoDB 和 BDB 提供事务安全表，其他存储引擎都是非事务安全表。</p>
 <p>使用<code>show engines</code>命令可以查看支持的存储引擎。我在 MySQL 8.0 中执行命令得到的结果如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/0b0d90cb4b762609bbbd0ce373b25cc8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/0b0d90cb4b762609bbbd0ce373b25cc8.png" alt=""></p>
 <p>一般使用的都是 InnoDB 引擎，所以主要还是研究 InnoDB 的特性和原理。</p>
 <h2 id="自动增长列"><a href="#自动增长列" class="headerlink" title="自动增长列"></a>自动增长列</h2><p>InnoDB 表的自动增长列可以手工插入，但是插入的值如果是空或者 0，则实际插入的将是自动增长后的值。如果插入一个大于当前自增id的数的时候，自增id会变成这个数字，中间的就被跳过了。</p>
 <p>可以通过<code>ALTER TABLE *** AUTO_INCREMENT = n;</code>语句强制设置自动增长列的初识值，默认从 1 开始，但是该强制的默认值是保留在内存中的，如果该值在使用之前数据库重新启动，那么这个强制的默认值就会丢失，就需要在数据库启动以后重新设置。</p>
@@ -5053,7 +5053,7 @@
 <h3 id="聚簇索引-amp-非聚簇索引"><a href="#聚簇索引-amp-非聚簇索引" class="headerlink" title="聚簇索引 &amp; 非聚簇索引"></a>聚簇索引 &amp; 非聚簇索引</h3><p>聚集索引与非聚集索引的区别是：叶节点是否存放一整行记录</p>
 <p>InnoDB 主键使用的是聚簇索引，MyISAM 不管是主键索引，还是二级索引使用的都是非聚簇索引。</p>
 <p>下图形象说明了聚簇索引表(InnoDB)和非聚簇索引(MyISAM)的区别：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/5a3086cee19057902e88e42f4653ba47.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/5a3086cee19057902e88e42f4653ba47.jpg" alt=""></p>
 <ol>
 <li><p>对于<strong>非聚簇索引表</strong>来说（右图），表数据和索引是分成两部分存储的，主键索引和二级索引存储上没有任何区别。使用的是 B+ 树作为索引的存储结构，所有的节点都是索引，叶子节点存储的是索引 + 索引对应的记录的数据。</p>
 </li>
@@ -5093,7 +5093,7 @@
 </li>
 </ol>
 <h2 id="索引优化和最佳实践"><a href="#索引优化和最佳实践" class="headerlink" title="索引优化和最佳实践"></a>索引优化和最佳实践</h2><p>先来个偷来的大长图：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/d3b79d089a9811ea99b000d861792df0.jpg" alt="img"></p>
+<p><img src="http://static.beritra.com/blog/202005/d3b79d089a9811ea99b000d861792df0.jpg" alt="img"></p>
 <h3 id="一些其他的技巧"><a href="#一些其他的技巧" class="headerlink" title="一些其他的技巧"></a>一些其他的技巧</h3><ul>
 <li>通常来说简单的把可为 NUL 的列改为 NOT NULL 不会对性能提升有多少帮助，只是如果计划在列上创建索引，就应该将该列设置为 NOT NULL。</li>
 <li>对整数类型指定宽度，比如 INT(11)，没有任何卵用。INT 使用32位（4个字节）存储空间，那么它的表示范围已经确定，所以  INT(1) 和 INT(20) 对于存储和计算是相同的。</li>
@@ -5114,7 +5114,7 @@
 <h4 id="不等于"><a href="#不等于" class="headerlink" title="不等于"></a>不等于</h4><p> 类似<code>where id !=2</code>或者<code>where id &lt;&gt; 2</code>都不会走索引，尽量使用 UNION 关键字进行表述。</p>
 <h4 id="范围查询"><a href="#范围查询" class="headerlink" title="范围查询"></a>范围查询</h4><p>如果是连续的范围，优先用 between 而不是 in。</p>
 <p>最后又偷了一个别人的图：</p>
-<p><img src="http://nas.beritra.com:18081/blog/202005/gCe4M3snqW.png" alt=""></p>
+<p><img src="http://static.beritra.com/blog/202005/gCe4M3snqW.png" alt=""></p>
 <p>参考文章：</p>
 <p><a href="https://tech.meituan.com/2014/06/30/mysql-index.html" target="_blank" rel="noopener">MySQL索引原理及慢查询优化</a></p>
 <p><a href="https://juejin.im/post/5c2c53396fb9a04a053fc7fe#heading-31" target="_blank" rel="noopener">MySQL优化/面试，看这一篇就够了</a></p>
@@ -5162,7 +5162,7 @@
 <p>查看主节点的binary log文件名和位置：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">show master status;</span></pre></td></tr></table></figure>
 
-<p><img src="http://nas.beritra.com:18081/uploads/big/8a7f799589b2d471ddf3f97a0d8d01e5.png" alt="image-20191119183450339"></p>
+<p><img src="http://static.beritra.com/uploads/big/8a7f799589b2d471ddf3f97a0d8d01e5.png" alt="image-20191119183450339"></p>
 <p>记录下来<code>File</code>和<code>Position</code>两个字段，下面要用。</p>
 <h4 id="备用实例"><a href="#备用实例" class="headerlink" title="备用实例"></a>备用实例</h4><p>在从节点上设置参数：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CHANGE MASTER TO MASTER_HOST&#x3D;&#39;10.17.55.201&#39;,MASTER_USER&#x3D;&#39;repl&#39;,MASTER_PASSWORD&#x3D;&#39;1&#39;,MASTER_LOG_FILE&#x3D;&#39;mysql-bin.000002&#39;,MASTER_LOG_POS&#x3D;1141;</span></pre></td></tr></table></figure>
@@ -5227,7 +5227,7 @@
 <a id="more"></a>
 
 <h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h3><p>根据 Java1.7 版本的虚拟机规范，Java虚拟机包括以下几个运行时数据区。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/28a3ed4f719f2d32c9c1ed4845a27b07.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/28a3ed4f719f2d32c9c1ed4845a27b07.jpg" alt=""></p>
 <h4 id="一、程序计数器"><a href="#一、程序计数器" class="headerlink" title="一、程序计数器"></a>一、程序计数器</h4><p>程序计数器(Program Counter Register)是一块较小的内存空间，可以看做当前线程所执行的字节码的行号指示器。分支、循环、跳转、异常处理、线程恢复等等都依赖于计数器完成。</p>
 <p>每个线程拥有独立的计数器，互相不影响，独立存储。</p>
 <p>执行 Java 方法的时候计数器记录的是虚拟机字节码指令的地址，如果执行的是 Native 方法，那么计数器则为空(Undefined)。该内存区域是唯一一个在 Java 虚拟机规范中没有规定任何<code>OutOfMemoryError</code>情况的区域。</p>
@@ -5283,10 +5283,10 @@
 <h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><p>对象建立之后，Java 程序需要通过栈上的 reference 数据来操作堆上的具体内容。由于 reference 类型在 Java 虚拟机规范中之规定了一个指向对象的引用，并没有定义这个引用应该如何定位、访问堆中对象的具体位置，所以对象访问方式取决于虚拟机如何实现，当前主流有使用句柄和直接指针两种。</p>
 <ul>
 <li><p>使用句柄访问的话，Java 堆中会单独划分一部分区域作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据和类型数据各自的具体地址信息。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/a51a8ecfaf1803cb16c4ea5f15600527.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/a51a8ecfaf1803cb16c4ea5f15600527.png" alt=""></p>
 </li>
 <li><p>如果使用直接指针访问，那么 Java 对对象的布局中就必须考虑如何放置访问类型数据的相关信息，而 reference 中存储的直接就是对象地址。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b260fa468819f8dcb85ecf9cf51c73dd.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b260fa468819f8dcb85ecf9cf51c73dd.png" alt=""></p>
 </li>
 </ul>
 <p>这两种方式各有优势，使用句柄的好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。</p>
@@ -5335,7 +5335,7 @@
 <p>安全区域是指在一段代码中，引用关系不会发生变化，在这个区域中的任何位置进行 GC 都是安全的。当线程执行到 Safe Region 中的代码时，会标识自己已经进入了 Safe Region，这样发起 GC 的时候就不用管进入 Safe Region 状态的线程了。</p>
 <h3 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h3><p>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。</p>
 <p>常见的垃圾收集器有以下几种：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b5af81a71b8415ae3b4d6378cdd3019f.jpeg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b5af81a71b8415ae3b4d6378cdd3019f.jpeg" alt=""></p>
 <p>他们分别适用于不同分代，连线说明可以配合使用。</p>
 <p>jdk1.7 默认垃圾收集器Parallel Scavenge（新生代）+Serial Old（老年代）</p>
 <p>jdk1.8 默认垃圾收集器Parallel Scavenge（新生代）+Serial Old（老年代）</p>
@@ -5678,7 +5678,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <li>卸载（Unloading）</li>
 </ul>
 <p>共七个阶段。其中验证、准备、解析三个部分统称连接（Linking），这七个阶段的发生顺序如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/04010d6fe65f96d49f64f18a40528d8a.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/04010d6fe65f96d49f64f18a40528d8a.png" alt=""></p>
 <p>在图中，加载、验证、准备、初始化和卸载这 5 个阶段是顺序的，类的加载必须按照这种顺序按部就班地开始，而解析阶段则不一定：它在某些情况下可以在初始化阶段之后开始，这是为了支持 Java 语言的运行时绑定（也称为动态绑定或晚期绑定）。注意在，这里写的是“开始”，而不是按部就班的“进行”或者“完成”。强调这点的原因是这些阶段通常都是交叉混合进行的，通常会在一个阶段执行的过程中调用、激活下一个阶段。</p>
 <p>虚拟机规范严格规定了有且只有 5 种情况必须立即对类进行“初始化”（而加载、验证、准备自然需要在此之前开始）：</p>
 <ul>
@@ -5730,7 +5730,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value=<span class="number">123</span>;</span></pre></td></tr></table></figure>
 
 <p>那变量 value 在准备阶段过后的初始值为 0 而不是 123，因为这个时候尚未开始执行任何 Java 方法，而把 value 赋值为 123 的<code>putstatic</code>指令是程序被编译后，存放于类构造器<code>&lt;clinit&gt;()</code>方法之中，所以把 value 赋值为 123 的动作将在初始化阶段才会执行。下表列出了 Java 中所有基本数据类型的零值。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/a694fc404774cb03d0a60f51afd316d1.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/a694fc404774cb03d0a60f51afd316d1.png" alt=""></p>
 <p>有一些特殊情况：如果类字段的字段属性表中存在<code>ConstantValue</code>属性，那么准备阶段变量 value 就会被初始化为<code>ConstantValue</code>属性所指的值，假设上面类变量 value 的定义变为：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> value=<span class="number">123</span>;</span></pre></td></tr></table></figure>
 
@@ -5759,7 +5759,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <li>应用程序类加载器（Application ClassLoader）：这个类加载器由<code>sun.misc.Launcher$ExtClassLoader</code>实现。由于这个类加载器是 ClassLoader 中的<code>getSystemClassLoader()</code>方法的返回值，所以一般也称它为系统类加载器。它负责加载用户路径（ClassPath）上所指定的类库，开发者可以直接使用这个类加载器。</li>
 </ul>
 <p>我们的应用程序都是由这 3 种类加载器相互配合进行加载的，如果有必要，还可以加入自己定义的类加载器。这些类加载器之间的关系一般如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/17e4a5d77426df4bb5549bc5316112bb.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/17e4a5d77426df4bb5549bc5316112bb.jpg" alt=""></p>
 <p>这种层次关系，称之为类加载器的双亲委派模型（Parents Delegation Model）。双亲委派模型的要求除了顶层的启动类加载器外，其余的类加载器都应当有自己的父类加载器。这里类加载器之间的父子关系一般不会以继承（Inheritance）的关系来实现，而是通过使用组合（Compositon）关系来复用父加载器的代码。</p>
 <p>双亲委派模型的工作过程是：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父加载器反馈自己无法完成这个加载请求（它的搜索范围内没有找到所需的类）时，子加载器才尝试自己加载。</p>
 <p>使用双亲委派模型来组织类加载器之间的关系，有一个显而易见的好处就是 Java 类随着它的类加载器一起具备了带有优先级的层次关系。例如类<code>java.lang.Object</code>，它存放在<code>rt.jar</code>中，无论哪一个类加载器需要加载这个类，最终都是委派个处于模型最顶端的启动类加载器进行加载，因此<code>Object</code>类在程序的各种类加载器环境中都是同一个类。相反，如果没有使用双亲委派模型，由各个类加载器去自行加载的话，如果用户自己编写了一个<code>java.lang.Object</code>的类，也放在程序的<code>ClassPath</code>下，那么系统就会出现多个不同的<code>Object</code>类，Java 类型基础的行为也不能保证了。</p>

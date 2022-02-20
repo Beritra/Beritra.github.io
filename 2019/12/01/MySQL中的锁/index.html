@@ -52,32 +52,32 @@
 <meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;12&#x2F;01&#x2F;MySQL%E4%B8%AD%E7%9A%84%E9%94%81&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
 <meta property="og:description" content="本文主要摘抄自 MySQL 的官方文档和《MySQL技术内幕（InnoDB存储引擎）第二版》，少部分来自网络博客和自己补充。注意，该书内容是基于MySQL 5.6 及更早的版本，具体的实现方式有可能发生了改变，有些内容我做了注释和补充，但是不保证百分百的完整和正确。">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;bd688943194e21785253085c31ab3068.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;60c089a6fc20004f8dfe2448bf718b79.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;2dee43dca39b6166f58fa2502037c082.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;d4f39c4487a879b52e864613bfae6a13.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;459473d464483abf7120afe478c03ade.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;4cd48d8a91196d45f528b0ef2ee6c1f9.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;582c68591c786071eccc2fcf1878b367.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;9941f4666dee54782b182f5eacdcf3a8.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;d0ad4367ae0308988d67fafe16ab57d8.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;1aba09745c0c14391626b500f0bc1870.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;301223cb3933201dd3f24ccfba86ebdb.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;526914fec4f38a48344b723dfe357d60.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;5fa1953169dcdbe8e205fe9446ab697e.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;75e52cbf37518d1129ffec738ac3eba3.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;2e8c143f61edc551fced109b87191a03.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;medium&#x2F;c49c74ec349c32bcfba6252d150c04ad.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;beb5c1646f29da096ada91f25e50bcdb.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;73be1410494a154abddd702b2fd31e59.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;bd688943194e21785253085c31ab3068.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;60c089a6fc20004f8dfe2448bf718b79.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;2dee43dca39b6166f58fa2502037c082.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;d4f39c4487a879b52e864613bfae6a13.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;459473d464483abf7120afe478c03ade.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;4cd48d8a91196d45f528b0ef2ee6c1f9.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;582c68591c786071eccc2fcf1878b367.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;9941f4666dee54782b182f5eacdcf3a8.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;d0ad4367ae0308988d67fafe16ab57d8.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;1aba09745c0c14391626b500f0bc1870.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;301223cb3933201dd3f24ccfba86ebdb.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;526914fec4f38a48344b723dfe357d60.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;5fa1953169dcdbe8e205fe9446ab697e.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;75e52cbf37518d1129ffec738ac3eba3.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;2e8c143f61edc551fced109b87191a03.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;medium&#x2F;c49c74ec349c32bcfba6252d150c04ad.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;beb5c1646f29da096ada91f25e50bcdb.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;73be1410494a154abddd702b2fd31e59.png">
 <meta property="article:published_time" content="2019-12-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2020-05-20T17:38:18.353Z">
+<meta property="article:modified_time" content="2022-02-20T11:27:13.888Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="锁">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;bd688943194e21785253085c31ab3068.png">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;bd688943194e21785253085c31ab3068.png">
 
 <link rel="canonical" href="http://beritra.github.com/2019/12/01/MySQL%E4%B8%AD%E7%9A%84%E9%94%81/">
 
@@ -261,7 +261,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-21 01:38:18" itemprop="dateModified" datetime="2020-05-21T01:38:18+08:00">2020-05-21</time>
+                <time title="修改时间：2022-02-20 19:27:13" itemprop="dateModified" datetime="2022-02-20T19:27:13+08:00">2022-02-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -308,9 +308,9 @@
 <h2 id="lock-与-latch"><a href="#lock-与-latch" class="headerlink" title="lock 与 latch"></a>lock 与 latch</h2><p>在数据库中，lock 与 latch 都可以被称为“锁”，但是两者有着截然不同的含义，本文主要关注的是lock。</p>
 <p>latch 一般称为闩锁（轻量级的锁），因为其要求锁定的时间必须非常短。若持续的时间长，则应用的性能会非常差。在 InnoDB 存储引擎中，latch 又可以分为 mutex（互斥锁）和 rwlock（读写锁）。其目的是用来保证并发线程操作临界资源的正确性，并且通常没有死锁检测的机制。</p>
 <p>lock 的对象是事务，用来锁定的是数据库中的对象，如表、页、行。并且一般 lock 的对象仅在事务 commit 或 rollback 后进行释放（不同事务隔离级别释放的时间可能不同）。此外，lock，正如在大多数数据库中一样，是有死锁机制的。下图显示了 lock 与 latch 的不同：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/bd688943194e21785253085c31ab3068.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/bd688943194e21785253085c31ab3068.png" alt=""></p>
 <p>对于 InnoDB 存储引擎中的 latch，可以通过命令<code>SHOW ENGINE INNODB MUTEX</code>来进行查看。具体的数据结果说明如下：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/60c089a6fc20004f8dfe2448bf718b79.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/60c089a6fc20004f8dfe2448bf718b79.png" alt=""></p>
 <p>上述信息是比较底层的，一般仅供开发人员参好。但是用户还是可以通过这些参数调优。</p>
 <p>相对于 latch 的查看，lock 的信息就显得直观多了。用户可以通过命令<code>SHOW ENGING INNODB STATUS</code>及<code>infomation_schema</code>架构下的表<code>INNODB_TRX</code>、<code>INNODB_LOCKS</code>、<code>INNODB_LOCK_WAITS</code>来观察锁的信息。</p>
 <h2 id="InnoDB-存储引擎中的锁"><a href="#InnoDB-存储引擎中的锁" class="headerlink" title="InnoDB 存储引擎中的锁"></a>InnoDB 存储引擎中的锁</h2><h3 id="锁的类型"><a href="#锁的类型" class="headerlink" title="锁的类型"></a>锁的类型</h3><p>InnoDB 存储引擎实现了如下两种标准的行级锁：</p>
@@ -319,25 +319,25 @@
 <li>排它锁（Exclusive Lock，X Lock），允许事务删除或更新一行数据。</li>
 </ul>
 <p>如果一个事务 T1 已经获得了行 r 的共享锁，那么另外的事务 T2 可以立即获得行 r 的共享锁，因为读取并没有改变行 r 的数据，称这种情况为锁兼容（Lock Compatible）。但若有其他事务 T3 想获得行 r 的排它锁，则其必须等待事务 T1、T2 释放行 r 上的共享锁——这种情况称为锁不兼容。下表显示了共享锁和排他锁的兼容性。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/2dee43dca39b6166f58fa2502037c082.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/2dee43dca39b6166f58fa2502037c082.png" alt=""></p>
 <p>可以看出，X 锁与任何所都不兼容，而 S 锁仅和 S 锁兼容。需要特别注意的是，S 和 X 锁都是行锁，兼容是指对同一记录（row）锁的兼容性情况。</p>
 <p>此外，InnoDB 存储引擎支持多粒度（granular）锁定，这种锁定允许事务在行级上的锁和表级上的锁同时存在。为了支持在不同粒度上进行加锁操作，InnoDB 存储引擎支持一种额外的锁方式，称之为意向锁（Intention Lock）。意向锁是将锁定的对象分为多个层次，意向锁意味着事务希望在更细粒度（fine granularity）上进行加锁。</p>
 <p>怼细粒度的对象上锁，那么首先需要对粗粒度的对象上锁。如图所示，如果要对页上的对象 r 上 X 锁，那么分别需要对数据库A、表、页上 IX 锁，最后对记录 r 上 X 锁。若其中任何一部分导致等待，那么操作都需要等粗粒度锁的完成。 </p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/d4f39c4487a879b52e864613bfae6a13.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/d4f39c4487a879b52e864613bfae6a13.png" alt=""></p>
 <p>InnoDB 引擎支持意向锁设计的比较简练，其意向锁即为表级别的锁。设计目的主要是为了在一个事务中揭示下一行将被请求的锁类型。其支持两种意向锁：</p>
 <ol>
 <li>意向共享锁（IS Lock），事务想要获得一张表中某几行的共享锁。</li>
 <li>意向排他锁（IX Lock），事务想要获得一张表中某几行的排它锁。</li>
 </ol>
 <p>由于 InnoDB 存储引擎支持的是行级别的锁，因此意向锁不会阻塞除全表扫描以外的任何请求。表级意向锁和行级锁的兼容性如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/459473d464483abf7120afe478c03ade.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/459473d464483abf7120afe478c03ade.png" alt=""></p>
 <p>用户可以通过命令<code>SHOW ENGINE INNODB STATUS</code>命令查看当前锁请求的信息</p>
 <p>从 InnoDB 1.0 开始，在<code>INFORMATION_SCHEMA</code>架构下添加了表<code>INNODB_TRX</code>、<code>INNODB_LOCKS</code>、<code>INNODB_LOCKS_WAITS</code>。通过这三张表，用户可以更简单地监控当前事务并分析可能存在的锁问题。<code>INNODB</code>的定义如下图所示，一共8个字段（我在MySQL 8.0 版本进行测试，发现已经扩充到了24个字段）：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/4cd48d8a91196d45f528b0ef2ee6c1f9.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/4cd48d8a91196d45f528b0ef2ee6c1f9.png" alt=""></p>
 <p>这个表可以显示当前运行的 InnoDB 事务，并不能判断锁的一些情况。如果需要查看锁，则还需要访问表<code>INNODB_LOCKS</code>，该表的字段如下所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/582c68591c786071eccc2fcf1878b367.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/582c68591c786071eccc2fcf1878b367.png" alt=""></p>
 <p>再通过表<code>INNODB_LOCKS</code>查看了每张表上锁的情况后，用户就可以判断由此引发的等待状况了。当事务较小时，用户就可以人为地、直观地进行判断了。但是当事务量非常大，其中锁和等待也时常发生，这个时候就不那么容易判断。但是通过表<code>INNODB_LOCK_WAIT</code>，可以很直观地反应当前事务的等待。表<code>INNODB_LOCK_WAITS</code>由四个字段组成，如下图所示。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/9941f4666dee54782b182f5eacdcf3a8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/9941f4666dee54782b182f5eacdcf3a8.png" alt=""></p>
 <blockquote>
 <p>注意：在 MySQL 8.0 版本中，INFORMATION_SCHEMA 下的 INNODB_LOCKS 和 INNODB_LOCK_WAITS 表已被删除。 用Performance Schema data_locks和 data_lock_waits 表替代。</p>
 </blockquote>
@@ -367,7 +367,7 @@
 <p>注意，MySQL 8.0 之前查询当前事务隔离级别的语句是<code>select @@tx_isolation</code>，之后是上面用的<code>select @@transaction_isolation</code></p>
 </blockquote>
 <p>下面将从时间的角度上展现上述演示的示例过程，如下表所示。需要特别注意的是，对于<code>READ COMMITTED</code>的事务隔离级别而言，从数据库理论的角度来看，其违反了事务 ACID 中的 I 的特性，即隔离性。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/d0ad4367ae0308988d67fafe16ab57d8.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/d0ad4367ae0308988d67fafe16ab57d8.png" alt=""></p>
 <h3 id="一致性锁定锁"><a href="#一致性锁定锁" class="headerlink" title="一致性锁定锁"></a>一致性锁定锁</h3><p>在前一节讲到，默认配置下，事务隔离级别是<code>REPEATABLE READ</code>模式，InnoDB 存储引擎的<code>SELECT</code>操作使用一致性非锁定锁。但是在某些情况下，用户需要显式得堆数据库读取操作进行加锁以保证数据逻辑的一致性。InnoDB 存储引擎对于<code>SELECT</code>语句支持两种一致性的锁定读（locking read）操作：</p>
 <ul>
 <li>SELECT … FOR UPDATE</li>
@@ -381,9 +381,9 @@
 <p>插入操作会依据这个自增的计数器的值加 1 赋予自增长列。这个实现方式称作<code>AUTO-INC Locking</code>。这个锁其实是采用一种特殊的表锁机制，为了提高插入的性能，锁不是在一个事务完成后才释放，而是在完成对自增长值插入 SQL 语句后立即释放。</p>
 <p>虽然<code>AUTO-INC Locking</code>从一定程度上提高了并发插入的效率，但是还存在一定性能上的问题。首先对于自增长值得咧并发插入性能较差，事务必须等待前一个插入完成。其次，对于<code>INSERT ... SELECT</code>的大数据量插入会影响插入性能。因为另一个事务中的插入会被阻塞。</p>
 <p>从 MySQL 5.1.22 开始，InnoDB 存储引擎中提供了一种轻量级互斥锁的自增长实现机制，这种机制大大提高了自增值的插入性能。从该版本开始，InnoDB 存储引擎提供了一个参数<code>innodb_autoinc_lock_mode</code>来控制自增长的模式，该参数的默认值为 1 。我们对自增长的插入进行分类的话，如图所示。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/1aba09745c0c14391626b500f0bc1870.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/1aba09745c0c14391626b500f0bc1870.png" alt=""></p>
 <p>接着来分析参数<code>innodb_autoinc_lock_mode</code>以及各个设置下堆自增的印象，总共有三个有效值可供供设定，即0、1、2，具体说明如下表所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/301223cb3933201dd3f24ccfba86ebdb.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/301223cb3933201dd3f24ccfba86ebdb.png" alt=""></p>
 <p>在 InnoDB 存储引擎中，自增长的列必须是索引，同时必须是索引的第一个列。如果不是第一个列，则 MySQL 数据库会抛出异常。</p>
 <h3 id="外键和锁"><a href="#外键和锁" class="headerlink" title="外键和锁"></a>外键和锁</h3><p>在 InnoDB 存储引擎中，对于一个外键列，如果没有显式的对这个列加索引，InnoDB 引擎会自动加一个索引，因为这样可以避免表锁。对于外键的插入或更新，首先需要查询父表中的记录，即 SELECT 父表。单是对于父表的 SELECT 操作，不是使用一致性非锁定读的方式，因为这样会发生数据不一致的问题。因此这时使用的是<code>SELECT ... LOCK IN SHARE MODE</code>方式，即主动对父表加一个 S 锁。如果这时候父表已经加上了一个 X 锁，子表上的操作会被阻塞。</p>
 <h2 id="锁的算法"><a href="#锁的算法" class="headerlink" title="锁的算法"></a>锁的算法</h2><h3 id="行锁的-3-种算法"><a href="#行锁的-3-种算法" class="headerlink" title="行锁的 3 种算法"></a>行锁的 3 种算法</h3><p>InnoDB 存储引擎有三种行锁的算法，分别是：</p>
@@ -420,7 +420,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">create table t(a int primary key);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">insert into t select 1;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">insert into t select 2;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">insert into t select 5;</span></pre></td></tr></table></figure>
 
 <p>然后执行下列语句：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/526914fec4f38a48344b723dfe357d60.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/526914fec4f38a48344b723dfe357d60.png" alt=""></p>
 <p>表 t 一共只有1、2、5 三个值。在上面的例子中，会话 A 首先对 a=5 进行 X 素哟定。而由于 a 是主键且唯一，因此锁定的仅仅是 5 这个值，而不是（2,5）这个范围，这样在会话 B 中插入值 4 而不会阻塞，可以立即插入并返回。</p>
 <p>若是辅助索引，情况会完全不同。根据下列代码创建测试表 z：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">mysql&gt; create table z(a int,b int, primary key(a),key(b));</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into z select 1,1;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into z select 3,1;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into z select 5,3;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into z select 7,6;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into z select 10,8;</span></pre></td></tr></table></figure>
@@ -461,13 +461,13 @@
 <h2 id="锁问题"><a href="#锁问题" class="headerlink" title="锁问题"></a>锁问题</h2><p>通过锁定机制可以实现事务的隔离性要求，使得事务可以并发的工作。锁提高了并发，但是也有潜在的问题。不过好在事务隔离性的要求，锁只会带来以下三种问题。</p>
 <h3 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h3><p>在理解脏读（Dirty Read）之前，需要理解脏数据的概念。脏数据是指未提交的数据，如果读到了脏数据，即一个事务可以读到另外一个事务未提交的数据，则显然违反了数据的隔离性。</p>
 <p>下面的表格显示了一个脏读的例子：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/5fa1953169dcdbe8e205fe9446ab697e.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/5fa1953169dcdbe8e205fe9446ab697e.png" alt=""></p>
 <p>表 t 还是上面创建的那个，不过不同于上述例子，这里把事务隔离级别改成了<code>READ UNCOMMITTED</code>。因此在会话 A 未提交的前提下，事务 B 两次 SELECT 取得了不同结果，即产生了脏读。</p>
 <p>脏读现象在生产环境并不经常发生，由上面例子可以看出来，脏读需要隔离级别为<code>READ UNCOMMITTED</code>，实际上大多数数据库至少都是<code>READ COMMITTED</code>，而 InnoDB 默认的都是<code>READ REPEATABLE</code>。</p>
 <p>脏读隔离看似毫无用处，但是一些特殊的情况下还可以将事务的隔离级别放开到<code>READ UNCOMMITTED</code>。例如 replication 环境下的 slave 节点，并且在该 slave 节点上的查询并不需要特别精确的返回值。、</p>
 <h3 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h3><p>不可重复读是指在一个事务内多次读取同一个数据集合。在这个事务还没有结束时，另一个事务也访问该同一个数据集合，并做了一些 DML 操作。因此在第一个事务两次读数据之间，由于第二个事务的修改，那么第一个事务读到的数据可能是不一样的。这种情况成为不可重复读。</p>
 <p>不可重复读和脏读的区别：脏读读到的是未提交的数据，不可重复读读到的却是提交过的数据，但是其违反了数据库事务一致性的要求。下面的表格展示了一个例子：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/75e52cbf37518d1129ffec738ac3eba3.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/75e52cbf37518d1129ffec738ac3eba3.png" alt=""></p>
 <p>这个例子的前提是，两个事务的隔离级别都调整为<code>READ COMMITTED</code>。会话 B 的事务提交之后，事务 A 进行读取，读到的是 1 和 2 两条记录。</p>
 <p>一般情况下，不可重复读是可以接受的，因为读到的是已经提交的数据，本身不会带来太大的问题，因此很多数据库的默认级别设置为<code>READ COMMITTED</code>，允许不可重复读。</p>
 <p>在 InnoDB 存储引擎中，使用 Next-Key Lock 算法来避免不可重复读的问题。在 Next-Key Lock 算法下，对于索引的扫描，不仅是锁住了扫描到的索引，还锁着了索引覆盖的范围（gap）。因此在这个范围内的插入都是不被允许的。这样就避免了其他事务在这个范围内插入数据导致不可重复读的问题。</p>
@@ -487,7 +487,7 @@
 <li>User2 也修改了记录，更新数据库提交。</li>
 </ol>
 <p>显然，这个过程中 User1  的更新操作“丢失”了。为了避免这种问题，需要让事务操作串行化，而不是并行。即在操作步骤 1 中，对用户读取的记录加上一个排他锁 X 。同样，在步骤 2 中，同样需要加入排它锁 X 。通过这种方式，步骤 2 就必须等待步骤 1 和 3 完成。下面的表格演示了如何避免上述逻辑上丢失更新问题的产生。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/2e8c143f61edc551fced109b87191a03.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/2e8c143f61edc551fced109b87191a03.png" alt=""></p>
 <h2 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h2><p>由于不同锁之间的兼容关系，有时候一个事务中的锁需要等待另一个事务中的锁释放它占用的资源，这就是阻塞。</p>
 <p>在 InnoDB 存储引擎中，参数<code>innodb_lock_wait_timeout</code>控制等待时间，<code>innodb_rollback_on_timeout</code>用来设定是否在等待超时时堆进行中的事务进行回滚操作。参数<code>innodb_lock_wait_timeout</code>是动态的，可以在数据库运行时动态调整，而<code>innodb_rollback_on_timeout</code>是静态的，不能在运行中修改。</p>
 <h2 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h2><h3 id="死锁的概念"><a href="#死锁的概念" class="headerlink" title="死锁的概念"></a>死锁的概念</h3><p>死锁是指两个或两个以上事务在执行过程中，因争夺锁资源而造成的一种相互等待的现象。</p>
@@ -499,7 +499,7 @@
 </ul>
 <p>通过上述链表可以构造一张图，如果这张图中存在回路，就代表的存在死锁。 wait-for graph 是一种比较主动的死锁检测机制，InnoDB 一般会选择回滚 undo 量最小的事务。</p>
 <h3 id="死锁概率"><a href="#死锁概率" class="headerlink" title="死锁概率"></a>死锁概率</h3><p>死锁的概率推导过程就不抄了，直接截图放这里：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/medium/c49c74ec349c32bcfba6252d150c04ad.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/medium/c49c74ec349c32bcfba6252d150c04ad.png" alt=""></p>
 <p>可以看出死锁发生概率与以下几点有关：</p>
 <ul>
 <li>系统中事务数量（n），数量越多死锁概率越大。</li>
@@ -507,13 +507,13 @@
 <li>操作数据的集合（R），越小则死锁的概率越大。</li>
 </ul>
 <h3 id="死锁的示例"><a href="#死锁的示例" class="headerlink" title="死锁的示例"></a>死锁的示例</h3><p>下面的表演示了一个死锁的经典情况：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/beb5c1646f29da096ada91f25e50bcdb.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/beb5c1646f29da096ada91f25e50bcdb.png" alt=""></p>
 <p>上面的例子中，会话 B 抛出了 1213 这个错误提示，即表示事务发生了死锁。大多数死锁 InnoDB 引擎本身可以侦测到，不需要人为进行干预。</p>
 <p>还有另外一种情况，即当前事务持有了待插入记录的下一个记录的 X 锁，但是在等待队列中存在一个 S 锁的请求，则可能发生死锁。举个栗子，先创建一个表：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">CREATE TABLE t( a INT PRIMARY KEY)ENGINE&#x3D;INNODB;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">INSERT INTO t VALUES (1),(2),(4),(5);</span></pre></td></tr></table></figure>
 
 <p>然后运行下表所示的查询：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/73be1410494a154abddd702b2fd31e59.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/73be1410494a154abddd702b2fd31e59.png" alt=""></p>
 <p>可以看到，会话 A 中已经对记录 4 持有了 X 锁，但是会话 A 中插入记录 3 时会导致死锁发生。这个问题的产生是由于会话 B 中请求记录 4 的 S 锁而发生等待，但之前请求的锁对于主键值记录 1、2 都已经成功，若在时间点 5 能插入记录，那么会话 B 在获得记录 4 持有的 S 锁之后，还需要向后获得记录 3 的记录，这样就显得不合理。因此 InnoDB 引擎在这里主动选择了死锁，而回滚的是 undo log 记录大的事务，这与 AB-BA 死锁的处理方式又有所不同。</p>
 <h2 id="锁升级"><a href="#锁升级" class="headerlink" title="锁升级"></a>锁升级</h2><p>锁升级（Lock Escalation）是指将当前锁的粒度降低。举例来说，数据库可以吗一个表的 1000 个行锁升级为一个页锁，或者页锁升级为一个表锁。如果数据库设计中认为锁是稀有资源，想要尽量避免锁的开销，就会频繁出现锁升级现象。</p>
 <p>InnoDB 存储引擎不存在锁升级的问题。因为其不是根据每个记录来产生行锁的，而是采用位图。不管一个事务锁住页中的一个记录还是多个记录，开销通常都是一致的。</p>
@@ -667,7 +667,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

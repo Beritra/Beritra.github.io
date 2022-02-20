@@ -52,21 +52,21 @@
 <meta property="og:url" content="http:&#x2F;&#x2F;beritra.github.com&#x2F;2019&#x2F;01&#x2F;01&#x2F;%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JVM%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%94%E8%AE%B0&#x2F;index.html">
 <meta property="og:site_name" content="Beritra">
 <meta property="og:description" content="本文是《深入理解JVM虚拟机》的读书笔记和摘要">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;28a3ed4f719f2d32c9c1ed4845a27b07.jpg">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;a51a8ecfaf1803cb16c4ea5f15600527.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;b260fa468819f8dcb85ecf9cf51c73dd.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;b5af81a71b8415ae3b4d6378cdd3019f.jpeg">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;04010d6fe65f96d49f64f18a40528d8a.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;a694fc404774cb03d0a60f51afd316d1.png">
-<meta property="og:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;17e4a5d77426df4bb5549bc5316112bb.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;28a3ed4f719f2d32c9c1ed4845a27b07.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;a51a8ecfaf1803cb16c4ea5f15600527.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;b260fa468819f8dcb85ecf9cf51c73dd.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;b5af81a71b8415ae3b4d6378cdd3019f.jpeg">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;04010d6fe65f96d49f64f18a40528d8a.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;a694fc404774cb03d0a60f51afd316d1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;17e4a5d77426df4bb5549bc5316112bb.jpg">
 <meta property="article:published_time" content="2019-01-01T04:12:12.000Z">
-<meta property="article:modified_time" content="2020-06-06T08:44:09.797Z">
+<meta property="article:modified_time" content="2022-02-20T11:27:13.896Z">
 <meta property="article:author" content="Beritra">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="虚拟机">
 <meta property="article:tag" content="JVM">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;nas.beritra.com:18081&#x2F;uploads&#x2F;big&#x2F;28a3ed4f719f2d32c9c1ed4845a27b07.jpg">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;static.beritra.com&#x2F;uploads&#x2F;big&#x2F;28a3ed4f719f2d32c9c1ed4845a27b07.jpg">
 
 <link rel="canonical" href="http://beritra.github.com/2019/01/01/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JVM%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AC%94%E8%AE%B0/">
 
@@ -250,7 +250,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-06 16:44:09" itemprop="dateModified" datetime="2020-06-06T16:44:09+08:00">2020-06-06</time>
+                <time title="修改时间：2022-02-20 19:27:13" itemprop="dateModified" datetime="2022-02-20T19:27:13+08:00">2022-02-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -293,7 +293,7 @@
 <a id="more"></a>
 
 <h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h3><p>根据 Java1.7 版本的虚拟机规范，Java虚拟机包括以下几个运行时数据区。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/28a3ed4f719f2d32c9c1ed4845a27b07.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/28a3ed4f719f2d32c9c1ed4845a27b07.jpg" alt=""></p>
 <h4 id="一、程序计数器"><a href="#一、程序计数器" class="headerlink" title="一、程序计数器"></a>一、程序计数器</h4><p>程序计数器(Program Counter Register)是一块较小的内存空间，可以看做当前线程所执行的字节码的行号指示器。分支、循环、跳转、异常处理、线程恢复等等都依赖于计数器完成。</p>
 <p>每个线程拥有独立的计数器，互相不影响，独立存储。</p>
 <p>执行 Java 方法的时候计数器记录的是虚拟机字节码指令的地址，如果执行的是 Native 方法，那么计数器则为空(Undefined)。该内存区域是唯一一个在 Java 虚拟机规范中没有规定任何<code>OutOfMemoryError</code>情况的区域。</p>
@@ -349,10 +349,10 @@
 <h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><p>对象建立之后，Java 程序需要通过栈上的 reference 数据来操作堆上的具体内容。由于 reference 类型在 Java 虚拟机规范中之规定了一个指向对象的引用，并没有定义这个引用应该如何定位、访问堆中对象的具体位置，所以对象访问方式取决于虚拟机如何实现，当前主流有使用句柄和直接指针两种。</p>
 <ul>
 <li><p>使用句柄访问的话，Java 堆中会单独划分一部分区域作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据和类型数据各自的具体地址信息。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/a51a8ecfaf1803cb16c4ea5f15600527.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/a51a8ecfaf1803cb16c4ea5f15600527.png" alt=""></p>
 </li>
 <li><p>如果使用直接指针访问，那么 Java 对对象的布局中就必须考虑如何放置访问类型数据的相关信息，而 reference 中存储的直接就是对象地址。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b260fa468819f8dcb85ecf9cf51c73dd.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b260fa468819f8dcb85ecf9cf51c73dd.png" alt=""></p>
 </li>
 </ul>
 <p>这两种方式各有优势，使用句柄的好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。</p>
@@ -401,7 +401,7 @@
 <p>安全区域是指在一段代码中，引用关系不会发生变化，在这个区域中的任何位置进行 GC 都是安全的。当线程执行到 Safe Region 中的代码时，会标识自己已经进入了 Safe Region，这样发起 GC 的时候就不用管进入 Safe Region 状态的线程了。</p>
 <h3 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h3><p>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。</p>
 <p>常见的垃圾收集器有以下几种：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/b5af81a71b8415ae3b4d6378cdd3019f.jpeg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/b5af81a71b8415ae3b4d6378cdd3019f.jpeg" alt=""></p>
 <p>他们分别适用于不同分代，连线说明可以配合使用。</p>
 <p>jdk1.7 默认垃圾收集器Parallel Scavenge（新生代）+Serial Old（老年代）</p>
 <p>jdk1.8 默认垃圾收集器Parallel Scavenge（新生代）+Serial Old（老年代）</p>
@@ -744,7 +744,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <li>卸载（Unloading）</li>
 </ul>
 <p>共七个阶段。其中验证、准备、解析三个部分统称连接（Linking），这七个阶段的发生顺序如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/04010d6fe65f96d49f64f18a40528d8a.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/04010d6fe65f96d49f64f18a40528d8a.png" alt=""></p>
 <p>在图中，加载、验证、准备、初始化和卸载这 5 个阶段是顺序的，类的加载必须按照这种顺序按部就班地开始，而解析阶段则不一定：它在某些情况下可以在初始化阶段之后开始，这是为了支持 Java 语言的运行时绑定（也称为动态绑定或晚期绑定）。注意在，这里写的是“开始”，而不是按部就班的“进行”或者“完成”。强调这点的原因是这些阶段通常都是交叉混合进行的，通常会在一个阶段执行的过程中调用、激活下一个阶段。</p>
 <p>虚拟机规范严格规定了有且只有 5 种情况必须立即对类进行“初始化”（而加载、验证、准备自然需要在此之前开始）：</p>
 <ul>
@@ -796,7 +796,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value=<span class="number">123</span>;</span></pre></td></tr></table></figure>
 
 <p>那变量 value 在准备阶段过后的初始值为 0 而不是 123，因为这个时候尚未开始执行任何 Java 方法，而把 value 赋值为 123 的<code>putstatic</code>指令是程序被编译后，存放于类构造器<code>&lt;clinit&gt;()</code>方法之中，所以把 value 赋值为 123 的动作将在初始化阶段才会执行。下表列出了 Java 中所有基本数据类型的零值。</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/a694fc404774cb03d0a60f51afd316d1.png" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/a694fc404774cb03d0a60f51afd316d1.png" alt=""></p>
 <p>有一些特殊情况：如果类字段的字段属性表中存在<code>ConstantValue</code>属性，那么准备阶段变量 value 就会被初始化为<code>ConstantValue</code>属性所指的值，假设上面类变量 value 的定义变为：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> value=<span class="number">123</span>;</span></pre></td></tr></table></figure>
 
@@ -825,7 +825,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <li>应用程序类加载器（Application ClassLoader）：这个类加载器由<code>sun.misc.Launcher$ExtClassLoader</code>实现。由于这个类加载器是 ClassLoader 中的<code>getSystemClassLoader()</code>方法的返回值，所以一般也称它为系统类加载器。它负责加载用户路径（ClassPath）上所指定的类库，开发者可以直接使用这个类加载器。</li>
 </ul>
 <p>我们的应用程序都是由这 3 种类加载器相互配合进行加载的，如果有必要，还可以加入自己定义的类加载器。这些类加载器之间的关系一般如图所示：</p>
-<p><img src="http://nas.beritra.com:18081/uploads/big/17e4a5d77426df4bb5549bc5316112bb.jpg" alt=""></p>
+<p><img src="http://static.beritra.com/uploads/big/17e4a5d77426df4bb5549bc5316112bb.jpg" alt=""></p>
 <p>这种层次关系，称之为类加载器的双亲委派模型（Parents Delegation Model）。双亲委派模型的要求除了顶层的启动类加载器外，其余的类加载器都应当有自己的父类加载器。这里类加载器之间的父子关系一般不会以继承（Inheritance）的关系来实现，而是通过使用组合（Compositon）关系来复用父加载器的代码。</p>
 <p>双亲委派模型的工作过程是：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父加载器反馈自己无法完成这个加载请求（它的搜索范围内没有找到所需的类）时，子加载器才尝试自己加载。</p>
 <p>使用双亲委派模型来组织类加载器之间的关系，有一个显而易见的好处就是 Java 类随着它的类加载器一起具备了带有优先级的层次关系。例如类<code>java.lang.Object</code>，它存放在<code>rt.jar</code>中，无论哪一个类加载器需要加载这个类，最终都是委派个处于模型最顶端的启动类加载器进行加载，因此<code>Object</code>类在程序的各种类加载器环境中都是同一个类。相反，如果没有使用双亲委派模型，由各个类加载器去自行加载的话，如果用户自己编写了一个<code>java.lang.Object</code>的类，也放在程序的<code>ClassPath</code>下，那么系统就会出现多个不同的<code>Object</code>类，Java 类型基础的行为也不能保证了。</p>
@@ -988,7 +988,7 @@ MTT ： 最大持有次数限制 </code></pre><h4 id="GC-参数"><a href="#GC-�
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
